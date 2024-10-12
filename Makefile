@@ -12,19 +12,19 @@ run: build
 	@./bin/thtm
 
 .PHONY: migrate-up
-migrate-up: setenv 
+migrate-up:
 	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) up
 
 .PHONY: migrate-down
-migrate-down: setenv 
+migrate-down:
 	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down
 
 .PHONY: migrate-upto
-migrate-upto: setenv 
+migrate-upto:
 	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) up-to $(VERSION)
 
 .PHONY: migrate-downto
-migrate-downto: setenv
+migrate-downto:
 	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down-to $(VERSION)
 
 .PHONY: live
