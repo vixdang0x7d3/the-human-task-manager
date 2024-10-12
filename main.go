@@ -23,14 +23,10 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-
-	v1Router := e.Group("/v1")
-
-	v1Router.GET("/healthz", func(c echo.Context) error {
+	e.GET("/healthz", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, struct{}{})
 	})
-
-	v1Router.GET("/err", func(c echo.Context) error {
+	e.GET("/err", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Something went wrong")
 	})
 
