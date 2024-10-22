@@ -17,8 +17,5 @@ sql:
             go_type:
               import: "time"
               type: "Time"
-          - db_type: "varchar"
-            go_type:
-              import: 
 
 

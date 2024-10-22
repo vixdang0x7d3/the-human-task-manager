@@ -28,6 +28,10 @@ func (h *UserHandler) HandleCreateUser(c echo.Context) error {
 		return err
 	}
 
+	if c.Request().Header.Get("Accept") == "text/html" {
+		return echo.ErrInternalServerError // TODO: implement html rendering
+	}
+
 	return c.JSON(http.StatusAccepted, AppUser(user))
 }
 

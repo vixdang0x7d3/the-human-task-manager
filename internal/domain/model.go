@@ -6,6 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type CreateUserParams struct {
+	Username  string
+	FirstName string
+	LastName  string
+	Email     string
+	Password  string
+}
+
 type User struct {
 	ID        uuid.UUID
 	Username  string

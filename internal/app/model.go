@@ -7,11 +7,11 @@ import (
 )
 
 type CreateUserParam struct {
-	Username  string
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
+	Username  string `form:"username"`
+	FirstName string `form:"first_name"`
+	LastName  string `form:"last_name"`
+	Email     string `form:"email"`
+	Password  string `form:"password"`
 }
 
 type AppUser struct {
