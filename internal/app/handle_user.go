@@ -7,6 +7,10 @@ import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 )
 
+// dependency injection
+
+// String DI @Service @Repository
+
 type UserHandler struct {
 	service UserService
 }

@@ -7,7 +7,7 @@ pre-final test evaluation milestone: 2024/11/25
 # to-do's
 
 **User domain**
-- [x] impl user service's create user http endpoint
+- [x] impl user handler's create user http endpoint
 - [x] impl user core's create user: hash password, call user store to save user to database
 - [ ] refactor unit tests
 - [ ] implement basic data validation (check empty fields) for user core's create user

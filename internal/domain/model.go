@@ -7,11 +7,11 @@ import (
 )
 
 type CreateUserParams struct {
-	Username  string
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
+	Username  string `validate:"required"`
+	FirstName string `validate:"required"`
+	LastName  string `validate:"required"`
+	Email     string `validate:"required,email"`
+	Password  string `validate:"required"`
 }
 
 type User struct {

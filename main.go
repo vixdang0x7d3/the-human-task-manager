@@ -39,7 +39,10 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-	e.GET("/healthz", func(c echo.Context) error {
+
+	v1 := e.Group("/v1")
+
+	v1.GET("/healthz", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, struct{}{})
 	})
 	e.GET("/err", func(c echo.Context) error {
