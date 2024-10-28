@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/database"
 )
 
@@ -66,69 +65,11 @@ func TestCreateUser(t *testing.T) {
 			t.Errorf("user is not properly stored to db")
 		}
 
-		if !internal.CheckPassword(plainTextPassword, s.Users[gotDomainUser.ID].Password) {
+		if !CheckPassword(plainTextPassword, s.Users[gotDomainUser.ID].Password) {
 			t.Errorf("password is not properly hashed")
 		}
 
 		assertDomainUser(t, gotDomainUser, wantDomainUser)
-	})
-
-	t.Run("it returns error on invalid data", func(t *testing.T) {
-
-		type testCase struct {
-			Description      string
-			Input            CreateUserParams
-			ExpectedErrorMsg string
-		}
-
-		for _, tcase := range []testCase{
-			{
-				Description: "with no username",
-				Input: CreateUserParams{
-					Username:  "",
-					FirstName: "Test First Name",
-					LastName:  "Test Last Name",
-					Email:     "test@email.company",
-					Password:  "secretpassword",
-				},
-				ExpectedErrorMsg: "User validation error: Invalid username",
-			},
-
-			{
-				Description: "with invalid email",
-				Input: CreateUserParams{
-					Username:  "Test Username",
-					FirstName: "Test First Name",
-					LastName:  "Test Last Name",
-					Email:     "testabcxyz",
-					Password:  "secretpassword",
-				},
-				ExpectedErrorMsg: "User validation error: Invalid email",
-			},
-			{
-				Description: "with invalid email & username",
-				Input: CreateUserParams{
-					Username:  "",
-					FirstName: "Test First Name",
-					LastName:  "Test Last Name",
-					Email:     "testabcxyz",
-					Password:  "secretpassword",
-				},
-				ExpectedErrorMsg: "User validation error: Invalid username, email",
-			},
-		} {
-			t.Run(tcase.Description, func(t *testing.T) {
-				core := UserCore{s}
-				_, err := core.CreateUser(context.Background(), tcase.Input)
-				if err == nil {
-					t.Errorf(`want error got "%v"`, err)
-				}
-
-				if err.Error() != tcase.ExpectedErrorMsg {
-					t.Errorf(`want to display "%s", got "%s"`, tcase.ExpectedErrorMsg, err.Error())
-				}
-			})
-		}
 	})
 }
 

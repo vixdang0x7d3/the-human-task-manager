@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal"
 )
 
 func main() {
@@ -31,6 +33,8 @@ func main() {
 "bytes_out":${bytes_out}}` + "\n",
 		CustomTimeFormat: "2006-01-02 15:04:05.00000",
 	}))
+
+	e.Validator = &internal.CustomValidator{Validator: validator.New()}
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://*", "https://*"},

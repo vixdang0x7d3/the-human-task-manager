@@ -2,13 +2,9 @@ package domain
 
 import (
 	"context"
-	"errors"
-	"strings"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/database"
 )
 
@@ -26,21 +22,7 @@ type UserCore struct {
 // and save the user to db
 func (core *UserCore) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 
-	validate := validator.New(validator.WithRequiredStructEnabled())
-
-	err := validate.Struct(arg)
-
-	// this is garbage error handling, however i haven't came up with anything better,
-	// so this is what we're having for now
-	if err != nil {
-		fieldNames := []string{}
-		for _, err := range err.(validator.ValidationErrors) {
-			fieldNames = append(fieldNames, strings.ToLower(err.Field()))
-		}
-		return User{}, errors.New("User validation error: Invalid " + strings.Join(fieldNames, ", "))
-	}
-
-	hashedPassword, err := internal.HashPassword(arg.Password)
+	hashedPassword, err := HashPassword(arg.Password)
 	if err != nil {
 		return User{}, err
 	}
