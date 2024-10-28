@@ -63,7 +63,6 @@ func (core *UserCore) GetUserByID(userID string) (User, error) {
 	return User{}, nil
 }
 
-// contract for database layer
 type UserStore interface {
 	CreateUser(ctx context.Context, arg database.CreateUserParams) (database.User, error)
 	GetUser(ctx context.Context, id uuid.UUID) (database.User, error)

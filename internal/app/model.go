@@ -6,14 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateUserParam struct {
-	Username  string `form:"username"`
-	FirstName string `form:"first_name"`
-	LastName  string `form:"last_name"`
-	Email     string `form:"email"`
-	Password  string `form:"password"`
-}
-
+// explicit AppUser type used for rendering view
 type AppUser struct {
 	ID        uuid.UUID `json:"id"`
 	Username  string    `json:"username"`

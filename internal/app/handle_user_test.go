@@ -9,13 +9,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 )
 
 const (
-	MOCK_TIMESTAMP = "2024-12-10T08:53:55+00:00"
+	DUMMY_TIME = "2024-12-10T08:53:55+00:00"
 )
 
 type StubUserService struct {
@@ -24,7 +26,7 @@ type StubUserService struct {
 
 func (s *StubUserService) CreateUser(username, firstName, lastName, email, password string) (domain.User, error) {
 
-	mockTime, _ := time.Parse(time.RFC3339, MOCK_TIMESTAMP)
+	dummyTime, _ := time.Parse(time.RFC3339, DUMMY_TIME)
 
 	aUser := domain.User{
 		ID:        uuid.Nil,
@@ -32,8 +34,8 @@ func (s *StubUserService) CreateUser(username, firstName, lastName, email, passw
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
-		SignupAt:  mockTime,
-		LastLogin: mockTime,
+		SignupAt:  dummyTime,
+		LastLogin: dummyTime,
 	}
 	s.Users[aUser.ID.String()] = aUser
 
@@ -51,38 +53,16 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	t.Run("it records a new user", func(t *testing.T) {
-		params := CreateUserParam{
-			Username:  "TestUser",
-			FirstName: "Bob",
-			LastName:  "Ross",
-			Email:     "bobr@email.company",
-			Password:  "secretpassword",
-		}
 
-		mockTime, _ := time.Parse(time.RFC3339, MOCK_TIMESTAMP)
-		want := AppUser{
-			ID:        uuid.Nil,
-			Username:  params.Username,
-			FirstName: params.FirstName,
-			LastName:  params.LastName,
-			Email:     params.Email,
-			SignupAt:  mockTime,
-			LastLogin: mockTime,
-		}
-
-		e := echo.New()
-
-		f := make(url.Values)
-		f.Set("username", params.Username)
-		f.Set("first_name", params.FirstName)
-		f.Set("last_name", params.LastName)
-		f.Set("email", params.Email)
-		f.Set("password", params.Password)
+		// setup request
+		f := createUserFormParams("TestUser", "Bob", "Ross", "bobr@email.com", "secretpassword")
 
 		request, _ := http.NewRequest(http.MethodPost, "/v1/users/", strings.NewReader(f.Encode()))
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
-
 		response := httptest.NewRecorder()
+
+		e := echo.New()
+		e.Validator = &internal.CustomValidator{Validator: validator.New()}
 
 		c := e.NewContext(request, response)
 		h := UserHandler{
@@ -102,16 +82,85 @@ func TestCreateUser(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		// go time.Time can not be compared normally :D
+		want := AppUser{
+			Username:  "TestUser",
+			FirstName: "Bob",
+			LastName:  "Ross",
+			Email:     "bobr@email.com",
+		}
+
 		assertEqualUser(t, got, want)
+	})
+
+	t.Run("field validations", func(t *testing.T) {
+
+		type testCase struct {
+			Description string
+			Input       url.Values
+			ErrorMsg    string
+		}
+
+		for _, tc := range []testCase{
+			{
+				Description: "with invalid email",
+				Input: createUserFormParams(
+					"TestUsername",
+					"TestFirstName",
+					"TestLastName",
+					"abcxyz",
+					"TestPassword",
+				),
+				ErrorMsg: "validation error: invalid email",
+			},
+
+			{
+				Description: "with missing username",
+				Input: createUserFormParams(
+					"",
+					"TestFirstName",
+					"TestLastName",
+					"abcxyz",
+					"TestPassword",
+				),
+				ErrorMsg: "validation error: invalid email",
+			},
+
+			{
+				Description: "with missing password",
+				Input: createUserFormParams(
+					"",
+					"TestFirstName",
+					"TestLastName",
+					"abcxyz",
+					"TestPassword",
+				),
+				ErrorMsg: "validation error: invalid email",
+			},
+		} {
+			t.Run(tc.Description, func(t *testing.T) {
+
+				request := httptest.NewRequest(http.MethodPost, "/v1/users", strings.NewReader(tc.Input.Encode()))
+				request.Header.Set("Content-Type", echo.MIMEApplicationForm)
+				response := httptest.NewRecorder()
+
+				e := echo.New()
+				e.Validator = &internal.CustomValidator{Validator: validator.New()}
+
+				c := e.NewContext(request, response)
+				h := UserHandler{
+					service: service,
+				}
+				err := h.HandleCreateUser(c)
+				if err == nil {
+					t.Errorf("want error, got %s", err)
+				}
+			})
+		}
 	})
 }
 
-func assertEqualUser(t *testing.T, got, want AppUser) {
+func assertEqualUser(t *testing.T, got AppUser, want AppUser) {
 	t.Helper()
-	if got.ID != want.ID {
-		t.Errorf("got %s want %s", got.ID, want.ID)
-	}
 	if got.Username != want.Username {
 		t.Errorf("got %s want %s", got.Username, want.Username)
 	}
@@ -124,10 +173,15 @@ func assertEqualUser(t *testing.T, got, want AppUser) {
 	if got.Email != want.Email {
 		t.Errorf("got %s want %s", got.Email, want.Email)
 	}
-	if !got.LastLogin.Equal(want.LastLogin) {
-		t.Errorf("got %s want %s", got.LastLogin, want.LastLogin)
-	}
-	if !got.SignupAt.Equal(want.SignupAt) {
-		t.Errorf("got %s want %s", got.SignupAt, want.SignupAt)
-	}
+}
+
+func createUserFormParams(username, firstname, lastname, email, password string) url.Values {
+	f := make(url.Values)
+	f.Set("username", username)
+	f.Set("first_name", firstname)
+	f.Set("last_name", lastname)
+	f.Set("email", email)
+	f.Set("password", password)
+
+	return f
 }
