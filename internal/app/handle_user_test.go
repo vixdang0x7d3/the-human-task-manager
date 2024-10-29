@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -24,16 +25,16 @@ type StubUserService struct {
 	Users map[string]domain.User
 }
 
-func (s *StubUserService) CreateUser(username, firstName, lastName, email, password string) (domain.User, error) {
+func (s *StubUserService) CreateUser(ctx context.Context, arg domain.CreateUserParams) (domain.User, error) {
 
 	dummyTime, _ := time.Parse(time.RFC3339, DUMMY_TIME)
 
 	aUser := domain.User{
-		ID:        uuid.Nil,
-		Username:  username,
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
+		ID:        uuid.MustParse("001af946-4f04-4dbf-a265-3be702667aea"),
+		Username:  arg.Username,
+		FirstName: arg.FirstName,
+		LastName:  arg.LastName,
+		Email:     arg.Email,
 		SignupAt:  dummyTime,
 		LastLogin: dummyTime,
 	}
@@ -42,7 +43,7 @@ func (s *StubUserService) CreateUser(username, firstName, lastName, email, passw
 	return aUser, nil
 }
 
-func (s *StubUserService) GetUser(userID string) (domain.User, error) {
+func (s *StubUserService) GetUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
 	return domain.User{}, nil
 }
 
@@ -66,7 +67,7 @@ func TestCreateUser(t *testing.T) {
 
 		c := e.NewContext(request, response)
 		h := UserHandler{
-			service: service,
+			Service: service,
 		}
 		err := h.HandleCreateUser(c)
 		if err != nil {
@@ -128,11 +129,11 @@ func TestCreateUser(t *testing.T) {
 			{
 				Description: "with missing password",
 				Input: createUserFormParams(
-					"",
+					"TestUsername",
 					"TestFirstName",
 					"TestLastName",
 					"abcxyz",
-					"TestPassword",
+					"",
 				),
 				ErrorMsg: "validation error: invalid email",
 			},
@@ -148,7 +149,7 @@ func TestCreateUser(t *testing.T) {
 
 				c := e.NewContext(request, response)
 				h := UserHandler{
-					service: service,
+					Service: service,
 				}
 				err := h.HandleCreateUser(c)
 				if err == nil {

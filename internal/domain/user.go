@@ -44,6 +44,14 @@ func (core *UserCore) CreateUser(ctx context.Context, arg CreateUserParams) (Use
 	return toDomainUser(user), nil
 }
 
+func (core *UserCore) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
+	user, err := core.Store.GetUser(ctx, id)
+	if err != nil {
+		return User{}, err
+	}
+	return toDomainUser(user), nil
+}
+
 func toDomainUser(user database.User) User {
 	return User{
 		ID:        user.ID,

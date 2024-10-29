@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 type UserHandler struct {
-	service UserService
+	Service UserService
 }
 
 func (h *UserHandler) HandleCreateUser(c echo.Context) error {
@@ -34,33 +35,58 @@ func (h *UserHandler) HandleCreateUser(c echo.Context) error {
 		LastLogin time.Time `json:"last_login"`
 	}
 
-	arg := &request{}
-	if err := c.Bind(arg); err != nil {
+	arg := request{}
+	if err := c.Bind(&arg); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	if err := c.Validate(arg); err != nil {
 		return err
 	}
 
-	user, err := h.service.CreateUser(
-		arg.Username,
-		arg.FirstName,
-		arg.LastName,
-		arg.Email,
-		arg.Password,
-	)
+	user, err := h.Service.CreateUser(c.Request().Context(), domain.CreateUserParams(arg))
 	if err != nil {
 		return err
 	}
 
 	if c.Request().Header.Get("Accept") == "text/html" {
-		return echo.ErrInternalServerError // TODO: implement html rendering
+		return echo.NewHTTPError(http.StatusBadRequest, "Unimplemented feature") // TODO: implement html rendering
+	}
+
+	return c.JSON(http.StatusAccepted, response(user))
+}
+
+func (h *UserHandler) HandleGetUser(c echo.Context) error {
+
+	// used for testing purpose
+	type response struct {
+		ID        uuid.UUID `json:"id"`
+		Username  string    `json:"username"`
+		FirstName string    `json:"first_name"`
+		LastName  string    `json:"last_name"`
+		Email     string    `json:"email"`
+		SignupAt  time.Time `json:"signup_at"`
+		LastLogin time.Time `json:"last_login"`
+	}
+
+	idString := c.Param("id")
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Malformed id")
+	}
+
+	user, err := h.Service.GetUser(c.Request().Context(), id)
+	if err != nil {
+		return err
+	}
+
+	if c.Request().Header.Get("Accept") == "text/html" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Unimplemented feature") // TODO: implement html rendering
 	}
 
 	return c.JSON(http.StatusAccepted, response(user))
 }
 
 type UserService interface {
-	CreateUser(username, firstName, lastName, email, password string) (domain.User, error)
-	GetUser(userID string) (domain.User, error)
+	CreateUser(ctx context.Context, arg domain.CreateUserParams) (domain.User, error)
+	GetUser(ctx context.Context, id uuid.UUID) (domain.User, error)
 }

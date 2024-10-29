@@ -6,13 +6,13 @@ import (
 	"github.com/google/uuid"
 )
 
-// explicit AppUser type used for rendering view
+// AppUser is the View Model for User domain
 type AppUser struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Email     string    `json:"email"`
-	SignupAt  time.Time `json:"signup_at"`
-	LastLogin time.Time `json:"last_login"`
+	ID        uuid.UUID
+	Username  string
+	FirstName string
+	LastName  string
+	Email     string
+	SignupAt  time.Time
+	LastLogin time.Time
 }

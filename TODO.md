@@ -9,8 +9,13 @@ pre-final test evaluation milestone: 2024/11/25
 **User domain**
 - [x] impl user handler's create user http endpoint
 - [x] impl user core's create user: hash password, call user store to save user to database
-- [ ] refactor unit tests
-- [ ] implement basic data validation (check empty fields) for user core's create user
+- [x] refactor unit tests
+- [x] implement basic data validation (check empty fields) for user core's create user
+- [ ] refactor validation to app layer :D
+- [ ] impl user handlers' get user http endpoint, check if uuid is valid
+- [ ] impl user core's get user: call user store to get user via uuid.
+- [ ] wire up the endpoints in main
+
 
 **Task domain**
 (nothing yet)
