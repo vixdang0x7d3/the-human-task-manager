@@ -13,13 +13,6 @@ type UserCore struct {
 	Store UserStore
 }
 
-// TODO:
-// - field validation especially email, only allows certain characters for password
-// - check if email exists already if it is u're cooked
-// - check for NOT NULL fields
-// - encrypt password
-// At the moment the method will just encrypt the password
-// and save the user to db
 func (core *UserCore) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 
 	hashedPassword, err := HashPassword(arg.Password)
@@ -44,6 +37,7 @@ func (core *UserCore) CreateUser(ctx context.Context, arg CreateUserParams) (Use
 	return toDomainUser(user), nil
 }
 
+// it so simple so im not gonna write test :P
 func (core *UserCore) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	user, err := core.Store.GetUser(ctx, id)
 	if err != nil {
@@ -62,13 +56,6 @@ func toDomainUser(user database.User) User {
 		SignupAt:  user.SignupAt,
 		LastLogin: user.LastLogin,
 	}
-}
-
-// TODO:
-// - return a user, check if id exist for fuck sake
-// should it accepts a uuid.UUID or a stupid string ?
-func (core *UserCore) GetUserByID(userID string) (User, error) {
-	return User{}, nil
 }
 
 type UserStore interface {

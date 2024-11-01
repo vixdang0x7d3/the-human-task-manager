@@ -17,18 +17,14 @@ import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 )
 
-const (
-	DUMMY_TIME = "2024-12-10T08:53:55+00:00"
-)
-
 type StubUserService struct {
-	Users map[string]domain.User
+	Users      map[string]domain.User
+	recordedID uuid.UUID
 }
 
 func (s *StubUserService) CreateUser(ctx context.Context, arg domain.CreateUserParams) (domain.User, error) {
 
-	dummyTime, _ := time.Parse(time.RFC3339, DUMMY_TIME)
-
+	dummyTime, _ := time.Parse(time.RFC3339, "2024-12-10T08:53:55+00:00")
 	aUser := domain.User{
 		ID:        uuid.MustParse("001af946-4f04-4dbf-a265-3be702667aea"),
 		Username:  arg.Username,
@@ -44,13 +40,71 @@ func (s *StubUserService) CreateUser(ctx context.Context, arg domain.CreateUserP
 }
 
 func (s *StubUserService) GetUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
+	s.recordedID = id
 	return domain.User{}, nil
+}
+
+func TestGetUser(t *testing.T) {
+
+	uuidString := "7f173ec4-402d-4cd3-8446-0423771f972f"
+	service := &StubUserService{
+		Users: map[string]domain.User{},
+	}
+
+	t.Run("it passes a valid id to service", func(t *testing.T) {
+
+		e := echo.New()
+		request := httptest.NewRequest(http.MethodGet, "/v1/users/", nil)
+		response := httptest.NewRecorder()
+
+		c := e.NewContext(request, response)
+		c.SetParamNames("id")
+		c.SetParamValues(uuidString)
+
+		handler := UserHandler{
+			Service: service,
+		}
+		err := handler.HandleGetUser(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if service.recordedID != uuid.MustParse(uuidString) {
+			t.Errorf("want %v got %v", uuid.MustParse(uuidString), service.recordedID)
+		}
+	})
+
+	t.Run("it returns error if user not found", func(t *testing.T) {
+	})
 }
 
 func TestCreateUser(t *testing.T) {
 
 	service := &StubUserService{
-		map[string]domain.User{},
+		Users: map[string]domain.User{},
+	}
+
+	type WantAppUser struct {
+		Username  string `json:"username"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Email     string `json:"email"`
+	}
+
+	assertAppUser := func(t *testing.T, got, want WantAppUser) {
+		t.Helper()
+		if got.Username != want.Username {
+			t.Errorf("got %s want %s", got.Username, want.Username)
+		}
+		if got.FirstName != want.FirstName {
+			t.Errorf("got %s want %s", got.FirstName, want.FirstName)
+		}
+		if got.LastName != want.LastName {
+			t.Errorf("got %s want %s", got.LastName, want.LastName)
+		}
+		if got.Email != want.Email {
+			t.Errorf("got %s want %s", got.Email, want.Email)
+		}
 	}
 
 	t.Run("it records a new user", func(t *testing.T) {
@@ -78,19 +132,19 @@ func TestCreateUser(t *testing.T) {
 			t.Errorf("expected %d users stored, got %d users stored", len(service.Users), 1)
 		}
 
-		var got AppUser
+		var got WantAppUser
 		if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 			t.Fatal(err)
 		}
 
-		want := AppUser{
+		want := WantAppUser{
 			Username:  "TestUser",
 			FirstName: "Bob",
 			LastName:  "Ross",
 			Email:     "bobr@email.com",
 		}
 
-		assertEqualUser(t, got, want)
+		assertAppUser(t, got, want)
 	})
 
 	t.Run("field validations", func(t *testing.T) {
@@ -123,7 +177,7 @@ func TestCreateUser(t *testing.T) {
 					"abcxyz",
 					"TestPassword",
 				),
-				ErrorMsg: "validation error: invalid email",
+				ErrorMsg: "validation error: invalid something",
 			},
 
 			{
@@ -135,7 +189,7 @@ func TestCreateUser(t *testing.T) {
 					"abcxyz",
 					"",
 				),
-				ErrorMsg: "validation error: invalid email",
+				ErrorMsg: "validation error: invalid something",
 			},
 		} {
 			t.Run(tc.Description, func(t *testing.T) {
@@ -158,22 +212,6 @@ func TestCreateUser(t *testing.T) {
 			})
 		}
 	})
-}
-
-func assertEqualUser(t *testing.T, got AppUser, want AppUser) {
-	t.Helper()
-	if got.Username != want.Username {
-		t.Errorf("got %s want %s", got.Username, want.Username)
-	}
-	if got.FirstName != want.FirstName {
-		t.Errorf("got %s want %s", got.FirstName, want.FirstName)
-	}
-	if got.LastName != want.LastName {
-		t.Errorf("got %s want %s", got.LastName, want.LastName)
-	}
-	if got.Email != want.Email {
-		t.Errorf("got %s want %s", got.Email, want.Email)
-	}
 }
 
 func createUserFormParams(username, firstname, lastname, email, password string) url.Values {
