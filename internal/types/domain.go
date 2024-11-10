@@ -1,4 +1,4 @@
-package app
+package types
 
 import (
 	"time"
@@ -6,8 +6,15 @@ import (
 	"github.com/google/uuid"
 )
 
-// AppUser is the View Model for User domain
-type AppUser struct {
+type CreateUserCmd struct {
+	Username  string
+	FirstName string
+	LastName  string
+	Email     string
+	Password  string
+}
+
+type User struct {
 	ID        uuid.UUID
 	Username  string
 	FirstName string

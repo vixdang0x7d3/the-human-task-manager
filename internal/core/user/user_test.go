@@ -1,4 +1,4 @@
-package domain
+package user
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/database"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
 
 type StubUserStore struct {
@@ -20,7 +21,7 @@ func (s *StubUserStore) CreateUser(ctx context.Context, arg database.CreateUserP
 	return s.Users[arg.ID], nil
 }
 
-func (s *StubUserStore) GetUser(ctx context.Context, id uuid.UUID) (database.User, error) {
+func (s *StubUserStore) ByID(ctx context.Context, id uuid.UUID) (database.User, error) {
 	return database.User{}, nil
 }
 
@@ -33,7 +34,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("it creates a user", func(t *testing.T) {
 		plainTextPassword := "secretpassword"
 
-		arg := CreateUserParams{
+		arg := types.CreateUserCmd{
 			Username:  "TestUSer",
 			FirstName: "Bob",
 			LastName:  "Ross",
@@ -41,7 +42,7 @@ func TestCreateUser(t *testing.T) {
 			Password:  plainTextPassword,
 		}
 
-		wantDomainUser := User{
+		wantDomainUser := types.User{
 			ID:        uuid.New(),
 			Username:  arg.Username,
 			FirstName: arg.FirstName,
@@ -65,7 +66,7 @@ func TestCreateUser(t *testing.T) {
 			t.Errorf("user is not properly stored to db")
 		}
 
-		if !CheckPassword(plainTextPassword, s.Users[gotDomainUser.ID].Password) {
+		if !checkPassword(plainTextPassword, s.Users[gotDomainUser.ID].Password) {
 			t.Errorf("password is not properly hashed")
 		}
 
@@ -73,7 +74,7 @@ func TestCreateUser(t *testing.T) {
 	})
 }
 
-func assertDomainUser(t *testing.T, got, want User) {
+func assertDomainUser(t *testing.T, got, want types.User) {
 	t.Helper()
 	if got.Username != want.Username {
 		t.Errorf("got %s want %s", got.Username, want.Username)

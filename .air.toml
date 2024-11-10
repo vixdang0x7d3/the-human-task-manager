@@ -5,16 +5,16 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/thtm"
-  cmd = "go build -o ./tmp/thtm ."
+  cmd = "tailwindcss -i static/css/input.css -o static/css/output.css --minify && templ generate -path internal/template && go build -o ./tmp/thtm ."
   delay = 1000
-  exclude_dir = ["assets", "tmp", "bin", "sql", "vendor", "testdata"]
+  exclude_dir = ["tmp", "bin", "sql", "vendor", "testdata", "node_modules", "docs", ".git"]
   exclude_file = []
-  exclude_regex = [".*_templ.go", "_test.go"]
+  exclude_regex = [".*_templ.go", "_test.go", ".md"]
   exclude_unchanged = false
   follow_symlink = false
   full_bin = ""
   include_dir = []
-  include_ext = ["go", "tpl", "tmpl", "templ", "html"]
+  include_ext = ["go", "tpl", "tmpl", "templ", "html", "js", "css"]
   include_file = []
   kill_delay = "0s"
   log = "build-errors.log"
@@ -42,9 +42,9 @@ tmp_dir = "tmp"
   clean_on_exit = false
 
 [proxy]
-  enabled =true 
+  enabled =true
   app_port = 8080
-  proxy_port = 9999
+  proxy_port = 7331
 
 [screen]
   clear_on_rebuild = false

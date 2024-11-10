@@ -1,4 +1,4 @@
-package app
+package user
 
 import (
 	"context"
@@ -13,19 +13,19 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/app/validate"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
 
 type StubUserService struct {
-	Users      map[string]domain.User
+	Users      map[string]types.User
 	recordedID uuid.UUID
 }
 
-func (s *StubUserService) CreateUser(ctx context.Context, arg domain.CreateUserParams) (domain.User, error) {
+func (s *StubUserService) CreateUser(ctx context.Context, arg types.CreateUserCmd) (types.User, error) {
 
 	dummyTime, _ := time.Parse(time.RFC3339, "2024-12-10T08:53:55+00:00")
-	aUser := domain.User{
+	aUser := types.User{
 		ID:        uuid.MustParse("001af946-4f04-4dbf-a265-3be702667aea"),
 		Username:  arg.Username,
 		FirstName: arg.FirstName,
@@ -39,16 +39,16 @@ func (s *StubUserService) CreateUser(ctx context.Context, arg domain.CreateUserP
 	return aUser, nil
 }
 
-func (s *StubUserService) GetUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
+func (s *StubUserService) ByID(ctx context.Context, id uuid.UUID) (types.User, error) {
 	s.recordedID = id
-	return domain.User{}, nil
+	return types.User{}, nil
 }
 
-func TestGetUser(t *testing.T) {
+func TestByID(t *testing.T) {
 
 	uuidString := "7f173ec4-402d-4cd3-8446-0423771f972f"
 	service := &StubUserService{
-		Users: map[string]domain.User{},
+		Users: map[string]types.User{},
 	}
 
 	t.Run("it passes a valid id to service", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestGetUser(t *testing.T) {
 		handler := UserHandler{
 			Service: service,
 		}
-		err := handler.HandleGetUser(c)
+		err := handler.HandleUserGetByID(c)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -81,7 +81,7 @@ func TestGetUser(t *testing.T) {
 func TestCreateUser(t *testing.T) {
 
 	service := &StubUserService{
-		Users: map[string]domain.User{},
+		Users: map[string]types.User{},
 	}
 
 	type WantAppUser struct {
@@ -117,13 +117,13 @@ func TestCreateUser(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		e := echo.New()
-		e.Validator = &internal.CustomValidator{Validator: validator.New()}
+		e.Validator = &validate.CustomValidator{Validator: validator.New()}
 
 		c := e.NewContext(request, response)
 		h := UserHandler{
 			Service: service,
 		}
-		err := h.HandleCreateUser(c)
+		err := h.HandleUserCreate(c)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -199,13 +199,13 @@ func TestCreateUser(t *testing.T) {
 				response := httptest.NewRecorder()
 
 				e := echo.New()
-				e.Validator = &internal.CustomValidator{Validator: validator.New()}
+				e.Validator = &validate.CustomValidator{Validator: validator.New()}
 
 				c := e.NewContext(request, response)
 				h := UserHandler{
 					Service: service,
 				}
-				err := h.HandleCreateUser(c)
+				err := h.HandleUserCreate(c)
 				if err == nil {
 					t.Errorf("want error, got %s", err)
 				}

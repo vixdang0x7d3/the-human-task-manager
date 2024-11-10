@@ -1,0 +1,38 @@
+package pages
+
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/template"
+
+templ Signup() {
+	@template.Boilerplate() {
+		@template.Head()
+		<body>
+			<div class="card bg-base-200 w-200 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">Sign up new account</h2>
+					<form action="/v1/users" method="POST">
+						<label class="input input-bordered flex items-center gap-2">
+							Username
+							<input name="username" id="username" required?={ true } type="text" class="grow" placeholder="taskman"/>
+						</label>
+						<label class="input input-bordered flex items-center gap-2">
+							Email
+							<input name="email" id="email" required?={ true } type="email" class="grow" placeholder="htm@site.com"/>
+						</label>
+						<label class="input input-bordered flex items-center gap-2">
+							First Name
+							<input name="first_name" id="first_name" required?={ true } type="text" class="grow" placeholder="Human"/>
+						</label>
+						<label class="input input-bordered flex items-center gap-2">
+							Last Name
+							<input name="last_name" id="last_name" required?={ true } type="text" class="grow" placeholder="Task Manager"/>
+						</label>
+						<label class="input input-bordered flex items-center gap-2">
+							Password
+							<input name="password" id="password" required?={ true } type="password" class="grow"/>
+						</label>
+					</form>
+				</div>
+			</div>
+		</body>
+	}
+}

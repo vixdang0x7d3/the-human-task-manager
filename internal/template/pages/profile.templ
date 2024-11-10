@@ -1,0 +1,26 @@
+package pages
+
+import (
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/template"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
+)
+
+templ Profile(model types.ProfileViewModel) {
+	@template.Boilerplate() {
+		@template.Head()
+		<body>
+			<div class="flex items-center justify-center py-10">
+				<div class=" card bg-base-200 w-96 shadow-xl">
+					<div class="card-body items-center text-center">
+						<h2 class="card-title">User Profile</h2>
+						<div class="text-left py-2">
+							<p>Username: { model.Username }</p>
+							<p>Email: { model.Email }</p>
+							<p>Name: { model.FirstName } { model.LastName }</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</body>
+	}
+}

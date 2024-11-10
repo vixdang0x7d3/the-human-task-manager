@@ -1,22 +1,17 @@
-package app
+package user
 
 import (
-	"context"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
 
-type UserHandler struct {
-	Service UserService
-}
+func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 
-func (h *UserHandler) HandleCreateUser(c echo.Context) error {
-
-	type request struct {
+	type formData struct {
 		Username  string `form:"username" validate:"required"`
 		FirstName string `form:"first_name" validate:"required"`
 		LastName  string `form:"last_name" validate:"required"`
@@ -35,7 +30,7 @@ func (h *UserHandler) HandleCreateUser(c echo.Context) error {
 		LastLogin time.Time `json:"last_login"`
 	}
 
-	arg := request{}
+	arg := formData{}
 	if err := c.Bind(&arg); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -43,7 +38,7 @@ func (h *UserHandler) HandleCreateUser(c echo.Context) error {
 		return err
 	}
 
-	user, err := h.Service.CreateUser(c.Request().Context(), domain.CreateUserParams(arg))
+	user, err := h.Service.CreateUser(c.Request().Context(), types.CreateUserCmd(arg))
 	if err != nil {
 		return err
 	}
@@ -55,7 +50,7 @@ func (h *UserHandler) HandleCreateUser(c echo.Context) error {
 	return c.JSON(http.StatusAccepted, response(user))
 }
 
-func (h *UserHandler) HandleGetUser(c echo.Context) error {
+func (h *UserHandler) HandleUserGetByID(c echo.Context) error {
 
 	// used for testing purpose
 	type response struct {
@@ -74,7 +69,8 @@ func (h *UserHandler) HandleGetUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Malformed id")
 	}
 
-	user, err := h.Service.GetUser(c.Request().Context(), id)
+	user, err := h.Service.ByID(c.Request().Context(), id)
+
 	if err != nil {
 		return err
 	}
@@ -84,9 +80,4 @@ func (h *UserHandler) HandleGetUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusAccepted, response(user))
-}
-
-type UserService interface {
-	CreateUser(ctx context.Context, arg domain.CreateUserParams) (domain.User, error)
-	GetUser(ctx context.Context, id uuid.UUID) (domain.User, error)
 }

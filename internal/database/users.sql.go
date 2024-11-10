@@ -12,6 +12,27 @@ import (
 	"github.com/google/uuid"
 )
 
+const byID = `-- name: ByID :one
+SELECT id, username, first_name, last_name, email, password, signup_at, last_login FROM users
+WHERE id=$1
+`
+
+func (q *Queries) ByID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, byID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.SignupAt,
+		&i.LastLogin,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(id, username, first_name, last_name, email, password, signup_at, last_login)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -40,27 +61,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.SignupAt,
 		arg.LastLogin,
 	)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.FirstName,
-		&i.LastName,
-		&i.Email,
-		&i.Password,
-		&i.SignupAt,
-		&i.LastLogin,
-	)
-	return i, err
-}
-
-const getUser = `-- name: GetUser :one
-SELECT id, username, first_name, last_name, email, password, signup_at, last_login FROM users
-WHERE id=$1
-`
-
-func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.db.QueryRow(ctx, getUser, id)
 	var i User
 	err := row.Scan(
 		&i.ID,

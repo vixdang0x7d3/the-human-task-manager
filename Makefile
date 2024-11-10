@@ -1,42 +1,67 @@
-
 include .env
 
-SHELL := /bin/bash
+.PHONY: db-up \
+	db-down \
+	goose-up \
+	goose-down \
+	goose-upto \
+	goose-downto \
+	goose status \
+	sqlc \
+	templ-build \
+	tailwind-build \
+	live/tailwind \
+	build \
+	run \
+	test \
+	live \
+	clean
 
-.PHONY: build
-build:
-	@go build -o bin/thtm
+db-up:
+	@docker compose up -d
 
-.PHONY: run
-run: build
-	@./bin/thtm
+db-down:
+	@docker compose down
 
-.PHONY: goose-up
 goose-up:
-	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) up
+	@GOOSE_MIGRATION_DIR=$(MIGRATION_DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) up
 
-.PHONY: goose-down
 goose-down:
-	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down
+	@GOOSE_MIGRATION_DIR=$(MIGRATION_DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down
 
-.PHONY: goose-upto
 goose-upto:
-	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) up-to $(VERSION)
+	@GOOSE_MIGRATION_DIR=$(MIGRATION_DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) up-to $(VERSION)
 
-.PHONY: goose-downto
 goose-downto:
-	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down-to $(VERSION)
+	@GOOSE_MIGRATION_DIR=$(MIGRATION_DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down-to $(VERSION)
 
-
-.PHONY: goose-status
 goose-status:
-	@GOOSE_MIGRATION_DIR=$(DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) status
+	@GOOSE_MIGRATION_DIR=$(MIGRATION_DIR) goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) status
 
-.PHONY: live
-live:
+sqlc:
+	@sqlc generate
+
+tailwind-build:
+	@tailwindcss -i static/css/input.css -o static/css/output.css --minify
+
+templ-build:
+	@templ generate -path internal/template/
+
+build:
+	@go build -o tmp/thtm
+
+run: build db-up goose-up
+	@./tmp/thtm
+
+test:
+	@go test ./...
+
+live/tailwind:
+	@tailwindcss -i static/css/input.css -o static/css/output.css --watch --minify
+
+live: 
 	@air
 
-.PHONY: clean
-clean: unset
+clean: db-down goose-down
 	rm -rf bin/* tmp/*
 	

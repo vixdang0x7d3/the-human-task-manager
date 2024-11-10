@@ -1,0 +1,18 @@
+package pages
+
+import (
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/template"
+)
+
+templ content(name string) {
+	<body>
+		<div class="text-center">Look { name }! i built something</div>
+	</body>
+}
+
+templ Index(name string) {
+	@template.Boilerplate() {
+		@template.Head()
+		@content(name)
+	}
+}
