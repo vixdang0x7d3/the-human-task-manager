@@ -82,4 +82,33 @@ func Head() templ.Component {
 	})
 }
 
+func Navbar() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"navbar bg-base-100\"><div class=\"flex-1\"><a class=\"btn btn-ghost text-xl\" href=\"#!\" title=\"Home\">Human Task Manager</a><!-- return index --></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\"><li><a href=\"#!\" title=\"Projects\">PROJECT</a></li><li><details><summary>PERSONAL</summary><ul class=\"bg-base-100 rounded-t-none p-2\"><li><a href=\"#!\" title=\"Task List\">Task List</a></li><li><a href=\"#!\" title=\"Calender\">Calender</a></li><li><a href=\"#!\" title=\"Track Time\">Track Time</a></li><li><a href=\"#!\" title=\"Statitics\">Statitics</a></li></ul></details></li><li><a href=\"#!\" title=\"Your Profile\">PROFILE</a></li><li><a href=\"#!\" title=\"Home\">HOME</a></li><!-- return index --><li><a href=\"#!\" title=\"Logout\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" class=\"h-5 w-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H4a3 3 0 01-3-3V7a3 3 0 013-3h6a3 3 0 013 3v1\"></path></svg></a><!-- Separate logout emoji item --></li></ul></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
 var _ = templruntime.GeneratedTemplate
