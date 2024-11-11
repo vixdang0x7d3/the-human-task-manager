@@ -25,3 +25,7 @@ func (h *UserHandler) HandleShowSignup(c echo.Context) error {
 
 	return template.Render(c, http.StatusOK, pages.Signup())
 }
+
+func (h *UserHandler) HandleShowLogin(c echo.Context) error {
+	return template.Render(c, http.StatusOK, pages.Login())
+}
