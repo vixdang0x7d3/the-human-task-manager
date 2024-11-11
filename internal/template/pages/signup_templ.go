@@ -47,7 +47,7 @@ func Signup() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body><div class=\"card bg-base-200 w-200 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Sign up new account</h2><form action=\"/v1/users\" method=\"POST\"><label class=\"input input-bordered flex items-center gap-2\">Username <input name=\"username\" id=\"username\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body><div class=\"flex items-center justify-center py-10\"><div class=\"card bg-base-200 w-120 shadow-xl\"><div class=\"card-body items-center text-center\"><h2 class=\"card-title pb-4\">Sign up new account</h2><form action=\"/v1/users\" method=\"POST\"><div class=\"flex flex-col gap-2\"><label class=\"input input-bordered flex items-center gap-2\">Username: <input name=\"username\" id=\"username\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -57,7 +57,7 @@ func Signup() templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"text\" class=\"grow\" placeholder=\"taskman\"></label> <label class=\"input input-bordered flex items-center gap-2\">Email <input name=\"email\" id=\"email\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"text\" class=\"grow\" placeholder=\"taskman\"></label> <label class=\"input input-bordered flex items-center gap-2\">Email: <input name=\"email\" id=\"email\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -67,7 +67,7 @@ func Signup() templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"email\" class=\"grow\" placeholder=\"htm@site.com\"></label> <label class=\"input input-bordered flex items-center gap-2\">First Name <input name=\"first_name\" id=\"first_name\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"email\" class=\"grow\" placeholder=\"htm@site.com\"></label> <label class=\"input input-bordered flex items-center gap-2\">First Name: <input name=\"first_name\" id=\"first_name\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -77,7 +77,7 @@ func Signup() templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"text\" class=\"grow\" placeholder=\"Human\"></label> <label class=\"input input-bordered flex items-center gap-2\">Last Name <input name=\"last_name\" id=\"last_name\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"text\" class=\"grow\" placeholder=\"Human\"></label> <label class=\"input input-bordered flex items-center gap-2\">Last Name: <input name=\"last_name\" id=\"last_name\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -87,7 +87,7 @@ func Signup() templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"text\" class=\"grow\" placeholder=\"Task Manager\"></label> <label class=\"input input-bordered flex items-center gap-2\">Password <input name=\"password\" id=\"password\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"text\" class=\"grow\" placeholder=\"Task Manager\"></label> <label class=\"input input-bordered flex items-center gap-2\">Password: <input name=\"password\" id=\"password\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -97,7 +97,7 @@ func Signup() templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"password\" class=\"grow\"></label></form></div></div></body>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" type=\"password\" class=\"grow\" placeholder=\"********\"></label></div><div class=\"card-actions justify-end pt-4\"><input type=\"submit\" value=\"Submit\" class=\"btn btn-primary\"> <a href=\"#!\" class=\"btn btn-secondary\">Cancel</a></div></form></div></div></div></body>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

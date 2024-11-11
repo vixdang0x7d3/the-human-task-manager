@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/template"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
 
@@ -17,17 +18,6 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 		LastName  string `form:"last_name" validate:"required"`
 		Email     string `form:"email" validate:"required,email"`
 		Password  string `form:"password" validate:"required"`
-	}
-
-	// used for testing purpose
-	type response struct {
-		ID        uuid.UUID `json:"id"`
-		Username  string    `json:"username"`
-		FirstName string    `json:"first_name"`
-		LastName  string    `json:"last_name"`
-		Email     string    `json:"email"`
-		SignupAt  time.Time `json:"signup_at"`
-		LastLogin time.Time `json:"last_login"`
 	}
 
 	arg := formData{}
@@ -42,12 +32,9 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	_ = user
 
-	if c.Request().Header.Get("Accept") == "text/html" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Unimplemented feature") // TODO: implement html rendering
-	}
-
-	return c.JSON(http.StatusAccepted, response(user))
+	return template.Render(c, http.StatusOK, nil)
 }
 
 func (h *UserHandler) HandleUserGetByID(c echo.Context) error {
