@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -44,7 +45,7 @@ func (s *StubUserService) ByID(ctx context.Context, id uuid.UUID) (types.User, e
 	return types.User{}, nil
 }
 
-func TestByID(t *testing.T) {
+func TestGetByID(t *testing.T) {
 
 	uuidString := "7f173ec4-402d-4cd3-8446-0423771f972f"
 	service := &StubUserService{
@@ -74,8 +75,8 @@ func TestByID(t *testing.T) {
 		}
 	})
 
-	t.Run("it returns error if user not found", func(t *testing.T) {
-	})
+	// t.Run("it returns error if user not found", func(t *testing.T) {
+	// })
 }
 
 func TestCreateUser(t *testing.T) {
@@ -85,44 +86,44 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	type WantAppUser struct {
-		Username  string `json:"username"`
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
-		Email     string `json:"email"`
+		Username  string
+		FirstName string
+		LastName  string
+		Email     string
 	}
 
-	assertAppUser := func(t *testing.T, got, want WantAppUser) {
+	assertRendered := func(t *testing.T, got *goquery.Selection, want WantAppUser) {
 		t.Helper()
-		if got.Username != want.Username {
-			t.Errorf("got %s want %s", got.Username, want.Username)
+
+		if username := got.Find(`div[id=username]`).Text(); username != want.Username {
+			t.Errorf("want %s to be rendered, got %s", want.Username, username)
 		}
-		if got.FirstName != want.FirstName {
-			t.Errorf("got %s want %s", got.FirstName, want.FirstName)
+		if email := got.Find(`div[id=email]`).Text(); email != want.Username {
+			t.Errorf("want %s to be rendered, got %s", want.Email, email)
 		}
-		if got.LastName != want.LastName {
-			t.Errorf("got %s want %s", got.LastName, want.LastName)
-		}
-		if got.Email != want.Email {
-			t.Errorf("got %s want %s", got.Email, want.Email)
+		wantFullName := fmt.Sprintf(`%s %s`, want.FirstName, want.LastName)
+		gotFullName := got.Find(`div[id=full-name]`).Text()
+		if gotFullName != wantFullName {
+			t.Errorf("want %s to be rendered, got %s", wantFullName, gotFullName)
 		}
 	}
 
 	t.Run("it records a new user", func(t *testing.T) {
-
 		// setup request
 		f := createUserFormParams("TestUser", "Bob", "Ross", "bobr@email.com", "secretpassword")
-
 		request, _ := http.NewRequest(http.MethodPost, "/v1/users/", strings.NewReader(f.Encode()))
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
 
+		// setup handler and inject fake
 		e := echo.New()
 		e.Validator = &validate.CustomValidator{Validator: validator.New()}
-
-		c := e.NewContext(request, response)
 		h := UserHandler{
 			Service: service,
 		}
+
+		// run handler
+		c := e.NewContext(request, response)
 		err := h.HandleUserCreate(c)
 		if err != nil {
 			t.Fatal(err)
@@ -132,19 +133,19 @@ func TestCreateUser(t *testing.T) {
 			t.Errorf("expected %d users stored, got %d users stored", len(service.Users), 1)
 		}
 
-		var got WantAppUser
-		if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
-			t.Fatal(err)
+		doc, err := goquery.NewDocumentFromReader(response.Result().Body)
+		if err != nil {
+			t.Fatalf("failed to read template: %v", err)
 		}
 
-		want := WantAppUser{
+		wantAppUser := WantAppUser{
 			Username:  "TestUser",
+			Email:     "bobr@email.com",
 			FirstName: "Bob",
 			LastName:  "Ross",
-			Email:     "bobr@email.com",
 		}
 
-		assertAppUser(t, got, want)
+		assertRendered(t, doc.Find(`div[id='user=info]`), wantAppUser)
 	})
 
 	t.Run("field validations", func(t *testing.T) {

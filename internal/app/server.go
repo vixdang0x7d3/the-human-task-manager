@@ -32,7 +32,6 @@ func NewServer(db *database.Queries, staticAssets fs.FS) (*echo.Echo, error) {
 	}))
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Root:       "static",
-		Browse:     true,
 		Filesystem: http.FS(staticAssets),
 	}))
 	route(e, db)
