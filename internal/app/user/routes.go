@@ -6,6 +6,8 @@ func (h *UserHandler) Route(e *echo.Group) {
 
 	// ui serving endpoints
 	e.GET("/profile", h.HandleShowProfile)
+
+	e.GET("/login", h.HandleShowLogin)
 	e.GET("/signup", h.HandleShowSignup)
 
 	// api endpoints
