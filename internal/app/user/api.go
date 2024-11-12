@@ -41,7 +41,7 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 		LastName:  user.LastName,
 	}
 
-	return template.Render(c, http.StatusOK, components.UserInfoPostSignup(data))
+	return template.Render(c, http.StatusOK, components.UserInfoPostLogin(data))
 }
 
 func (h *UserHandler) HandleUserGetByID(c echo.Context) error {
