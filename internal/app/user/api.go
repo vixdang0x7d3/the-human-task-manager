@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/template"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/template/components"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
 
@@ -32,9 +33,15 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	_ = user
 
-	return template.Render(c, http.StatusOK, nil)
+	data := types.ProfileViewModel{
+		Username:  user.Username,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+	}
+
+	return template.Render(c, http.StatusOK, components.UserInfoPostLogin(data))
 }
 
 func (h *UserHandler) HandleUserGetByID(c echo.Context) error {

@@ -47,7 +47,7 @@ func Signup() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body><div class=\"flex items-center justify-center py-10\"><div class=\"card bg-base-200 w-120 shadow-xl\"><div class=\"card-body items-center text-center\"><h2 class=\"card-title pb-4\">Sign up new account</h2><form action=\"/v1/users\" method=\"POST\"><div class=\"flex flex-col gap-2\"><label class=\"input input-bordered flex items-center gap-2\">Username: <input name=\"username\" id=\"username\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body><div class=\"flex items-center justify-center py-10\"><div class=\"card bg-base-200 w-120 shadow-xl\"><div class=\"card-body\" class=\"card-body items-center text-center\"><h2 class=\"card-title pb-4\">Sign up new account</h2><form hx-post=\"/v1/users\" hx-target=\"#card-body\"><div class=\"flex flex-col gap-2\"><label class=\"input input-bordered flex items-center gap-2\">Username: <input name=\"username\" id=\"username\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
