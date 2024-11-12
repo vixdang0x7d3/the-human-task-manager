@@ -11,5 +11,5 @@ func (h *UserHandler) Route(e *echo.Group) {
 	e.GET("/signup", h.HandleShowSignup)
 
 	// api endpoints
-	e.GET("/user", h.HandleUserCreate)
+	e.POST("/users", h.HandleUserCreate)
 }
