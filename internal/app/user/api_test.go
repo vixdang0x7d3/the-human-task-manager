@@ -85,30 +85,35 @@ func TestCreateUser(t *testing.T) {
 		Users: map[string]types.User{},
 	}
 
-	type WantAppUser struct {
-		Username  string
+	type wantUserInfo struct {
 		FirstName string
 		LastName  string
-		Email     string
 	}
 
-	assertRendered := func(t *testing.T, got *goquery.Selection, want WantAppUser) {
+	assertResponse := func(t *testing.T, got *goquery.Document, want wantUserInfo) {
 		t.Helper()
-
-		if username := got.Find(`div[id=username]`).Text(); username != want.Username {
-			t.Errorf("want %s to be rendered, got %s", want.Username, username)
-		}
-		if email := got.Find(`div[id=email]`).Text(); email != want.Username {
-			t.Errorf("want %s to be rendered, got %s", want.Email, email)
-		}
 		wantFullName := fmt.Sprintf(`%s %s`, want.FirstName, want.LastName)
-		gotFullName := got.Find(`div[id=full-name]`).Text()
-		if gotFullName != wantFullName {
-			t.Errorf("want %s to be rendered, got %s", wantFullName, gotFullName)
+
+		if got.Find(`h2`).Length() == 0 {
+			t.Errorf("expected a header, not found")
+		}
+
+		if got.Find(`p`).Length() == 0 {
+			t.Errorf("expected welcome message, not found")
+		}
+
+		if link, ok := got.Find(`a`).Attr(`href`); !ok {
+			t.Errorf("expected a link to login page, not found")
+		} else if link != "/v1/login" {
+			t.Errorf("expected link to '/v1/login', got '%s'", link)
+		}
+
+		if !strings.Contains(got.Find(`p`).Text(), wantFullName) {
+			t.Errorf("expected user full name rendered, got %s", got.Find(`p`).Text())
 		}
 	}
 
-	t.Run("it records a new user", func(t *testing.T) {
+	t.Run("it signup new user and render a response", func(t *testing.T) {
 		// setup request
 		f := createUserFormParams("TestUser", "Bob", "Ross", "bobr@email.com", "secretpassword")
 		request, _ := http.NewRequest(http.MethodPost, "/v1/users/", strings.NewReader(f.Encode()))
@@ -138,14 +143,12 @@ func TestCreateUser(t *testing.T) {
 			t.Fatalf("failed to read template: %v", err)
 		}
 
-		wantAppUser := WantAppUser{
-			Username:  "TestUser",
-			Email:     "bobr@email.com",
+		want := wantUserInfo{
 			FirstName: "Bob",
 			LastName:  "Ross",
 		}
 
-		assertRendered(t, doc.Find(`div[id='user=info]`), wantAppUser)
+		assertResponse(t, doc, want)
 	})
 
 	t.Run("field validations", func(t *testing.T) {
@@ -206,9 +209,9 @@ func TestCreateUser(t *testing.T) {
 				h := UserHandler{
 					Service: service,
 				}
-				err := h.HandleUserCreate(c)
-				if err == nil {
-					t.Errorf("want error, got %s", err)
+				h.HandleUserCreate(c)
+				if response.Code != 400 {
+					t.Errorf("Expected error code 400, got %d", response.Code)
 				}
 			})
 		}
