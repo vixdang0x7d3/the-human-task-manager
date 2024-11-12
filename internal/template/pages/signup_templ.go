@@ -43,16 +43,19 @@ func Signup() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = template.Head().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body><div class=\"flex items-center justify-center py-10\"><div class=\"card bg-base-200 w-120 shadow-xl\"><div class=\"card-body\" class=\"card-body items-center text-center\"><h2 class=\"card-title pb-4\">Sign up new account</h2><form hx-post=\"/v1/users\" hx-target=\"#card-body\"><div class=\"flex flex-col gap-2\"><label class=\"input input-bordered flex items-center gap-2\">Username: <input name=\"username\" id=\"username\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if true {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" required")
+			templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- allow htmx to handle response with error code --> <script src=\"https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js\"></script> <!-- client side validation because i'm too lazy :P  --> <script src=\"https://unpkg.com/htmx.org/dist/ext/validate.js\"></script>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

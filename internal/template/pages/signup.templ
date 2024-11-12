@@ -13,10 +13,10 @@ templ Signup() {
 		<body>
 			@template.Navbar()
 			<div class="flex items-center justify-center py-10">
-				<div class="card bg-base-200 w-120 shadow-xl">
-					<div hx-post="/v1/users/" class="card-body items-center text-center">
+				<div class="card bg-base-200 w-120 shadow-xl" hx-ext="response-targets">
+					<div id="card-body" class="card-body items-center text-center">
 						<h2 class="card-title pb-4">Sign up new account</h2>
-						<form>
+						<form hx-post="/v1/users" hx-target="#card-body" hx-target-400="#message">
 							<div class="flex flex-col gap-2">
 								<label class="input input-bordered flex items-center gap-2">
 									Username:
