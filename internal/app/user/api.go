@@ -23,10 +23,10 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 
 	arg := formData{}
 	if err := c.Bind(&arg); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return err
 	}
 	if err := c.Validate(arg); err != nil {
-		return err
+		return template.Render(c, http.StatusBadRequest, components.ErrorMessage("validation errors!"))
 	}
 
 	user, err := h.Service.CreateUser(c.Request().Context(), types.CreateUserCmd(arg))
@@ -41,7 +41,7 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 		LastName:  user.LastName,
 	}
 
-	return template.Render(c, http.StatusOK, components.UserInfoPostLogin(data))
+	return template.Render(c, http.StatusOK, components.UserInfoPostSignup(data))
 }
 
 func (h *UserHandler) HandleUserGetByID(c echo.Context) error {
