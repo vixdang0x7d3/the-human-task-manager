@@ -19,9 +19,10 @@ import (
 )
 
 type StubUserService struct {
-	Users         map[string]types.User
-	recordedID    uuid.UUID
-	recordedEmail string
+	Users            map[string]types.User
+	recordedID       uuid.UUID
+	recordedEmail    string
+	recordedPassword string
 }
 
 func (s *StubUserService) CreateUser(ctx context.Context, arg types.CreateUserCmd) (types.User, error) {
@@ -57,7 +58,13 @@ func (s *StubUserService) ByEmail(ctx context.Context, email string) (types.User
 	}, nil
 }
 
-func TestGetByEmail(t *testing.T) {
+func (s *StubUserService) CheckPassword(ctx context.Context, email string, password string) error {
+	s.recordedEmail = email
+	s.recordedPassword = password
+	return nil
+}
+
+func TestLoginCheckEmail(t *testing.T) {
 	email := "valid@email.com"
 	service := &StubUserService{}
 
@@ -90,7 +97,7 @@ func TestGetByEmail(t *testing.T) {
 		e.Validator = &validate.CustomValidator{Validator: validator.New()}
 
 		f := createLoginCheckEmailFormParams(email)
-		request := httptest.NewRequest(http.MethodPost, "/v1/users/login", strings.NewReader(f.Encode()))
+		request := httptest.NewRequest(http.MethodPost, "/v1/users/login-email", strings.NewReader(f.Encode()))
 
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
@@ -111,13 +118,57 @@ func TestGetByEmail(t *testing.T) {
 			t.Fatalf("failed to read template")
 		}
 
-		fmt.Println(doc.Text())
-
 		want := wantViewData{
 			Email:     "valid@email.com",
 			FirstName: "Valid",
 		}
 		assertRendered(t, doc, want)
+	})
+
+	t.Run("", func(t *testing.T) {})
+}
+
+func TestLoginCheckPassword(t *testing.T) {
+
+	// * login
+	// get email
+	// get password
+	// fetch user (with password) from database
+	// check password with hash
+	// if successful
+	// \-> show success
+
+	service := &StubUserService{
+		Users: map[string]types.User{},
+	}
+
+	t.Run("it passes correct data and render happy path", func(t *testing.T) {
+
+		e := echo.New()
+		e.Validator = &validate.CustomValidator{Validator: validator.New()}
+
+		f := createLoginCheckPasswordFormParams("valid@email.com", "secretpassword")
+		request := httptest.NewRequest(http.MethodPost, "/v1/login", strings.NewReader(f.Encode()))
+		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
+		response := httptest.NewRecorder()
+
+		h := NewHandler(service)
+		err := h.HandleLoginCheckPassword(e.NewContext(request, response))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if service.recordedPassword != "secretpassword" {
+			t.Errorf("expected to pass a correct password, got %s", service.recordedPassword)
+		}
+		if service.recordedEmail != "valid@email.com" {
+			t.Errorf("expected to a pass correct email, got %s", service.recordedEmail)
+		}
+
+		doc, err := goquery.NewDocumentFromReader(response.Result().Body)
+		if doc.Find(`div`).Text() != "success!" {
+			t.Errorf("expected to returns success message, got %s want %s", doc.Find(`div`).Text(), "success!")
+		}
 	})
 }
 
@@ -308,5 +359,12 @@ func createUserFormParams(username, firstname, lastname, email, password string)
 func createLoginCheckEmailFormParams(email string) url.Values {
 	f := make(url.Values)
 	f.Set("email", email)
+	return f
+}
+
+func createLoginCheckPasswordFormParams(email string, password string) url.Values {
+	f := make(url.Values)
+	f.Set("email", email)
+	f.Set("password", password)
 	return f
 }

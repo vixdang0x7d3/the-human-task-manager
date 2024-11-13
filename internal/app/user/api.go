@@ -115,5 +115,13 @@ func (h *UserHandler) HandleLoginCheckPassword(c echo.Context) error {
 		return err
 	}
 
-	return echo.NewHTTPError(http.StatusBadRequest, "Feature's not ready yet ;)")
+	if err := c.Validate(arg); err != nil {
+		return err
+	}
+
+	if err := h.Service.CheckPassword(c.Request().Context(), arg.Email, arg.Password); err != nil {
+		return c.HTML(http.StatusBadRequest, err.Error())
+	}
+
+	return c.HTML(http.StatusOK, `<div>success!</div>`)
 }

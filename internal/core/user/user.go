@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -58,6 +59,17 @@ func (c *UserCore) ByEmail(ctx context.Context, email string) (types.User, error
 		return types.User{}, err
 	}
 	return toDomainUser(user), nil
+}
+
+func (c *UserCore) CheckPassword(ctx context.Context, email string, password string) error {
+	u, err := c.Store.ByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+	if !checkPassword(password, u.Password) {
+		return errors.New("incorrect password error")
+	}
+	return nil
 }
 
 func toDomainUser(user database.User) types.User {
