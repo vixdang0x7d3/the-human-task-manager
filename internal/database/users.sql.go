@@ -12,6 +12,27 @@ import (
 	"github.com/google/uuid"
 )
 
+const byEmail = `-- name: ByEmail :one
+SELECT id, username, first_name, last_name, email, password, signup_at, last_login FROM users
+WHERE email=$1
+`
+
+func (q *Queries) ByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, byEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.SignupAt,
+		&i.LastLogin,
+	)
+	return i, err
+}
+
 const byID = `-- name: ByID :one
 SELECT id, username, first_name, last_name, email, password, signup_at, last_login FROM users
 WHERE id=$1

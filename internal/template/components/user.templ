@@ -2,10 +2,21 @@ package components
 
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 
-templ UserInfoPostSignup(model types.ProfileViewModel) {
+templ UserInfoPostSignup(model types.UserViewModel) {
 	<div>
 		<h2 class="card-title py-2">Your account have been created!</h2>
 		<p>Welcome to The Human Task Manager, { model.FirstName } { model.LastName }!</p>
 		<a href="/v1/login" class="link link-primary">Go to login page</a>
+	</div>
+}
+
+templ UserLoginWithPassword(model types.UserViewModel) {
+	<div class="flex items-center justify-center py-10">
+		<h2>Welcome to Human Task Manager, { model.FirstName }!</h2>
+		<form>
+			<input type="text" name="email" id="email" class="grow" value={ model.Email }/>
+			<input type="password" name="password" id="password" class="grow"/>
+			<input type="submit" value="Login"/>
+		</form>
 	</div>
 }

@@ -25,6 +25,10 @@ func (s *StubUserStore) ByID(ctx context.Context, id uuid.UUID) (database.User, 
 	return database.User{}, nil
 }
 
+func (s *StubUserStore) ByEmail(ctx context.Context, email string) (database.User, error) {
+	return database.User{}, nil
+}
+
 func TestCreateUser(t *testing.T) {
 	s := &StubUserStore{
 		CreateCount: 0,

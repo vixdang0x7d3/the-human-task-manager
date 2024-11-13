@@ -19,8 +19,9 @@ import (
 )
 
 type StubUserService struct {
-	Users      map[string]types.User
-	recordedID uuid.UUID
+	Users         map[string]types.User
+	recordedID    uuid.UUID
+	recordedEmail string
 }
 
 func (s *StubUserService) CreateUser(ctx context.Context, arg types.CreateUserCmd) (types.User, error) {
@@ -45,6 +46,81 @@ func (s *StubUserService) ByID(ctx context.Context, id uuid.UUID) (types.User, e
 	return types.User{}, nil
 }
 
+func (s *StubUserService) ByEmail(ctx context.Context, email string) (types.User, error) {
+
+	s.recordedEmail = email
+	return types.User{
+		Username:  "validUser",
+		Email:     email,
+		FirstName: "Valid",
+		LastName:  "",
+	}, nil
+}
+
+func TestGetByEmail(t *testing.T) {
+	email := "valid@email.com"
+	service := &StubUserService{}
+
+	type wantViewData struct {
+		FirstName string
+		Email     string
+	}
+
+	assertRendered := func(t testing.TB, got *goquery.Document, want wantViewData) {
+		t.Helper()
+
+		if got.Find(`form`).Length() == 0 {
+			t.Error("expected form to be rendered, not found")
+		}
+
+		if !strings.Contains(got.Find(`h2`).Text(), want.FirstName) {
+			t.Errorf("expected firstname to be rendered, got %s, want contains %s", got.Find(`h2`).Text(), want.FirstName)
+		}
+
+		if val, ok := got.Find(`form input[id="email"]`).Attr("value"); !ok {
+			t.Error("expected email input to be rendered and has attribute value='<email>', not found")
+		} else if val != want.Email {
+			t.Errorf("expected email input has value=<email>, got %s want %s", val, want.Email)
+		}
+
+	}
+
+	t.Run("it passes a valid email to service", func(t *testing.T) {
+		e := echo.New()
+		e.Validator = &validate.CustomValidator{Validator: validator.New()}
+
+		f := createLoginCheckEmailFormParams(email)
+		request := httptest.NewRequest(http.MethodPost, "/v1/users/login", strings.NewReader(f.Encode()))
+
+		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
+		response := httptest.NewRecorder()
+		h := NewHandler(service)
+
+		c := e.NewContext(request, response)
+		err := h.HandleLoginCheckEmail(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if service.recordedEmail != email {
+			t.Errorf("expected to pass a correct email, want %s got %s", email, service.recordedEmail)
+		}
+
+		doc, err := goquery.NewDocumentFromReader(response.Result().Body)
+		if err != nil {
+			t.Fatalf("failed to read template")
+		}
+
+		fmt.Println(doc.Text())
+
+		want := wantViewData{
+			Email:     "valid@email.com",
+			FirstName: "Valid",
+		}
+		assertRendered(t, doc, want)
+	})
+}
+
 func TestGetByID(t *testing.T) {
 
 	uuidString := "7f173ec4-402d-4cd3-8446-0423771f972f"
@@ -55,17 +131,17 @@ func TestGetByID(t *testing.T) {
 	t.Run("it passes a valid id to service", func(t *testing.T) {
 
 		e := echo.New()
-		request := httptest.NewRequest(http.MethodGet, "/v1/users/", nil)
+		request := httptest.NewRequest(http.MethodGet, "/v1/users", nil)
 		response := httptest.NewRecorder()
 
 		c := e.NewContext(request, response)
 		c.SetParamNames("id")
 		c.SetParamValues(uuidString)
 
-		handler := UserHandler{
+		h := UserHandler{
 			Service: service,
 		}
-		err := handler.HandleUserGetByID(c)
+		err := h.HandleUserGetByID(c)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -226,5 +302,11 @@ func createUserFormParams(username, firstname, lastname, email, password string)
 	f.Set("email", email)
 	f.Set("password", password)
 
+	return f
+}
+
+func createLoginCheckEmailFormParams(email string) url.Values {
+	f := make(url.Values)
+	f.Set("email", email)
 	return f
 }

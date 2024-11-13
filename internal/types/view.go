@@ -1,6 +1,6 @@
 package types
 
-type ProfileViewModel struct {
+type UserViewModel struct {
 	Username  string
 	Email     string
 	FirstName string

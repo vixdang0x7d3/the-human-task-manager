@@ -15,4 +15,5 @@ func (h *UserHandler) Route(e *echo.Group) {
 
 	// api endpoints
 	e.POST("/users", h.HandleUserCreate)
+	e.POST("/login-email", h.HandleLoginCheckEmail)
 }

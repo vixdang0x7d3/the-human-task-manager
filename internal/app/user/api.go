@@ -34,14 +34,14 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 		return err
 	}
 
-	data := types.ProfileViewModel{
+	viewData := types.UserViewModel{
 		Username:  user.Username,
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 	}
 
-	return template.Render(c, http.StatusOK, components.UserInfoPostSignup(data))
+	return template.Render(c, http.StatusAccepted, components.UserInfoPostSignup(viewData))
 }
 
 func (h *UserHandler) HandleUserGetByID(c echo.Context) error {
@@ -74,4 +74,32 @@ func (h *UserHandler) HandleUserGetByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusAccepted, response(user))
+}
+
+func (h *UserHandler) HandleLoginCheckEmail(c echo.Context) error {
+
+	type formData struct {
+		Email string `form:"email" validate:"required,email"`
+	}
+
+	arg := formData{}
+	if err := c.Bind(&arg); err != nil {
+		return err
+	}
+
+	if err := c.Validate(arg); err != nil {
+		return err
+	}
+
+	user, err := h.Service.ByEmail(c.Request().Context(), arg.Email)
+	if err != nil { // TODO: a more robust error handling
+		return err
+	}
+
+	viewData := types.UserViewModel{
+		FirstName: user.FirstName,
+		Email:     user.Email,
+	}
+
+	return template.Render(c, http.StatusAccepted, components.UserLoginWithPassword(viewData))
 }

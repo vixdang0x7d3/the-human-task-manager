@@ -55,7 +55,7 @@ func Signup() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- allow htmx to handle response with error code --> <script src=\"https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js\"></script> <!-- client side validation because i'm too lazy :P  --> <script src=\"https://unpkg.com/htmx.org/dist/ext/validate.js\"></script>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- allow htmx to handle response with error code --> <script src=\"https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js\"></script>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

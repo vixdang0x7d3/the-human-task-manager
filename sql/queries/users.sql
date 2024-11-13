@@ -7,3 +7,6 @@ RETURNING *;
 SELECT * FROM users
 WHERE id=$1;
 
+-- name: ByEmail :one
+SELECT * FROM users
+WHERE email=$1;

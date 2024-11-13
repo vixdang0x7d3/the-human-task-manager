@@ -11,7 +11,7 @@ import (
 
 func (h *UserHandler) HandleShowProfile(c echo.Context) error {
 
-	user := types.ProfileViewModel{
+	user := types.UserViewModel{
 		Username:  "bobr123",
 		Email:     "bobr@email.com",
 		FirstName: "Bob",
@@ -27,6 +27,7 @@ func (h *UserHandler) HandleShowSignup(c echo.Context) error {
 }
 
 func (h *UserHandler) HandleShowLogin(c echo.Context) error {
+
 	return template.Render(c, http.StatusOK, pages.Login())
 }
 

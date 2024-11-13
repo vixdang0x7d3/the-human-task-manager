@@ -52,6 +52,14 @@ func (c *UserCore) ByID(ctx context.Context, id uuid.UUID) (types.User, error) {
 	return toDomainUser(user), nil
 }
 
+func (c *UserCore) ByEmail(ctx context.Context, email string) (types.User, error) {
+	user, err := c.Store.ByEmail(ctx, email)
+	if err != nil {
+		return types.User{}, err
+	}
+	return toDomainUser(user), nil
+}
+
 func toDomainUser(user database.User) types.User {
 	return types.User{
 		ID:        user.ID,
@@ -77,4 +85,5 @@ func checkPassword(password, hash string) bool {
 type UserStore interface {
 	CreateUser(ctx context.Context, arg database.CreateUserParams) (database.User, error)
 	ByID(ctx context.Context, id uuid.UUID) (database.User, error)
+	ByEmail(ctx context.Context, email string) (database.User, error)
 }

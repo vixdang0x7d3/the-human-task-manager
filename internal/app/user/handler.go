@@ -20,4 +20,5 @@ func NewHandler(service UserService) *UserHandler {
 type UserService interface {
 	CreateUser(ctx context.Context, arg types.CreateUserCmd) (types.User, error)
 	ByID(ctx context.Context, id uuid.UUID) (types.User, error)
+	ByEmail(ctx context.Context, email string) (types.User, error)
 }
