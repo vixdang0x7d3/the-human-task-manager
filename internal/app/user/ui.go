@@ -42,15 +42,3 @@ func (h *UserHandler) HandleShowHome(c echo.Context) error {
 
 	return template.Render(c, http.StatusOK, pages.Home(user))
 }
-
-func (h *UserHandler) HandleShowLoginConfirm(c echo.Context) error {
-
-	user := types.UserViewModel{
-		Username:  "bobr123",
-		Email:     "bobr@email.com",
-		FirstName: "Bob",
-		LastName:  "Ross",
-	}
-
-	return template.Render(c, http.StatusOK, pages.LoginConfirm(user))
-}

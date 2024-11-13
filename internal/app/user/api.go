@@ -103,3 +103,17 @@ func (h *UserHandler) HandleLoginCheckEmail(c echo.Context) error {
 
 	return template.Render(c, http.StatusAccepted, components.UserLoginWithPassword(viewData))
 }
+
+func (h *UserHandler) HandleLoginCheckPassword(c echo.Context) error {
+	type formData struct {
+		Email    string `form:"email" validate:"required,email"`
+		Password string `form:"password" validate:"required"`
+	}
+
+	arg := formData{}
+	if err := c.Bind(&arg); err != nil {
+		return err
+	}
+
+	return echo.NewHTTPError(http.StatusBadRequest, "Feature's not ready yet ;)")
+}
