@@ -33,7 +33,7 @@ func (h *UserHandler) HandleShowLogin(c echo.Context) error {
 
 func (h *UserHandler) HandleShowHome(c echo.Context) error {
 
-	user := types.ProfileViewModel{
+	user := types.UserViewModel{
 		Username:  "bobr123",
 		Email:     "bobr@email.com",
 		FirstName: "Bob",
@@ -45,7 +45,7 @@ func (h *UserHandler) HandleShowHome(c echo.Context) error {
 
 func (h *UserHandler) HandleShowLoginConfirm(c echo.Context) error {
 
-	user := types.ProfileViewModel{
+	user := types.UserViewModel{
 		Username:  "bobr123",
 		Email:     "bobr@email.com",
 		FirstName: "Bob",
