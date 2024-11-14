@@ -1,4 +1,4 @@
-package user
+package app
 
 import (
 	"net/http"

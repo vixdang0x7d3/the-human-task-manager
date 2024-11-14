@@ -1,4 +1,4 @@
-package user
+package app
 
 import (
 	"context"
@@ -11,10 +11,9 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal/app/validate"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/app/sdk"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
 
@@ -94,14 +93,14 @@ func TestLoginCheckEmail(t *testing.T) {
 
 	t.Run("it passes a valid email to service", func(t *testing.T) {
 		e := echo.New()
-		e.Validator = &validate.CustomValidator{Validator: validator.New()}
+		e.Validator = sdk.NewCustomValidator()
 
 		f := createLoginCheckEmailFormParams(email)
 		request := httptest.NewRequest(http.MethodPost, "/v1/users/login-email", strings.NewReader(f.Encode()))
 
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
-		h := NewHandler(service)
+		h := NewUserHandler(service, nil)
 
 		c := e.NewContext(request, response)
 		err := h.HandleLoginCheckEmail(c)
@@ -145,14 +144,14 @@ func TestLoginCheckPassword(t *testing.T) {
 	t.Run("it passes correct data and render happy path", func(t *testing.T) {
 
 		e := echo.New()
-		e.Validator = &validate.CustomValidator{Validator: validator.New()}
+		e.Validator = sdk.NewCustomValidator()
 
 		f := createLoginCheckPasswordFormParams("valid@email.com", "secretpassword")
 		request := httptest.NewRequest(http.MethodPost, "/v1/login", strings.NewReader(f.Encode()))
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
 
-		h := NewHandler(service)
+		h := NewUserHandler(service, nil)
 		err := h.HandleLoginCheckPassword(e.NewContext(request, response))
 		if err != nil {
 			t.Fatal(err)
@@ -249,7 +248,7 @@ func TestCreateUser(t *testing.T) {
 
 		// setup handler and inject fake
 		e := echo.New()
-		e.Validator = &validate.CustomValidator{Validator: validator.New()}
+		e.Validator = sdk.NewCustomValidator()
 		h := UserHandler{
 			Service: service,
 		}
@@ -330,7 +329,7 @@ func TestCreateUser(t *testing.T) {
 				response := httptest.NewRecorder()
 
 				e := echo.New()
-				e.Validator = &validate.CustomValidator{Validator: validator.New()}
+				e.Validator = sdk.NewCustomValidator()
 
 				c := e.NewContext(request, response)
 				h := UserHandler{

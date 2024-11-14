@@ -1,4 +1,4 @@
-package user
+package core
 
 import (
 	"context"
@@ -15,7 +15,7 @@ type UserCore struct {
 	Store UserStore
 }
 
-func New(store UserStore) *UserCore {
+func NewUserCore(store UserStore) *UserCore {
 	return &UserCore{
 		Store: store,
 	}

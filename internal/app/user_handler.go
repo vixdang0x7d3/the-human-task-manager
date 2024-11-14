@@ -1,19 +1,22 @@
-package user
+package app
 
 import (
 	"context"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
 
 type UserHandler struct {
-	Service UserService
+	Service        UserService
+	SessionManager *scs.SessionManager
 }
 
-func NewHandler(service UserService) *UserHandler {
+func NewUserHandler(service UserService, sessionManager *scs.SessionManager) *UserHandler {
 	return &UserHandler{
-		Service: service,
+		Service:        service,
+		SessionManager: sessionManager,
 	}
 }
 

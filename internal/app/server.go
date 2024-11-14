@@ -4,23 +4,24 @@ import (
 	"io/fs"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/alexedwards/scs/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	session "github.com/spazzymoto/echo-scs-session"
 
-	userapp "github.com/vixdang0x7d3/the-human-task-manager/internal/app/user"
-	usercore "github.com/vixdang0x7d3/the-human-task-manager/internal/core/user"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/app/sdk"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/template/pages"
 
-	"github.com/vixdang0x7d3/the-human-task-manager/internal/app/validate"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/core"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/database"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/template"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal/template/pages"
 )
 
-func NewServer(db *database.Queries, staticAssets fs.FS) (*echo.Echo, error) {
+func SetupServer(db *database.Queries, staticAssets fs.FS, sessionManager *scs.SessionManager) *echo.Echo {
 	e := echo.New()
 
-	e.Validator = &validate.CustomValidator{Validator: validator.New()}
+	// validator & middleware
+	e.Validator = sdk.NewCustomValidator()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -34,13 +35,15 @@ func NewServer(db *database.Queries, staticAssets fs.FS) (*echo.Echo, error) {
 		Root:       "static",
 		Filesystem: http.FS(staticAssets),
 	}))
-	route(e, db)
+	e.Use(session.LoadAndSave(sessionManager))
 
-	return e, nil
-}
+	// services
+	userService := core.NewUserCore(db)
 
-func route(e *echo.Echo, db *database.Queries) {
+	// handlers
+	userHandler := NewUserHandler(userService, sessionManager)
 
+	// routes
 	v1 := e.Group("/v1")
 	v1.GET("/healthz", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, struct{}{})
@@ -48,12 +51,11 @@ func route(e *echo.Echo, db *database.Queries) {
 	v1.GET("/err", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "response with error always")
 	})
-
 	v1.GET("/", func(c echo.Context) error {
 		return template.Render(c, http.StatusOK, pages.Index("ma"))
 	})
 
-	userService := usercore.New(db)
-	userHandler := userapp.NewHandler(userService)
 	userHandler.Route(v1)
+
+	return e
 }
