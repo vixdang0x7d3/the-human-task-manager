@@ -98,7 +98,7 @@ func TestLoginCheckEmail(t *testing.T) {
 		e.Validator = sdk.NewCustomValidator()
 
 		f := createLoginCheckEmailFormParams(email)
-		request := httptest.NewRequest(http.MethodPost, "/v1/users/login-email", strings.NewReader(f.Encode()))
+		request := httptest.NewRequest(http.MethodPost, "/login-email", strings.NewReader(f.Encode()))
 
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
@@ -152,7 +152,7 @@ func TestLoginCheckPassword(t *testing.T) {
 		e.Validator = sdk.NewCustomValidator()
 
 		f := createLoginCheckPasswordFormParams("valid@email.com", "secretpassword")
-		request := httptest.NewRequest(http.MethodPost, "/v1/login", strings.NewReader(f.Encode()))
+		request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(f.Encode()))
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
 
@@ -175,8 +175,8 @@ func TestLoginCheckPassword(t *testing.T) {
 		}
 
 		doc, err := goquery.NewDocumentFromReader(response.Result().Body)
-		if doc.Find(`div`).Text() != "success!" {
-			t.Errorf("expected to returns success message, got %s want %s", doc.Find(`div`).Text(), "success!")
+		if strings.Trim(doc.Find(`div`).Text(), " ") != "Login successful :)" {
+			t.Errorf("expected to returns success message, got %s want %s", doc.Find(`div`).Text(), "Login successful :)")
 		}
 	})
 }
@@ -191,7 +191,7 @@ func TestGetByID(t *testing.T) {
 	t.Run("it passes a valid id to service", func(t *testing.T) {
 
 		e := echo.New()
-		request := httptest.NewRequest(http.MethodGet, "/v1/users", nil)
+		request := httptest.NewRequest(http.MethodGet, "/users", nil)
 		response := httptest.NewRecorder()
 
 		c := e.NewContext(request, response)
@@ -240,8 +240,8 @@ func TestCreateUser(t *testing.T) {
 
 		if link, ok := got.Find(`a`).Attr(`href`); !ok {
 			t.Errorf("expected a link to login page, not found")
-		} else if link != "/v1/login" {
-			t.Errorf("expected link to '/v1/login', got '%s'", link)
+		} else if link != "/login" {
+			t.Errorf("expected link to '/login', got '%s'", link)
 		}
 
 		if !strings.Contains(got.Find(`p`).Text(), wantFullName) {
@@ -252,7 +252,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("it signup new user and render a response", func(t *testing.T) {
 		// setup request
 		f := createUserFormParams("TestUser", "Bob", "Ross", "bobr@email.com", "secretpassword")
-		request, _ := http.NewRequest(http.MethodPost, "/v1/users/", strings.NewReader(f.Encode()))
+		request, _ := http.NewRequest(http.MethodPost, "/users/", strings.NewReader(f.Encode()))
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
 
@@ -334,7 +334,7 @@ func TestCreateUser(t *testing.T) {
 		} {
 			t.Run(tc.Description, func(t *testing.T) {
 
-				request := httptest.NewRequest(http.MethodPost, "/v1/users", strings.NewReader(tc.Input.Encode()))
+				request := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(tc.Input.Encode()))
 				request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 				response := httptest.NewRecorder()
 
