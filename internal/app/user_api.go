@@ -26,7 +26,7 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 		return err
 	}
 	if err := c.Validate(arg); err != nil {
-		return template.Render(c, http.StatusBadRequest, components.ErrorMessage("validation errors!"))
+		return template.Render(c, http.StatusBadRequest, components.AlertError("Invalid user info"))
 	}
 
 	user, err := h.Service.CreateUser(c.Request().Context(), types.CreateUserCmd(arg))
@@ -44,6 +44,7 @@ func (h *UserHandler) HandleUserCreate(c echo.Context) error {
 	return template.Render(c, http.StatusAccepted, components.UserInfoPostSignup(viewData))
 }
 
+// DEPRECATED: I dont even know why i wrote this shit
 func (h *UserHandler) HandleUserGetByID(c echo.Context) error {
 
 	// used for testing purpose
@@ -84,16 +85,16 @@ func (h *UserHandler) HandleLoginCheckEmail(c echo.Context) error {
 
 	arg := formData{}
 	if err := c.Bind(&arg); err != nil {
-		return err
+		return template.Render(c, http.StatusBadRequest, components.AlertError("bad request"))
 	}
 
 	if err := c.Validate(arg); err != nil {
-		return err
+		return template.Render(c, http.StatusBadRequest, components.AlertError("invalid email"))
 	}
 
 	user, err := h.Service.ByEmail(c.Request().Context(), arg.Email)
 	if err != nil { // TODO: a more robust error handling
-		return err
+		return template.Render(c, http.StatusInternalServerError, components.AlertError("email not found or db error i can't tell :P"))
 	}
 
 	viewData := types.UserViewModel{
@@ -116,12 +117,37 @@ func (h *UserHandler) HandleLoginCheckPassword(c echo.Context) error {
 	}
 
 	if err := c.Validate(arg); err != nil {
-		return err
+		return template.Render(c, http.StatusBadRequest, components.AlertError("invalid password"))
 	}
 
-	if err := h.Service.CheckPassword(c.Request().Context(), arg.Email, arg.Password); err != nil {
-		return c.HTML(http.StatusBadRequest, err.Error())
+	user, err := h.Service.CheckPassword(c.Request().Context(), arg.Email, arg.Password)
+	if err != nil {
+		return template.Render(c, http.StatusBadRequest, components.AlertError("password is not correct"))
 	}
 
-	return c.HTML(http.StatusOK, `<div>success!</div>`)
+	err = h.SessionManager.RenewToken(c.Request().Context())
+	if err != nil {
+		return template.Render(c, http.StatusInternalServerError, components.AlertError("fail to renew session"))
+	}
+
+	h.SessionManager.Put(c.Request().Context(), "userID", user.ID.String())
+	h.SessionManager.Put(c.Request().Context(), "userEmail", user.Email)
+	h.SessionManager.Put(c.Request().Context(), "userFistName", user.FirstName)
+
+	return template.Render(c, http.StatusOK, components.PostLoginRedirectWithDelay())
+}
+
+func (h *UserHandler) HandleLoginRedirect(c echo.Context) error {
+	c.Response().Header().Set("HX-Redirect", "/profile")
+	return c.NoContent(http.StatusFound)
+}
+
+func (h *UserHandler) HandleLogout(c echo.Context) error {
+	err := h.SessionManager.Destroy(c.Request().Context())
+	if err != nil {
+		return c.HTML(http.StatusInternalServerError, "fail to destroy session")
+	}
+
+	c.Response().Header().Set("HX-Redirect", "/login")
+	return c.NoContent(http.StatusFound)
 }

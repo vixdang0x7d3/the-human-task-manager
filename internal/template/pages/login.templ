@@ -7,10 +7,10 @@ import (
 templ loginNavBar() {
 	<div class="navbar bg-base-100">
 		<div class="flex-1">
-			<a class="btn btn-ghost text-xl">Human Task Manager</a>
+			<a href="#!" class="btn btn-ghost text-xl">Human Task Manager</a>
 		</div>
 		<div class="flex-none">
-			<a class="link link-primary px-4">Don't have an account?</a>
+			<a href="/signup" class="link link-primary px-4">Don't have an account?</a>
 		</div>
 	</div>
 }
@@ -21,11 +21,12 @@ templ Login() {
 			<!-- allow htmx to handle response with error code -->
 			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
 		}
-		<body>
+		<body hx-ext="response-targets">
 			@loginNavBar()
+			<div id="alert" class="fixed top-4 right-4"></div>
 			<div class="flex items-center justify-center py-10">
 				<div class="card bg-base-200 w-120 shadow-xl">
-					<div id="card-body" class="card-body" hx-ext="response-targets">
+					<div id="card-body" class="card-body">
 						<h2 class="card-title pb-10 text-primary-content">Welcome to Human Task Manager</h2>
 						<button class="btn btn-sm btn-secondary my-4">
 							<svg
@@ -44,7 +45,7 @@ templ Login() {
 							</svg>
 							Continue with google
 						</button>
-						<form hx-post="/v1/login-email" hx-target="#card-body" hx-target-400="#message">
+						<form hx-post="/login-email" hx-target="#card-body" hx-target-error="#alert">
 							<p class="text-primary-content pb-2">Login with email:</p>
 							<label class="input input-sm input-bordered flex items-center gap-2 py-4">
 								<svg
@@ -60,9 +61,8 @@ templ Login() {
 										d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z"
 									></path>
 								</svg>
-								<input type="email" name="email" id="email" class="input-sm" placeholder="Email"/>
+								<input type="email" name="email" id="email" class="input-sm grow" placeholder="Email"/>
 							</label>
-							<div id="message" class="text-error"></div>
 							<div class="card-actions justify-end py-4">
 								<button class="btn btn-sm btn-primary">Continue</button>
 							</div>

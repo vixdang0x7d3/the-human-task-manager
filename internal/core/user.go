@@ -61,15 +61,15 @@ func (c *UserCore) ByEmail(ctx context.Context, email string) (types.User, error
 	return toDomainUser(user), nil
 }
 
-func (c *UserCore) CheckPassword(ctx context.Context, email string, password string) error {
+func (c *UserCore) CheckPassword(ctx context.Context, email string, password string) (types.User, error) {
 	u, err := c.Store.ByEmail(ctx, email)
 	if err != nil {
-		return err
+		return types.User{}, err
 	}
 	if !checkPassword(password, u.Password) {
-		return errors.New("incorrect password error")
+		return types.User{}, errors.New("incorrect password error")
 	}
-	return nil
+	return toDomainUser(u), nil
 }
 
 func toDomainUser(user database.User) types.User {

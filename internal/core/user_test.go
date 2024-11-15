@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -26,7 +27,12 @@ func (s *StubUserStore) ByID(ctx context.Context, id uuid.UUID) (database.User, 
 }
 
 func (s *StubUserStore) ByEmail(ctx context.Context, email string) (database.User, error) {
-	return database.User{}, nil
+	for _, u := range s.Users {
+		if u.Email == email {
+			return u, nil
+		}
+	}
+	return database.User{}, errors.New("No user")
 }
 
 func TestCreateUser(t *testing.T) {
@@ -75,6 +81,45 @@ func TestCreateUser(t *testing.T) {
 		}
 
 		assertDomainUser(t, gotDomainUser, wantDomainUser)
+	})
+}
+
+func TestCheckPassword(t *testing.T) {
+
+	hashedPassword, _ := hashPassword("secret")
+	ignoreMe, _ := hashPassword("ignoreme")
+	s := &StubUserStore{
+		Users: map[uuid.UUID]database.User{
+			uuid.MustParse("ce25c916-f064-4e2f-a6db-bb15b87f599a"): {
+				ID:       uuid.MustParse("ce25c916-f064-4e2f-a6db-bb15b87f599a"),
+				Username: "TestUser",
+				Email:    "test@email.com",
+				Password: hashedPassword,
+			},
+
+			uuid.MustParse("522d0c6b-d922-4d2e-81d6-2e69fe7a8906"): {
+				ID:       uuid.MustParse("522d0c6b-d922-4d2e-81d6-2e69fe7a8906"),
+				Username: "AnotherUser",
+				Email:    "another@email.com",
+				Password: ignoreMe,
+			},
+		},
+	}
+
+	t.Run("happy path", func(t *testing.T) {
+
+		email := "test@email.com"
+		password := "secret"
+
+		c := NewUserCore(s)
+		user, err := c.CheckPassword(context.Background(), email, password)
+		if err != nil {
+			t.Errorf("should not have error, unexpected error: %v", err)
+		}
+
+		if user.Email != email {
+			t.Errorf("return wrong user's email")
+		}
 	})
 }
 

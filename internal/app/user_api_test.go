@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	session "github.com/spazzymoto/echo-scs-session"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/app/sdk"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/types"
 )
@@ -57,10 +59,10 @@ func (s *StubUserService) ByEmail(ctx context.Context, email string) (types.User
 	}, nil
 }
 
-func (s *StubUserService) CheckPassword(ctx context.Context, email string, password string) error {
+func (s *StubUserService) CheckPassword(ctx context.Context, email string, password string) (types.User, error) {
 	s.recordedEmail = email
 	s.recordedPassword = password
-	return nil
+	return types.User{}, nil
 }
 
 func TestLoginCheckEmail(t *testing.T) {
@@ -143,6 +145,9 @@ func TestLoginCheckPassword(t *testing.T) {
 
 	t.Run("it passes correct data and render happy path", func(t *testing.T) {
 
+		sessionManager := scs.New()
+		sessionManager.Lifetime = 24 * time.Hour
+
 		e := echo.New()
 		e.Validator = sdk.NewCustomValidator()
 
@@ -151,8 +156,13 @@ func TestLoginCheckPassword(t *testing.T) {
 		request.Header.Set("Content-Type", echo.MIMEApplicationForm)
 		response := httptest.NewRecorder()
 
-		h := NewUserHandler(service, nil)
-		err := h.HandleLoginCheckPassword(e.NewContext(request, response))
+		h := NewUserHandler(service, sessionManager)
+
+		middleware := session.LoadAndSave(sessionManager)
+		wrapped := middleware(h.HandleLoginCheckPassword)
+
+		err := wrapped(e.NewContext(request, response))
+
 		if err != nil {
 			t.Fatal(err)
 		}

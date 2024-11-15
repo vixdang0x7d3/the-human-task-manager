@@ -50,7 +50,7 @@ func Home(model types.UserViewModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -58,7 +58,7 @@ func Home(model types.UserViewModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body><div class=\"hero bg-base-200 min-h-screen\"><div class=\"hero-content text-center\"><div class=\"items-center max-w-md space-y-6\"><h1 class=\"text-5xl font-bold\">Good morning, ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"hero bg-base-200 min-h-screen\"><div class=\"hero-content text-center\"><div class=\"items-center max-w-md space-y-6\"><h1 class=\"text-5xl font-bold\">Good morning, ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -5,16 +5,24 @@ go 1.23.1
 require (
 	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/a-h/templ v0.2.793
+	github.com/alexedwards/scs/v2 v2.4.0
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/spazzymoto/echo-scs-session v1.0.0
 	golang.org/x/crypto v0.28.0
 )
 
 require (
-	github.com/alexedwards/scs/v2 v2.4.0 // indirect
+	github.com/samber/lo v1.38.1 // indirect
+	go.opentelemetry.io/otel v1.19.0 // indirect
+	go.opentelemetry.io/otel/trace v1.19.0 // indirect
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
+)
+
+require (
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -26,7 +34,8 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/spazzymoto/echo-scs-session v1.0.0 // indirect
+	github.com/rdbell/echo-pretty-logger v1.0.0
+	github.com/samber/slog-echo v1.14.7
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/net v0.29.0 // indirect

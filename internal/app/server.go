@@ -2,27 +2,30 @@ package app
 
 import (
 	"io/fs"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	slogecho "github.com/samber/slog-echo"
 	session "github.com/spazzymoto/echo-scs-session"
 
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/app/sdk"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal/template/pages"
 
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/core"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/database"
-	"github.com/vixdang0x7d3/the-human-task-manager/internal/template"
 )
 
 func SetupServer(db *database.Queries, staticAssets fs.FS, sessionManager *scs.SessionManager) *echo.Echo {
 	e := echo.New()
 
 	// validator & middleware
-	e.Validator = sdk.NewCustomValidator()
-	e.Use(middleware.Logger())
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	e.Use(slogecho.New(logger))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://*", "https://*"},
@@ -36,6 +39,8 @@ func SetupServer(db *database.Queries, staticAssets fs.FS, sessionManager *scs.S
 		Filesystem: http.FS(staticAssets),
 	}))
 	e.Use(session.LoadAndSave(sessionManager))
+	//	e.Use(sdk.RequireAuth(sessionManager))
+	e.Validator = sdk.NewCustomValidator()
 
 	// services
 	userService := core.NewUserCore(db)
@@ -44,18 +49,8 @@ func SetupServer(db *database.Queries, staticAssets fs.FS, sessionManager *scs.S
 	userHandler := NewUserHandler(userService, sessionManager)
 
 	// routes
-	v1 := e.Group("/v1")
-	v1.GET("/healthz", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, struct{}{})
-	})
-	v1.GET("/err", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusBadRequest, "response with error always")
-	})
-	v1.GET("/", func(c echo.Context) error {
-		return template.Render(c, http.StatusOK, pages.Index("ma"))
-	})
-
-	userHandler.Route(v1)
+	routeDefaults(e)
+	userHandler.Route(e)
 
 	return e
 }

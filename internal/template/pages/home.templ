@@ -8,8 +8,8 @@ import (
 templ Home(model types.UserViewModel) {
 	@template.Boilerplate() {
 		@template.Head()
-		@template.Navbar()
 		<body>
+			@template.Navbar()
 			<div class="hero bg-base-200 min-h-screen">
 				<div class="hero-content text-center">
 					<div class="items-center max-w-md space-y-6">
@@ -88,4 +88,3 @@ templ Home(model types.UserViewModel) {
 		</body>
 	}
 }
-

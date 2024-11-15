@@ -6,7 +6,7 @@ templ UserInfoPostSignup(model types.UserViewModel) {
 	<div>
 		<h2 class="card-title py-2">Your account have been created!</h2>
 		<p>Welcome to The Human Task Manager, { model.FirstName } { model.LastName }!</p>
-		<a href="/v1/login" class="link link-primary">Go to login page</a>
+		<a href="/login" class="link link-primary">Go to login page</a>
 	</div>
 }
 
@@ -15,7 +15,7 @@ templ UserLoginWithPassword(model types.UserViewModel) {
 		<h2 class="card-title text-primary-content">Welcome to Human Task Manager, { model.FirstName }!</h2>
 	</div>
 	<div class="px-10">
-		<form hx-post="/v1/login" hx-target-400="#message">
+		<form hx-post="/login" hx-target="#alert" hx-target-error="#alert">
 			<p class="py-2">Email:</p>
 			<label class="input input-sm input-bordered flex items-center gap-2">
 				<svg
@@ -31,7 +31,7 @@ templ UserLoginWithPassword(model types.UserViewModel) {
 						d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z"
 					></path>
 				</svg>
-				<input id="email" name="email" type="email" readonly value={ model.Email }/>
+				<input id="email" name="email" type="email" class="grow" readonly value={ model.Email }/>
 			</label>
 			<p class="py-2">Password:</p>
 			<label class="input input-sm input-bordered flex items-center gap-2">
@@ -47,7 +47,7 @@ templ UserLoginWithPassword(model types.UserViewModel) {
 						clip-rule="evenodd"
 					></path>
 				</svg>
-				<input id="password" name="password" type="password"/>
+				<input id="password" name="password" type="password" class="grow"/>
 			</label>
 			<div id="message" class="text-error"></div>
 			<div class="card-actions justify-end">
@@ -55,5 +55,24 @@ templ UserLoginWithPassword(model types.UserViewModel) {
 			</div>
 		</form>
 		<a href="#!" title="Fogot password" class="card-actions link link-secondary">Fogot your password?</a>
+	</div>
+}
+
+templ PostLoginRedirectWithDelay() {
+	<div role="alert" class="alert alert-success" hx-get="/login-success-redirect" hx-trigger="load delay:2s">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+		<span>Login successful :)</span>
 	</div>
 }

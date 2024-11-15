@@ -26,7 +26,7 @@ templ Navbar() {
 		</div>
 		<div class="flex-none">
 			<ul class="menu menu-horizontal px-1">
-				<li><a href="#!" title="Projects">PROJECT</a></li>
+				<li><a href="#!" title="Coming soon! UwU">PROJECT</a></li>
 				<li>
 					<details>
 						<summary>PERSONAL</summary>
@@ -38,10 +38,10 @@ templ Navbar() {
 						</ul>
 					</details>
 				</li>
-				<li><a href="#!" title="Your Profile">PROFILE</a></li>
-				<li><a href="#!" title="Home">HOME</a></li> <!-- return index -->
+				<li><a href="/profile" title="Your Profile">PROFILE</a></li>
+				<li><a href="/home" title="Home">HOME</a></li> <!-- return index -->
 				<li>
-					<a href="#!" title="Logout">
+					<a title="Logout" hx-get="/logout">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -62,4 +62,3 @@ templ Navbar() {
 		</div>
 	</div>
 }
-
