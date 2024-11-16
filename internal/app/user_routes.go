@@ -10,6 +10,7 @@ func (h *UserHandler) Route(e *echo.Echo) {
 	// ui serving endpoints
 	e.GET("/profile", h.HandleShowProfile, sdk.RequireAuth(h.SessionManager))
 	e.GET("/home", h.HandleShowHome, sdk.RequireAuth((h.SessionManager)))
+	e.GET("/tasklist", h.HandleShowTaskList)
 	e.GET("/login", h.HandleShowLogin)
 	e.GET("/signup", h.HandleShowSignup)
 
