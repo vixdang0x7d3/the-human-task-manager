@@ -12,7 +12,7 @@ templ content(name string) {
 
 templ Index(name string) {
 	@template.Boilerplate() {
-		@template.Head()
+		@template.Head("Default")
 		@template.Navbar()
 		@content(name)
 	}
