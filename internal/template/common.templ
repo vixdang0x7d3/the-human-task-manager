@@ -7,12 +7,12 @@ templ Boilerplate() {
 	</html>
 }
 
-templ Head() {
+templ Head(title string) {
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-		<title>Hi mom</title>
+		<title> { title } </title>
 		<link rel="stylesheet" href="/css/output.css"/>
 		<script src="/js/htmx.min.js"></script>
 		{ children... }
