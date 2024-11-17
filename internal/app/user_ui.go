@@ -73,3 +73,8 @@ func (h *UserHandler) HandleShowHome(c echo.Context) error {
 
 	return template.Render(c, http.StatusOK, pages.Home(viewData))
 }
+
+func (h *UserHandler) HandleShowTaskList(c echo.Context) error {
+
+	return template.Render(c, http.StatusOK, pages.Tasklist())
+}
