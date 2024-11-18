@@ -78,3 +78,20 @@ func (h *UserHandler) HandleShowTaskList(c echo.Context) error {
 
 	return template.Render(c, http.StatusOK, pages.Tasklist())
 }
+
+func (h *UserHandler) HandleShowTaskDetail(c echo.Context) error {
+
+	taskdata := types.TaskViewModel{
+		Title:       "This is a Title of the Task",
+		Description: "This is a Decription of the Task",
+		Create_at:   "11:57 17/11/2024",
+		Update_at:   "17/11/2024 11:57",
+		Deadline:    "2024-11-25T23:59",
+		Schedule:    "none",
+		Tags:        []string{"school", "math", "ttcs"},
+	}
+
+	Tags := []string{"morning", "personal", "groceries"}
+
+	return template.Render(c, http.StatusOK, pages.TaskDetail(taskdata, Tags))
+}
