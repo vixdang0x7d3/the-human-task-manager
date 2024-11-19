@@ -55,7 +55,7 @@ func (q *Queries) ByID(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users(id, username, first_name, last_name, email, password, signup_at, last_login)
+INSERT INTO users("id", "username", "first_name", "last_name", "email", "password", "signup_at", "last_login")
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING id, username, first_name, last_name, email, password, signup_at, last_login
 `

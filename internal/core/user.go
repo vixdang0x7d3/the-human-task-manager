@@ -42,7 +42,7 @@ func (c *UserCore) CreateUser(ctx context.Context, cmd types.CreateUserCmd) (typ
 		return types.User{}, err
 	}
 
-	return toDomainUser(user), nil
+	return types.ToDomainUser(user), nil
 }
 
 func (c *UserCore) ByID(ctx context.Context, id uuid.UUID) (types.User, error) {
@@ -50,7 +50,7 @@ func (c *UserCore) ByID(ctx context.Context, id uuid.UUID) (types.User, error) {
 	if err != nil {
 		return types.User{}, err
 	}
-	return toDomainUser(user), nil
+	return types.ToDomainUser(user), nil
 }
 
 func (c *UserCore) ByEmail(ctx context.Context, email string) (types.User, error) {
@@ -58,7 +58,7 @@ func (c *UserCore) ByEmail(ctx context.Context, email string) (types.User, error
 	if err != nil {
 		return types.User{}, err
 	}
-	return toDomainUser(user), nil
+	return types.ToDomainUser(user), nil
 }
 
 func (c *UserCore) CheckPassword(ctx context.Context, email string, password string) (types.User, error) {
@@ -69,19 +69,7 @@ func (c *UserCore) CheckPassword(ctx context.Context, email string, password str
 	if !checkPassword(password, u.Password) {
 		return types.User{}, errors.New("incorrect password error")
 	}
-	return toDomainUser(u), nil
-}
-
-func toDomainUser(user database.User) types.User {
-	return types.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		SignupAt:  user.SignupAt,
-		LastLogin: user.LastLogin,
-	}
+	return types.ToDomainUser(u), nil
 }
 
 func hashPassword(password string) (string, error) {
