@@ -11,6 +11,7 @@ func (h *UserHandler) Route(e *echo.Echo) {
 	e.GET("/profile", h.HandleShowProfile, sdk.RequireAuth(h.SessionManager))
 	e.GET("/home", h.HandleShowHome, sdk.RequireAuth((h.SessionManager)))
 	e.GET("/tasklist", h.HandleShowTaskList)
+	e.GET("/taskdetail", h.HandleShowTaskDetail)
 	e.GET("/login", h.HandleShowLogin)
 	e.GET("/signup", h.HandleShowSignup)
 
