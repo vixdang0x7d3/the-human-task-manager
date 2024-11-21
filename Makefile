@@ -50,7 +50,7 @@ templ-build:
 build:
 	@go build -o tmp/thtm
 
-run: build db-up goose-up
+run: build
 	@./tmp/thtm
 
 test:
