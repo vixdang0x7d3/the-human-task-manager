@@ -23,7 +23,7 @@ func NewDB(url string) *DB {
 
 func (db *DB) Open(ctx context.Context) (err error) {
 	if db.URL == "" {
-		return errors.New("db url required")
+		return errors.New("url required")
 	}
 
 	if db.pool, err = pgxpool.New(ctx, db.URL); err != nil {
@@ -39,9 +39,8 @@ func (db *DB) Close() {
 }
 
 func (db *DB) Acquire(ctx context.Context) (*pgxpool.Conn, error) {
-
 	if db.pool == nil {
-		return nil, errors.New("database pool required")
+		return nil, errors.New("pool required")
 	}
 
 	conn, err := db.pool.Acquire(ctx)
@@ -53,6 +52,10 @@ func (db *DB) Acquire(ctx context.Context) (*pgxpool.Conn, error) {
 }
 
 func (db *DB) BeginTx(ctx context.Context) (pgx.Tx, error) {
+	if db.pool == nil {
+		return nil, errors.New("pool required")
+	}
+
 	tx, err := db.pool.Begin(ctx)
 	if err != nil {
 		return nil, err

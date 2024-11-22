@@ -53,7 +53,13 @@ func (m *Main) Run(ctx context.Context) (err error) {
 		return fmt.Errorf("cannot open db: %w", err)
 	}
 
+	userService := postgres.NewUserService(m.db)
+	taskService := postgres.NewTaskService(m.db)
+
 	m.server.Addr = m.Address
+	m.server.UserService = userService
+	m.server.TaskService = taskService
+
 	return m.server.Open()
 }
 

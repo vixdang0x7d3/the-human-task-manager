@@ -1,0 +1,11 @@
+package components
+
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+
+templ UserInfoPostSignup(uv models.UserView) {
+	<div>
+		<h2 class="card-title py-2">Your account have been created!</h2>
+		<p>Welcome to The Human Task Manager, { uv.FirstName } { uv.LastName }!</p>
+		<a href="/login" class="link link-primary">Go to login page</a>
+	</div>
+}

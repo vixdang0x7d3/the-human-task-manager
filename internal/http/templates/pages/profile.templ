@@ -1,0 +1,27 @@
+package pages
+
+import (
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+)
+
+templ Profile(uv models.UserView) {
+	@templates.Boilerplate() {
+		@templates.Head("Profile")
+		<body>
+			@templates.Navbar()
+			<div class="flex items-center justify-center py-10">
+				<div class=" card bg-base-200 w-96 shadow-xl">
+					<div class="card-body items-center text-center">
+						<h2 class="card-title">User Profile</h2>
+						<div id="user-info" class="text-left py-2">
+							<p id="username">Username: { uv.Username }</p>
+							<p id="email">Email: { uv.Email }</p>
+							<p id="full-name">Name: { uv.FirstName } { uv.LastName }</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</body>
+	}
+}

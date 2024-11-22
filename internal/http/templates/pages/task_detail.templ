@@ -1,0 +1,210 @@
+package pages
+
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+
+templ RecentTag(tags []string) {
+	for _, item := range tags {
+		<span class="px-2 py-1 bg-base-200 text-base badge">
+			{ item }
+		</span>
+	}
+}
+
+templ BtnAddTags(tags []string) {
+	<div id="dropdown" class="relative dropdown dropdown-right">
+		<!-- Dropdown Button -->
+		<div id="dropdown-button" tabindex="0" role="button" class="btn btn-sm btn-square m-1">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="size-6"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+			</svg>
+		</div>
+		<!-- Dropdown Menu (hidden by default) -->
+		<!-- Render tags dynamically -->
+		<ul id="dropdown-menu" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-auto p-2 shadow">
+			for _, item := range tags {
+				<li>
+					<button class="btn btn-sm tag-item" data-tag={ item }>
+						{ item }
+					</button>
+				</li>
+			}
+			<li>
+				<button class="btn btn-sm" id="new-tag-button">
+					New+
+				</button>
+			</li>
+			<!-- New Tag Input (Hidden by Default) -->
+			<li id="new-tag-input-container" class="hidden">
+				<input type="text" id="new-tag-input" class="input input-bordered input-sm max-w-xs w-full" placeholder="Enter new tag..."/>
+			</li>
+		</ul>
+	</div>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const dropdownButton = document.getElementById('dropdown-button');
+			const dropdownMenu = document.getElementById('dropdown-menu');
+			const selectedTagsContainer = document.getElementById('selected-tags');
+            const newTagButton = document.getElementById('new-tag-button');
+            const newTagInputContainer = document.getElementById('new-tag-input-container');
+            const newTagInput = document.getElementById('new-tag-input');
+
+			// Toggle dropdown visibility
+			dropdownButton.addEventListener('click', () => {
+				// dropdownMenu.classList.toggle('hidden');
+                newTagInputContainer.classList.add('hidden');
+			});
+
+			// Handle tag selection
+			dropdownMenu.addEventListener('click', (e) => {
+				if (e.target.classList.contains('tag-item')) {
+					const selectedTag = e.target.dataset.tag;
+
+					// Add tag to the selected list
+					const tagElement = document.createElement('span');
+					tagElement.textContent = selectedTag;
+                    tagElement.className = "px-2 py-1 bg-base-200 text-base badge";
+					selectedTagsContainer.appendChild(tagElement);
+
+                    // Remove the tag button from the dropdown
+					e.target.parentElement.remove();
+				}
+			});
+
+            // Show input field when "New+" is clicked
+            newTagButton.addEventListener('click', () => {
+                newTagInputContainer.classList.remove('hidden');
+                newTagInput.focus(); // Focus on the input field
+            });
+
+            // Add new tag when Enter is pressed
+            newTagInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && newTagInput.value.trim() !== '') {
+                    e.preventDefault();
+
+                    const newTag = newTagInput.value.trim();
+
+                    // Add new tag to the selected list
+                    const tagElement = document.createElement('span');
+                    tagElement.textContent = newTag;
+                    tagElement.className = "px-2 py-1 bg-base-200 text-base badge";
+                    selectedTagsContainer.appendChild(tagElement);
+
+                    // Clear the input field and hide it
+                    newTagInput.value = '';
+                    newTagInputContainer.classList.add('hidden');
+                }
+            });
+		});
+	</script>
+}
+
+templ TaskDetail(tv models.TaskView, tags []string) {
+	@templates.Boilerplate() {
+		@templates.Head(tv.Title)
+		<body>
+			@templates.Navbar()
+			<div class="flex items-center justify-center py-4">
+				<div class="flex flex-col w-10/12">
+					<div class="flex items-center px-4 py-2 gap-6 bg-base-100">
+						<h1 class="text-4xl font-bold">Task #1</h1>
+						<button class="btn btn-sm btn-error">DELETE</button>
+					</div>
+					<div class="card w-full min-w-fit bg-base-300 shadow-xl justify-center">
+						<div class="card-body">
+							<form hx-post="#!" hx-target="#card-body" hx-target-error="#alert">
+								<div class="container bg-base-100 mx-auto p-4 py-10 flex">
+									<!--left side-->
+									<div class="w-10/12 px-10">
+										<label class="form-control w-10/12 max-w-md">
+											<div class="label">
+												<span class="label-text">Title</span>
+											</div>
+											<input type="text" placeholder="Title" class="input input-bordered w-full max-w-md" value={ tv.Title }/>
+										</label>
+										<label class="form-control w-10/12 max-w-md">
+											<div class="label">
+												<p class="label-text">Deadline</p>
+											</div>
+											<input type="datetime-local" id="dead-line" name="dead-line" placeholder="Title" class="input input-bordered w-full max-w-md" value={ tv.Deadline }/>
+										</label>
+										<label class="form-control w-10/12 max-w-md">
+											<div class="label">
+												<span class="label-text">Schedule</span>
+											</div>
+											<input type="datetime-local" placeholder="Title" class="input input-bordered w-full max-w-md" value={ tv.Schedule }/>
+										</label>
+										<label class="form-control w-10/12 max-w-md">
+											<div class="label">
+												<span class="label-text">Description</span>
+											</div>
+											<textarea class="textarea textarea-bordered h-24" placeholder="Description">{ tv.Description }</textarea>
+										</label>
+									</div>
+									<!--right side-->
+									<div class="w-10/12 px-10 pt-6 space-y-4">
+										<div class="indicator w-full">
+											<span class="indicator-item indicator-start left-8 px-1 bg-base-100 border-2 rounded-lg input-bordered">tags</span>
+											<div class="flex flex-auto w-full h-32 p-4 border-2 input-bordered rounded-lg">
+												<div id="selected-tags" class="flex flex-auto w-full gap-2">
+													@RecentTag(tv.Tags)
+													<!-- Main div showing selected tags -->
+												</div>
+												@BtnAddTags(tags)
+											</div>
+										</div>
+										<div class="flex justify-between ">
+											<select class="select select-bordered w-5/12 px-2 max-w-xs">
+												<option disabled selected>Priority</option>
+												<option>#A</option>
+												<option>#B</option>
+												<option>#C</option>
+											</select>
+											<select class="select select-bordered w-5/12 px-2 max-w-xs">
+												<option disabled selected>Status</option>
+												<option>Pending</option>
+												<option>Done</option>
+												<option>Suspended</option>
+											</select>
+										</div>
+										<div class="pt-4">
+											<div class="indicator w-full">
+												<span class="indicator-item indicator-start left-12 px-1 bg-base-100 border-2 rounded-lg input-bordered">Sub-tasks</span>
+												<div class="flex flex-row justify-center w-full h-32 p-4 border-2 input-bordered rounded-lg overflow-y-scroll">
+													<button class="btn btn-sm">
+														Add
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke-width="1.5"
+															stroke="currentColor"
+															class="size-6"
+														>
+															<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+														</svg>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</form>
+							<div class="card-actions justify-end px-4">
+								<button class="btn btn-sm btn-secondary">Save</button>
+								<button class="btn btn-sm btn-warning">Cancel</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</body>
+	}
+}

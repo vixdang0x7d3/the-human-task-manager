@@ -13,6 +13,10 @@ type TaskService struct {
 	db *DB
 }
 
+func NewTaskService(db *DB) *TaskService {
+	return &TaskService{db: db}
+}
+
 func (s *TaskService) CreateTask(ctx context.Context, cmd domain.CreateTaskCmd) (domain.Task, error) {
 	conn, err := s.db.Acquire(ctx)
 	if err != nil {
