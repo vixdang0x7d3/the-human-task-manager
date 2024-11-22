@@ -25,8 +25,10 @@ func (s *UserService) CreateUser(ctx context.Context, cmd domain.CreateUserCmd) 
 	if err != nil {
 		return domain.User{}, errors.New("cannot get a connection")
 	}
-	q := sqlc.New(conn)
 
+	defer conn.Release()
+
+	q := sqlc.New(conn)
 	user, err := createUser(ctx, q, cmd)
 	if err != nil {
 		return domain.User{}, err
@@ -40,8 +42,10 @@ func (s *UserService) ByEmail(ctx context.Context, email string) (domain.User, e
 	if err != nil {
 		return domain.User{}, errors.New("cannot get a connection")
 	}
-	q := sqlc.New(conn)
 
+	defer conn.Release()
+
+	q := sqlc.New(conn)
 	user, err := byEmail(ctx, q, email)
 	if err != nil {
 		return domain.User{}, err
