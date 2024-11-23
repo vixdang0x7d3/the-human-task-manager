@@ -2,12 +2,15 @@ package postgres
 
 import (
 	"context"
-	"errors"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/postgres/sqlc"
 )
+
+var _ domain.TaskService = (*TaskService)(nil)
 
 type TaskService struct {
 	db *DB
@@ -20,7 +23,7 @@ func NewTaskService(db *DB) *TaskService {
 func (s *TaskService) CreateTask(ctx context.Context, cmd domain.CreateTaskCmd) (domain.Task, error) {
 	conn, err := s.db.Acquire(ctx)
 	if err != nil {
-		return domain.Task{}, errors.New("cannot get a connection")
+		return domain.Task{}, err
 	}
 	q := sqlc.New(conn)
 
@@ -33,7 +36,76 @@ func (s *TaskService) CreateTask(ctx context.Context, cmd domain.CreateTaskCmd) 
 }
 
 func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (sqlc.Task, error) {
-	panic("unimplemented")
+
+	var (
+		err       error
+		projectID uuid.UUID
+		deadline  time.Time
+		schedule  time.Time
+		wait      time.Time
+		status    sqlc.TaskStatus
+		priority  sqlc.TaskPriority
+	)
+
+	status = sqlc.TaskStatusStarted
+
+	userID, err := uuid.Parse(cmd.UserID)
+	if err != nil {
+		return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted userID"}
+
+	}
+
+	if cmd.ProjectID != "" {
+		projectID, err = uuid.Parse(cmd.ProjectID)
+		if err != nil {
+			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted projectID"}
+		}
+	}
+
+	if cmd.Deadline != "" {
+		cmd.Deadline = strings.Join([]string{cmd.Deadline, ":00Z"}, "")
+		deadline, err = time.Parse(time.RFC3339, cmd.Deadline)
+		if err != nil {
+			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted deadline timestamp"}
+		}
+	}
+
+	if cmd.Schedule != "" {
+		cmd.Schedule = strings.Join([]string{cmd.Schedule, ":00Z"}, "")
+		schedule, err = time.Parse(time.RFC3339, cmd.Schedule)
+		if err != nil {
+			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted schedule timestamp"}
+		}
+	}
+
+	if cmd.Wait != "" {
+		cmd.Wait = strings.Join([]string{cmd.Wait, ":00Z"}, "")
+		wait, err = time.Parse(time.RFC3339, cmd.Wait)
+		if err != nil {
+			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted wait timestamp"}
+		}
+		status = sqlc.TaskStatusWaiting
+	}
+
+	task, err := q.CreateTask(ctx, sqlc.CreateTaskParams{
+		ID:     uuid.New(),
+		UserID: userID,
+		ProjectID: uuid.NullUUID{
+			UUID:  projectID,
+			Valid: true,
+		},
+		Description: cmd.Description,
+		Deadline:    deadline,
+		Schedule:    schedule,
+		Wait:        wait,
+		Status:      status,
+		Priority:    priority,
+	})
+	if err != nil {
+		return sqlc.Task{}, err
+	}
+
+	return task, nil
 }
 
 func toDomainTask(task sqlc.Task) domain.Task {

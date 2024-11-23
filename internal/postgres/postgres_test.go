@@ -18,6 +18,26 @@ import (
 
 var dsn string
 
+func TestDB(t *testing.T) {
+	db := MustOpenDB(t, context.Background())
+	CloseDB(t, db)
+}
+
+func MustOpenDB(tb testing.TB, ctx context.Context) *postgres.DB {
+	tb.Helper()
+
+	db := postgres.NewDB(dsn)
+	if err := db.Open(ctx); err != nil {
+		tb.Fatal(err)
+	}
+	return db
+}
+
+func CloseDB(tb testing.TB, db *postgres.DB) {
+	tb.Helper()
+	db.Close()
+}
+
 func TestMain(m *testing.M) {
 
 	var db *sql.DB
@@ -75,26 +95,6 @@ func TestMain(m *testing.M) {
 	}()
 
 	m.Run() // run all tests in this package
-}
-
-func TestDB(t *testing.T) {
-	db := MustOpenDB(t, context.Background())
-	Close(t, db)
-}
-
-func MustOpenDB(tb testing.TB, ctx context.Context) *postgres.DB {
-	tb.Helper()
-
-	db := postgres.NewDB(dsn)
-	if err := db.Open(ctx); err != nil {
-		tb.Fatal(err)
-	}
-	return db
-}
-
-func Close(tb testing.TB, db *postgres.DB) {
-	tb.Helper()
-	db.Close()
 }
 
 func mustMigrate(db *sql.DB) {

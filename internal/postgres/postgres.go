@@ -8,6 +8,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const (
+	pgErrCode_NotNullViolation = "23502"
+	pgErrCode_FKeyViolation    = "23503"
+	pgErrCode_UniqueViolation  = "23505"
+)
+
 type DB struct {
 	pool *pgxpool.Pool
 
