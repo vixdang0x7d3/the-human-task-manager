@@ -12,6 +12,7 @@ require (
 	github.com/ory/dockertest/v3 v3.11.0
 	github.com/pressly/goose/v3 v3.23.0
 	github.com/spazzymoto/echo-scs-session v1.0.0
+	golang.org/x/crypto v0.28.0
 )
 
 require (
@@ -52,7 +53,6 @@ require (
 	go.opentelemetry.io/otel v1.26.0 // indirect
 	go.opentelemetry.io/otel/trace v1.26.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8 // indirect
 	golang.org/x/sync v0.9.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
