@@ -5,7 +5,12 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/thtm"
-  cmd = "tailwindcss -i static/css/input.css -o static/css/output.css --minify && templ generate -path internal/template && go build -o ./tmp/thtm ."
+  cmd =  """
+  tailwindcss -i internal/http/assets/css/input.css -o internal/http/assets/css/output.css --minify &&
+  templ generate -path internal/http/templates &&
+  go build -o ./tmp/thtm .
+  """
+
   delay = 1000
   exclude_dir = ["tmp", "bin", "sql", "vendor", "testdata", "node_modules", "docs", ".git"]
   exclude_file = []

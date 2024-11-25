@@ -42,22 +42,22 @@ sqlc:
 	@sqlc generate
 
 tailwind-build:
-	@tailwindcss -i static/css/input.css -o static/css/output.css --minify
+	@tailwindcss -i internal/http/assets/css/input.css -o internal/http/assets/css/output.css --minify
 
 templ-build:
-	@templ generate -path internal/template/
+	@templ generate -path internal/http/templates/
 
 build:
 	@go build -o tmp/thtm
 
-run: build db-up goose-up
+run: build
 	@./tmp/thtm
 
 test:
-	@go test ./...
+	@go test ./... -v
 
 live/tailwind:
-	@tailwindcss -i static/css/input.css -o static/css/output.css --watch --minify
+	@tailwindcss -i internal/http/assets/css/input.css -o internal/http/assets/css/output.css --watch --minify
 
 live: 
 	@air
