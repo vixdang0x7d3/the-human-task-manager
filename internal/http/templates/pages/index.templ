@@ -3,15 +3,15 @@ package pages
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 
-templ Home(uv models.UserView) {
+templ Index(m models.UserView, logoutURL string) {
 	@templates.Boilerplate() {
 		@templates.Head("Home")
 		<body>
-			@templates.Navbar()
+			@templates.Navbar(logoutURL)
 			<div class="hero bg-base-200 min-h-screen">
 				<div class="hero-content text-center">
 					<div class="items-center max-w-md space-y-6">
-						<h1 class="text-5xl font-bold">Good morning, { uv.FirstName }</h1>
+						<h1 class="text-5xl font-bold">Good morning, { m.FirstName }</h1>
 						<!-- Notifications Section -->
 						<div class="indicator max-w-screen-sm p-4 rounded-lg bg-base-100">
 							<p class="indicator-item indicator-start left-16 rounded-lg px-1 font-sans bg-base-100">Notifications</p>

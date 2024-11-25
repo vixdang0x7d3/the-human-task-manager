@@ -1,13 +1,21 @@
 package components 
 
-import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+import (
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+)
 
-templ UserLoginWithPassword(uv models.UserView) {
+templ LoginPassword(m models.UserView, postURL string) {
 	<div class="items-center">
-		<h2 class="card-title text-primary-content">Welcome to Human Task Manager, { uv.FirstName }!</h2>
+		<h2 class="card-title text-primary-content">Welcome to Human Task Manager, { m.FirstName }!</h2>
 	</div>
 	<div class="px-10">
-		<form hx-post="/login" hx-target="#alert" hx-target-error="#alert">
+		<!--
+			this form makes a requests to validate user login info.
+			on success, it injects #alert div with a login success
+			message and issues a redirect to home page after 2s delay.
+			on error, it injects #message div with the error message.
+		-->
+		<form hx-post={ string(templ.URL(postURL)) } hx-target="#alert" hx-target-error="#message">
 			<p class="py-2">Email:</p>
 			<label class="input input-sm input-bordered flex items-center gap-2">
 				<svg
@@ -23,7 +31,7 @@ templ UserLoginWithPassword(uv models.UserView) {
 						d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z"
 					></path>
 				</svg>
-				<input id="email" name="email" type="email" class="grow" readonly value={ uv.Email }/>
+				<input id="email" name="email" type="email" class="grow" readonly value={ m.Email }/>
 			</label>
 			<p class="py-2">Password:</p>
 			<label class="input input-sm input-bordered flex items-center gap-2">
@@ -41,7 +49,7 @@ templ UserLoginWithPassword(uv models.UserView) {
 				</svg>
 				<input id="password" name="password" type="password" class="grow"/>
 			</label>
-			<div id="message" class="text-error"></div>
+			<div id="message" class="text-error text-center"></div>
 			<div class="card-actions justify-end">
 				<input type="submit" value="Login" class="btn btn-sm btn-primary mt-4"/>
 			</div>
@@ -50,8 +58,8 @@ templ UserLoginWithPassword(uv models.UserView) {
 	</div>
 }
 
-templ PostLoginRedirectWithDelay() {
-	<div role="alert" class="alert alert-success" hx-get="/login-success-redirect" hx-trigger="load delay:2s">
+templ LoginAlertRedirect(msg, url string) {
+	<div role="alert" class="alert alert-success" hx-get={ string(templ.URL(url)) } hx-trigger="load delay:2s">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="h-6 w-6 shrink-0 stroke-current"
@@ -65,6 +73,8 @@ templ PostLoginRedirectWithDelay() {
 				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 			></path>
 		</svg>
-		<span>Login successful :)</span>
+		<span>{ msg }</span>
 	</div>
+	<!-- delete error message if any with oob swap -->
+	<div id="message" class="text-error" hx-swap-oob="true"></div>
 }

@@ -2,22 +2,28 @@ package pages
 
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 
-templ loginNavBar() {
+templ loginNavBar(signupURL string) {
 	<div class="navbar bg-base-100">
 		<div class="flex-1">
 			<a href="#!" class="btn btn-ghost text-xl">Human Task Manager</a>
 		</div>
 		<div class="flex-none">
-			<a href="/signup" class="link link-primary px-4">Don't have an account?</a>
+			<a href={ templ.URL(signupURL) } class="link link-primary px-4">Don't have an account?</a>
 		</div>
 	</div>
 }
 
-templ Login() {
+templ LoginEmail(postURL, signupURL string) {
 	@templates.Boilerplate() {
-		@templates.Head("Login")
+		@templates.Head("Login") {
+			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+		}
 		<body hx-ext="response-targets">
-			@loginNavBar()
+			@loginNavBar(signupURL)
+			<!-- 
+				this alert div show login success notification
+				it is hx-targeted by the login password form
+			-->
 			<div id="alert" class="fixed top-4 right-4"></div>
 			<div class="flex items-center justify-center py-10">
 				<div class="card bg-base-200 w-120 shadow-xl">
@@ -40,7 +46,12 @@ templ Login() {
 							</svg>
 							Continue with google
 						</button>
-						<form hx-post="/login-email" hx-target="#card-body" hx-target-error="#alert">
+						<!-- 
+							this form makes a POST requests to validate email
+							on success, replace #card-body with a a login password form
+							on error, inject error message to #message
+						-->
+						<form hx-post={ string(templ.URL(postURL)) } hx-target="#card-body" hx-target-error="#message">
 							<p class="text-primary-content pb-2">Login with email:</p>
 							<label class="input input-sm input-bordered flex items-center gap-2 py-4">
 								<svg
@@ -58,6 +69,7 @@ templ Login() {
 								</svg>
 								<input type="email" name="email" id="email" class="input-sm grow" placeholder="Email"/>
 							</label>
+							<div id="message" class="text-error text-center"></div>
 							<div class="card-actions justify-end py-4">
 								<button class="btn btn-sm btn-primary">Continue</button>
 							</div>

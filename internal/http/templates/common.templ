@@ -14,13 +14,12 @@ templ Head(title string) {
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>{ title } </title>
 		<link rel="stylesheet" href="/css/output.css"/>
-		<script src="/js/htmx.min.js"></script>
-		<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+		<script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.js" integrity="sha384-BBDmZzVt6vjz5YbQqZPtFZW82o8QotoM7RUp5xOxV3nSJ8u2pSdtzFAbGKzTlKtg" crossorigin="anonymous"></script>
 		{ children... }
 	</head>
 }
 
-templ Navbar() {
+templ Navbar(logoutURL string) {
 	<div class="navbar bg-base-100">
 		<div class="flex-1">
 			<a class="btn btn-ghost text-xl" href="#!" title="Home">Human Task Manager</a> <!-- return index -->
@@ -42,7 +41,7 @@ templ Navbar() {
 				<li><a href="/profile" title="Your Profile">PROFILE</a></li>
 				<li><a href="/home" title="Home">HOME</a></li> <!-- return index -->
 				<li>
-					<a title="Logout" hx-get="/logout">
+					<a title="Logout" hx-delete={ string(templ.URL(logoutURL)) }>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"

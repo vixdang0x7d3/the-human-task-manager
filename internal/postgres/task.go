@@ -25,6 +25,8 @@ func (s *TaskService) CreateTask(ctx context.Context, cmd domain.CreateTaskCmd) 
 	if err != nil {
 		return domain.Task{}, err
 	}
+	defer conn.Release()
+
 	q := sqlc.New(conn)
 
 	task, err := createTask(ctx, q, cmd)
@@ -39,7 +41,7 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 
 	var (
 		err       error
-		projectID uuid.UUID
+		projectID uuid.NullUUID
 		deadline  time.Time
 		schedule  time.Time
 		wait      time.Time
@@ -48,17 +50,30 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 	)
 
 	status = sqlc.TaskStatusStarted
+	priority = sqlc.TaskPriorityNone
 
 	userID, err := uuid.Parse(cmd.UserID)
 	if err != nil {
-		return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted userID"}
+		return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted user ID"}
 
 	}
 
 	if cmd.ProjectID != "" {
-		projectID, err = uuid.Parse(cmd.ProjectID)
+
+		val, err := uuid.Parse(cmd.ProjectID)
 		if err != nil {
-			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted projectID"}
+			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted project ID"}
+		}
+
+		projectID = uuid.NullUUID{
+			UUID:  val,
+			Valid: true,
+		}
+	}
+
+	if cmd.Priority != "" {
+		if err = priority.Scan(cmd.Priority); err != nil {
+			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted priority"}
 		}
 	}
 
@@ -88,18 +103,16 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 	}
 
 	task, err := q.CreateTask(ctx, sqlc.CreateTaskParams{
-		ID:     uuid.New(),
-		UserID: userID,
-		ProjectID: uuid.NullUUID{
-			UUID:  projectID,
-			Valid: true,
-		},
+		ID:          uuid.New(),
+		UserID:      userID,
+		ProjectID:   projectID,
 		Description: cmd.Description,
 		Deadline:    deadline,
 		Schedule:    schedule,
 		Wait:        wait,
 		Status:      status,
 		Priority:    priority,
+		Create:      time.Now(),
 	})
 	if err != nil {
 		return sqlc.Task{}, err

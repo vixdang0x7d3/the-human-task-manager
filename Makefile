@@ -45,7 +45,7 @@ tailwind-build:
 	@tailwindcss -i internal/http/assets/css/input.css -o internal/http/assets/css/output.css --minify
 
 templ-build:
-	@templ generate -path internal/http/assets/templates/
+	@templ generate -path internal/http/templates/
 
 build:
 	@go build -o tmp/thtm
@@ -54,7 +54,7 @@ run: build
 	@./tmp/thtm
 
 test:
-	@go test ./...
+	@go test ./... -v
 
 live/tailwind:
 	@tailwindcss -i internal/http/assets/css/input.css -o internal/http/assets/css/output.css --watch --minify

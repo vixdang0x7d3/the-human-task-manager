@@ -20,7 +20,7 @@ func main() {
 
 	godotenv.Load()
 	m := NewMain(
-		fmt.Sprintf(":%s", os.Getenv("ADDRESS")),
+		os.Getenv("ADDRESS"),
 		os.Getenv("DB_URL"),
 	)
 

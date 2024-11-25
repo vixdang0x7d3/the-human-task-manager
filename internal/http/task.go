@@ -3,20 +3,38 @@ package http
 import "github.com/labstack/echo/v4"
 
 func (s *Server) registerTaskRoutes(r *echo.Group) {
-	r.GET("/tasks", s.handleTaskShow)
-	r.GET("/tasks/create", s.handleTaskCreateShow)
+	r.GET("/tasks", s.handleTaskIndex)
+	r.GET("/tasks/new", s.handleTaskNewShow)
 
-	r.POST("/tasks/create", s.handleTaskCreate)
+	r.POST("/tasks/new", s.handleTaskNew)
 }
 
-func (s *Server) handleTaskShow(c echo.Context) error {
+func (s *Server) handleTaskIndex(c echo.Context) error {
 	return nil
 }
 
-func (s *Server) handleTaskCreateShow(c echo.Context) error {
+// handleTaskItem return task important attributes
+// and aggregated data. Data returned by handleTaskItem
+// is shown in Index screen
+func (s *Server) handleTaskItem(c echo.Context) error {
 	return nil
 }
 
-func (s *Server) handleTaskCreate(c echo.Context) error {
+// handleTaskDetailShow returns a task object.
+// Data returned by handleTaskDetailShow is
+// shown in Task Update screen
+func (s *Server) handleTaskDetailShow(c echo.Context) error {
+	return nil
+}
+
+func (s *Server) handleTaskDetailUpdate(c echo.Context) error {
+	return nil
+}
+
+func (s *Server) handleTaskNewShow(c echo.Context) error {
+	return nil
+}
+
+func (s *Server) handleTaskNew(c echo.Context) error {
 	return nil
 }

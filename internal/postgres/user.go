@@ -75,7 +75,7 @@ func (s *UserService) ByEmailWithPassword(ctx context.Context, email string, pas
 	return toDomainUser(user), nil
 }
 
-func (s *UserService) ByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
+func (s *UserService) ByID(ctx context.Context, id string) (domain.User, error) {
 	conn, err := s.db.Acquire(ctx)
 	if err != nil {
 		return domain.User{}, err
@@ -126,12 +126,32 @@ func createUser(ctx context.Context, q UserQueries, cmd domain.CreateUserCmd) (s
 	return user, nil
 }
 
-func byID(ctx context.Context, q UserQueries, id uuid.UUID) (sqlc.User, error) {
-	panic("unimplemented")
+func byID(ctx context.Context, q UserQueries, id string) (sqlc.User, error) {
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return sqlc.User{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted ID"}
+	}
+
+	user, err := q.ByID(ctx, uuid)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "ID not found"}
+		}
+		return sqlc.User{}, err
+	}
+	return user, nil
 }
 
 func byEmail(ctx context.Context, q UserQueries, email string) (sqlc.User, error) {
-	panic("unimplemented")
+	user, err := q.ByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "email not found"}
+		}
+		return sqlc.User{}, err
+	}
+
+	return user, nil
 }
 
 func byEmailWithPassword(ctx context.Context, q UserQueries, email, password string) (sqlc.User, error) {

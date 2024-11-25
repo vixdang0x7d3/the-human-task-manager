@@ -120,7 +120,7 @@ func BtnAddTags(tags []string) templ.Component {
 	})
 }
 
-func TaskDetail(tv models.TaskView, tags []string) templ.Component {
+func TaskDetail(m models.TaskView, tags []string, logoutURL string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -153,7 +153,7 @@ func TaskDetail(tv models.TaskView, tags []string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templates.Head(tv.Title).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templates.Head(m.Title).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -161,7 +161,7 @@ func TaskDetail(tv models.TaskView, tags []string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templates.Navbar().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templates.Navbar(logoutURL).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -170,9 +170,9 @@ func TaskDetail(tv models.TaskView, tags []string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(tv.Title)
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(m.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 130, Col: 111}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 130, Col: 110}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -183,9 +183,9 @@ func TaskDetail(tv models.TaskView, tags []string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(tv.Deadline)
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(m.Deadline)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 136, Col: 156}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 136, Col: 155}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -196,9 +196,9 @@ func TaskDetail(tv models.TaskView, tags []string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(tv.Schedule)
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(m.Schedule)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 142, Col: 124}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 142, Col: 123}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -209,9 +209,9 @@ func TaskDetail(tv models.TaskView, tags []string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(tv.Description)
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(m.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 148, Col: 103}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 148, Col: 102}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -221,7 +221,7 @@ func TaskDetail(tv models.TaskView, tags []string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = RecentTag(tv.Tags).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = RecentTag(m.Tags).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

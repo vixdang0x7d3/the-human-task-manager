@@ -85,6 +85,12 @@ func TestCreateUser(t *testing.T) {
 	})
 }
 
+func TestByEmail(t *testing.T) {
+	db := MustOpenDB(t, context.Background())
+	defer CloseDB(t, db)
+	t.Skip("no test")
+}
+
 func TestByEmailWithPassword(t *testing.T) {
 
 	db := MustOpenDB(t, context.Background())
@@ -137,4 +143,13 @@ func TestByEmailWithPassword(t *testing.T) {
 			t.Errorf("unexpected error: %#v", err)
 		}
 	})
+}
+
+func MustCreateUser(tb testing.TB, ctx context.Context, db *postgres.DB, cmd domain.CreateUserCmd) domain.User {
+	tb.Helper()
+	user, err := postgres.NewUserService(db).CreateUser(ctx, cmd)
+	if err != nil {
+		tb.Fatal(err)
+	}
+	return user
 }
