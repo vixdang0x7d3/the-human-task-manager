@@ -14,6 +14,8 @@ func (s *Server) registerUserRoutes(r *echo.Group) {
 	r.GET("/index", s.handleIndexShow)
 	r.GET("/profile", s.handleProfileShow)
 
+	r.GET("/calendar", s.handleCalendarShow)
+
 	r.DELETE("/logout", s.handleLogout)
 }
 
@@ -61,4 +63,20 @@ func (s *Server) handleLogout(c echo.Context) error {
 
 	c.Response().Header().Set("HX-Redirect", "/u/login")
 	return c.NoContent(http.StatusOK)
+}
+
+func (s *Server) handleCalendarShow(c echo.Context) error {
+
+	m := []models.TaskView{
+		{
+			Title:    "task 1",
+			Schedule: "2024-11-26",
+		},
+		{
+			Title:    "task 2",
+			Schedule: "2024-11-28",
+		},
+	}
+
+	return render(c, http.StatusOK, pages.Calendar(m, "/logout"))
 }
