@@ -63,7 +63,7 @@ func NewServer() *Server {
 	}))
 
 	s.echo.GET("/", func(c echo.Context) error {
-		return c.Redirect(http.StatusFound, "/home")
+		return c.Redirect(http.StatusFound, "/index")
 	})
 
 	// registers unauthenticated routes
@@ -120,7 +120,7 @@ func requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			userID := sessions.GetString(c.Request().Context(), "userID")
 			if userID != "" {
-				c.Response().Header().Set("HX-Redirect", "../home")
+				c.Response().Header().Set("HX-Redirect", "../index")
 				return c.NoContent(http.StatusOK)
 			}
 			return next(c)
