@@ -17,6 +17,8 @@ func (s *Server) registerAuthRoutes(r *echo.Group) {
 	r.GET("/login", s.handleLoginShow)
 	r.GET("/signup", s.handleSignupShow)
 
+	r.GET("/calendar", s.handleCalendarShow)
+
 	r.POST("/signup", s.handleSignup)
 	r.POST("/login-email", s.handleLoginEmail)
 	r.POST("/login-password", s.handleLoginPassword)

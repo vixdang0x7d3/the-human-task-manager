@@ -20,19 +20,19 @@ templ Head(title string) {
 }
 
 templ Navbar(logoutURL string) {
-	<div class="navbar bg-base-100">
+	<div class="navbar bg-base-100 ">
 		<div class="flex-1">
 			<a class="btn btn-ghost text-xl" href="/index" title="Home">Human Task Manager</a> <!-- return index -->
 		</div>
-		<div class="flex-none">
+		<div class="flex-none z-40">
 			<ul class="menu menu-horizontal px-1">
 				<li><a href="#!" title="Coming soon! UwU">PROJECT</a></li>
 				<li>
 					<details>
 						<summary>PERSONAL</summary>
-						<ul class="bg-base-100 rounded-t-none p-2">
+						<ul class="bg-base-100 -z-0 rounded-t-none p-2">
 							<li><a href="/tasklist" title="Task List">Task List</a></li>
-							<li><a href="#!" title="Calender">Calender</a></li>
+							<li><a href="/calendar" title="Calender">Calender</a></li>
 							<li><a href="#!" title="Track Time">Track Time</a></li>
 							<li><a href="#!" title="Statitics">Statitics</a></li>
 						</ul>
