@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type TaskPriority string
@@ -120,6 +121,23 @@ type Task struct {
 	Create      time.Time
 	End         time.Time
 	Tags        []string
+}
+
+type TaskItem struct {
+	ID           uuid.UUID
+	Username     string
+	ProjectTitle string
+	CompletedBy  string
+	Description  string
+	Priority     TaskPriority
+	State        TaskState
+	Deadline     time.Time
+	Schedule     time.Time
+	Wait         time.Time
+	Create       time.Time
+	End          time.Time
+	Tags         []string
+	Urgency      pgtype.Numeric
 }
 
 type User struct {

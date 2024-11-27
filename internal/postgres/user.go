@@ -132,7 +132,7 @@ func byID(ctx context.Context, q UserQueries, id string) (sqlc.User, error) {
 		return sqlc.User{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted ID"}
 	}
 
-	user, err := q.ByID(ctx, uuid)
+	user, err := q.UserByID(ctx, uuid)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "ID not found"}
@@ -143,7 +143,7 @@ func byID(ctx context.Context, q UserQueries, id string) (sqlc.User, error) {
 }
 
 func byEmail(ctx context.Context, q UserQueries, email string) (sqlc.User, error) {
-	user, err := q.ByEmail(ctx, email)
+	user, err := q.UserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "email not found"}
@@ -155,7 +155,7 @@ func byEmail(ctx context.Context, q UserQueries, email string) (sqlc.User, error
 }
 
 func byEmailWithPassword(ctx context.Context, q UserQueries, email, password string) (sqlc.User, error) {
-	user, err := q.ByEmail(ctx, email)
+	user, err := q.UserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "email not found"}
@@ -184,6 +184,6 @@ func toDomainUser(user sqlc.User) domain.User {
 
 type UserQueries interface {
 	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
-	ByID(ctx context.Context, id uuid.UUID) (sqlc.User, error)
-	ByEmail(ctx context.Context, email string) (sqlc.User, error)
+	UserByID(ctx context.Context, id uuid.UUID) (sqlc.User, error)
+	UserByEmail(ctx context.Context, email string) (sqlc.User, error)
 }

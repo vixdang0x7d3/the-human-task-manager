@@ -124,7 +124,7 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE VIEW task_items AS
 SELECT
 	t.id,
-	coalesce(u.username, '') AS username,
+	u.username AS username,
 	coalesce(p.title, '') AS project_title,
 	coalesce(c.username, '') AS completed_by,
 	t.description,
@@ -134,7 +134,7 @@ SELECT
 	t.schedule,
 	t.wait,
 	t.create,
-	t.end,
+	t.END,
 	t.tags,
 	fn_urgency(t.*) AS urgency
 FROM tasks t

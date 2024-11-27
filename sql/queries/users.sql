@@ -3,10 +3,10 @@ INSERT INTO users("id", "username", "first_name", "last_name", "email", "passwor
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
--- name: ByID :one
+-- name: UserByID :one
 SELECT * FROM users
 WHERE id=$1;
 
--- name: ByEmail :one
+-- name: UserByEmail :one
 SELECT * FROM users
 WHERE email=$1;

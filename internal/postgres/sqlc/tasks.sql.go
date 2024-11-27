@@ -14,7 +14,7 @@ import (
 
 const createTask = `-- name: CreateTask :one
 INSERT INTO tasks("id", "user_id", "project_id", "description", "priority", "state", "deadline", "schedule", "wait", "create", "end", "tags")
-VALUES ($1, $2, $3,  $4, $11::task_priority, $12::task_status, $5, $6, $7, $8, $9, $10)
+VALUES ($1, $2, $3,  $4, $11::task_priority, $12::task_state, $5, $6, $7, $8, $9, $10)
 RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
 `
 
@@ -30,7 +30,7 @@ type CreateTaskParams struct {
 	End         time.Time
 	Tags        []string
 	Priority    TaskPriority
-	Status      interface{}
+	State       TaskState
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error) {
@@ -46,7 +46,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		arg.End,
 		arg.Tags,
 		arg.Priority,
-		arg.Status,
+		arg.State,
 	)
 	var i Task
 	err := row.Scan(

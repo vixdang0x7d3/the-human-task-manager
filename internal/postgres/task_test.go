@@ -74,3 +74,12 @@ func TestCreateTask(t *testing.T) {
 		}
 	})
 }
+
+func MustCreateTask(tb testing.TB, ctx context.Context, db *postgres.DB, cmd domain.CreateTaskCmd) domain.Task {
+	tb.Helper()
+	task, err := postgres.NewTaskService(db).CreateTask(ctx, cmd)
+	if err != nil {
+		tb.Fatal(err)
+	}
+	return task
+}

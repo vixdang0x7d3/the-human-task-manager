@@ -45,11 +45,11 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 		deadline  time.Time
 		schedule  time.Time
 		wait      time.Time
-		status    sqlc.TaskState
+		state     sqlc.TaskState
 		priority  sqlc.TaskPriority
 	)
 
-	status = sqlc.TaskStateStarted
+	state = sqlc.TaskStateStarted
 	priority = sqlc.TaskPriorityNone
 
 	userID, err := uuid.Parse(cmd.UserID)
@@ -99,7 +99,7 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 		if err != nil {
 			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted wait timestamp"}
 		}
-		status = sqlc.TaskStateWaiting
+		state = sqlc.TaskStateWaiting
 	}
 
 	task, err := q.CreateTask(ctx, sqlc.CreateTaskParams{
@@ -110,7 +110,7 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 		Deadline:    deadline,
 		Schedule:    schedule,
 		Wait:        wait,
-		Status:      status,
+		State:       state,
 		Priority:    priority,
 		Create:      time.Now(),
 		Tags:        cmd.Tags,
@@ -125,7 +125,7 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 func toDomainTask(task sqlc.Task) domain.Task {
 
 	var priority string
-	if task.Priority != "none" {
+	if task.Priority != sqlc.TaskPriorityNone {
 		priority = string(task.Priority)
 	}
 
