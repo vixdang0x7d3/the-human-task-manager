@@ -56,55 +56,54 @@ func (ns NullTaskPriority) Value() (driver.Value, error) {
 	return string(ns.TaskPriority), nil
 }
 
-type TaskStatus string
+type TaskState string
 
 const (
-	TaskStatusStarted   TaskStatus = "started"
-	TaskStatusWaiting   TaskStatus = "waiting"
-	TaskStatusCompleted TaskStatus = "completed"
-	TaskStatusDeleted   TaskStatus = "deleted"
+	TaskStateStarted   TaskState = "started"
+	TaskStateWaiting   TaskState = "waiting"
+	TaskStateCompleted TaskState = "completed"
+	TaskStateDeleted   TaskState = "deleted"
 )
 
-func (e *TaskStatus) Scan(src interface{}) error {
+func (e *TaskState) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = TaskStatus(s)
+		*e = TaskState(s)
 	case string:
-		*e = TaskStatus(s)
+		*e = TaskState(s)
 	default:
-		return fmt.Errorf("unsupported scan type for TaskStatus: %T", src)
+		return fmt.Errorf("unsupported scan type for TaskState: %T", src)
 	}
 	return nil
 }
 
-type NullTaskStatus struct {
-	TaskStatus TaskStatus
-	Valid      bool // Valid is true if TaskStatus is not NULL
+type NullTaskState struct {
+	TaskState TaskState
+	Valid     bool // Valid is true if TaskState is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullTaskStatus) Scan(value interface{}) error {
+func (ns *NullTaskState) Scan(value interface{}) error {
 	if value == nil {
-		ns.TaskStatus, ns.Valid = "", false
+		ns.TaskState, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.TaskStatus.Scan(value)
+	return ns.TaskState.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullTaskStatus) Value() (driver.Value, error) {
+func (ns NullTaskState) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.TaskStatus), nil
+	return string(ns.TaskState), nil
 }
 
 type Project struct {
-	ID       uuid.UUID
-	UserID   uuid.UUID
-	ParentID uuid.NullUUID
-	Title    string
+	ID     uuid.UUID
+	UserID uuid.UUID
+	Title  string
 }
 
 type Task struct {
@@ -114,12 +113,13 @@ type Task struct {
 	CompletedBy uuid.NullUUID
 	Description string
 	Priority    TaskPriority
-	Status      TaskStatus
+	State       TaskState
 	Deadline    time.Time
 	Schedule    time.Time
 	Wait        time.Time
 	Create      time.Time
 	End         time.Time
+	Tags        []string
 }
 
 type User struct {

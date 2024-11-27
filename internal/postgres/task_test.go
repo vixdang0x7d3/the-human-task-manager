@@ -36,6 +36,7 @@ func TestCreateTask(t *testing.T) {
 			Schedule:    "",
 			Wait:        "",
 			Priority:    "",
+			Tags:        []string{"TAG1", "TAG2", "TAG3"},
 		}
 
 		task, err := s.CreateTask(context.Background(), cmd)
@@ -64,8 +65,12 @@ func TestCreateTask(t *testing.T) {
 			t.Errorf("expected create timestamp")
 		}
 
-		if task.Status != string(sqlc.TaskStatusStarted) {
-			t.Errorf("expected status: %q != %q", task.Status, string(sqlc.TaskStatusStarted))
+		if task.State != string(sqlc.TaskStateStarted) {
+			t.Errorf("expected status: %q != %q", task.State, string(sqlc.TaskStateStarted))
+		}
+
+		if !reflect.DeepEqual(cmd.Tags, task.Tags) {
+			t.Errorf("tags mismatched %#v != %#v", cmd.Tags, task.Tags)
 		}
 	})
 }

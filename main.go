@@ -40,10 +40,10 @@ type Main struct {
 	db     *postgres.DB
 }
 
-func NewMain(addr, dburl string) *Main {
+func NewMain(addr, dsn string) *Main {
 	return &Main{
 		Address: addr,
-		db:      postgres.NewDB(dburl),
+		db:      postgres.NewDB(dsn),
 		server:  http.NewServer(),
 	}
 }

@@ -63,7 +63,7 @@ func NewServer() *Server {
 	}))
 
 	s.echo.GET("/", func(c echo.Context) error {
-		return c.Redirect(http.StatusFound, "/home")
+		return c.Redirect(http.StatusFound, "/index")
 	})
 
 	// registers unauthenticated routes

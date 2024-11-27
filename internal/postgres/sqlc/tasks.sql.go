@@ -13,9 +13,9 @@ import (
 )
 
 const createTask = `-- name: CreateTask :one
-INSERT INTO tasks("id", "user_id", "project_id", "description", "priority", "status", "deadline", "schedule", "wait", "create", "end")
-VALUES ($1, $2, $3,  $4, $10::task_priority, $11::task_status, $5, $6, $7, $8, $9)
-RETURNING id, user_id, project_id, completed_by, description, priority, status, deadline, schedule, wait, "create", "end"
+INSERT INTO tasks("id", "user_id", "project_id", "description", "priority", "state", "deadline", "schedule", "wait", "create", "end", "tags")
+VALUES ($1, $2, $3,  $4, $11::task_priority, $12::task_status, $5, $6, $7, $8, $9, $10)
+RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
 `
 
 type CreateTaskParams struct {
@@ -28,8 +28,9 @@ type CreateTaskParams struct {
 	Wait        time.Time
 	Create      time.Time
 	End         time.Time
+	Tags        []string
 	Priority    TaskPriority
-	Status      TaskStatus
+	Status      interface{}
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error) {
@@ -43,6 +44,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		arg.Wait,
 		arg.Create,
 		arg.End,
+		arg.Tags,
 		arg.Priority,
 		arg.Status,
 	)
@@ -54,12 +56,13 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		&i.CompletedBy,
 		&i.Description,
 		&i.Priority,
-		&i.Status,
+		&i.State,
 		&i.Deadline,
 		&i.Schedule,
 		&i.Wait,
 		&i.Create,
 		&i.End,
+		&i.Tags,
 	)
 	return i, err
 }

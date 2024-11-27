@@ -13,12 +13,13 @@ type Task struct {
 	ProjectID   uuid.UUID
 	Description string
 	Priority    string
-	Status      string
+	State       string
 	Deadline    time.Time
 	Schedule    time.Time
 	Wait        time.Time
 	Create      time.Time
 	End         time.Time
+	Tags        []string
 }
 
 type TaskService interface {
@@ -33,4 +34,5 @@ type CreateTaskCmd struct {
 	Schedule    string
 	Wait        string
 	Priority    string
+	Tags        []string
 }
