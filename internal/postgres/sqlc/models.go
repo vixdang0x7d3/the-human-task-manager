@@ -107,6 +107,11 @@ type Project struct {
 	Title  string
 }
 
+type ProjectMembership struct {
+	UserID    uuid.UUID
+	ProjectID uuid.UUID
+}
+
 type Task struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
@@ -124,20 +129,23 @@ type Task struct {
 }
 
 type TaskItem struct {
-	ID           uuid.UUID
-	Username     string
-	ProjectTitle string
-	CompletedBy  string
-	Description  string
-	Priority     TaskPriority
-	State        TaskState
-	Deadline     time.Time
-	Schedule     time.Time
-	Wait         time.Time
-	Create       time.Time
-	End          time.Time
-	Tags         []string
-	Urgency      pgtype.Numeric
+	ID              uuid.UUID
+	UserID          uuid.UUID
+	Username        string
+	ProjectID       uuid.NullUUID
+	ProjectTitle    string
+	CompletedBy     uuid.NullUUID
+	CompletedByName string
+	Description     string
+	Priority        TaskPriority
+	State           TaskState
+	Deadline        time.Time
+	Schedule        time.Time
+	Wait            time.Time
+	Create          time.Time
+	End             time.Time
+	Tags            []string
+	Urgency         pgtype.Numeric
 }
 
 type User struct {

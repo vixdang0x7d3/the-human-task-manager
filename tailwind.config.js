@@ -2,7 +2,7 @@
 module.exports = {
   content: [
     './internal/http/templates/**/*.templ',
-    './static/**/*.js'
+    './internal/http/assets/**/*.js'
   ],
   theme: {
     extend: {},

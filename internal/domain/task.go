@@ -36,3 +36,12 @@ type CreateTaskCmd struct {
 	Priority    string
 	Tags        []string
 }
+
+type UpdateTaskCmd struct {
+	Description string
+	Deadline    string
+	Schedule    string
+	Wait        string
+	Priority    string
+	Tags        []string
+}

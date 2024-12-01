@@ -12,8 +12,58 @@ import (
 	"github.com/google/uuid"
 )
 
+const completeTask = `-- name: CompleteTask :one
+UPDATE tasks
+SET
+	state = 'completed'::task_state,
+	completed_by = $1,
+	"end" = now()
+WHERE 
+	id = $2
+RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
+`
+
+type CompleteTaskParams struct {
+	UserID uuid.NullUUID
+	ID     uuid.UUID
+}
+
+func (q *Queries) CompleteTask(ctx context.Context, arg CompleteTaskParams) (Task, error) {
+	row := q.db.QueryRow(ctx, completeTask, arg.UserID, arg.ID)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ProjectID,
+		&i.CompletedBy,
+		&i.Description,
+		&i.Priority,
+		&i.State,
+		&i.Deadline,
+		&i.Schedule,
+		&i.Wait,
+		&i.Create,
+		&i.End,
+		&i.Tags,
+	)
+	return i, err
+}
+
 const createTask = `-- name: CreateTask :one
-INSERT INTO tasks("id", "user_id", "project_id", "description", "priority", "state", "deadline", "schedule", "wait", "create", "end", "tags")
+INSERT INTO tasks(
+	"id", 
+	"user_id", 
+	"project_id", 
+	"description", 
+	"priority", 
+	"state", 
+	"deadline", 
+	"schedule", 
+	"wait", 
+	"create", 
+	"end", 
+	"tags"
+)
 VALUES ($1, $2, $3,  $4, $11::task_priority, $12::task_state, $5, $6, $7, $8, $9, $10)
 RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
 `
@@ -47,6 +97,159 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		arg.Tags,
 		arg.Priority,
 		arg.State,
+	)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ProjectID,
+		&i.CompletedBy,
+		&i.Description,
+		&i.Priority,
+		&i.State,
+		&i.Deadline,
+		&i.Schedule,
+		&i.Wait,
+		&i.Create,
+		&i.End,
+		&i.Tags,
+	)
+	return i, err
+}
+
+const deleteTask = `-- name: DeleteTask :one
+UPDATE tasks
+SET
+	state = 'deleted'::task_state
+WHERE
+	id = $1
+RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
+`
+
+func (q *Queries) DeleteTask(ctx context.Context, id uuid.UUID) (Task, error) {
+	row := q.db.QueryRow(ctx, deleteTask, id)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ProjectID,
+		&i.CompletedBy,
+		&i.Description,
+		&i.Priority,
+		&i.State,
+		&i.Deadline,
+		&i.Schedule,
+		&i.Wait,
+		&i.Create,
+		&i.End,
+		&i.Tags,
+	)
+	return i, err
+}
+
+const startWaitingTasks = `-- name: StartWaitingTasks :many
+UPDATE tasks
+SET
+	state = 'started'::task_state
+WHERE 
+	state = 'waiting'::task_state
+AND	wait <= now()
+RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
+`
+
+func (q *Queries) StartWaitingTasks(ctx context.Context) ([]Task, error) {
+	rows, err := q.db.Query(ctx, startWaitingTasks)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Task
+	for rows.Next() {
+		var i Task
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.ProjectID,
+			&i.CompletedBy,
+			&i.Description,
+			&i.Priority,
+			&i.State,
+			&i.Deadline,
+			&i.Schedule,
+			&i.Wait,
+			&i.Create,
+			&i.End,
+			&i.Tags,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const taskByID = `-- name: TaskByID :one
+SELECT id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags FROM tasks
+WHERE id = $1
+`
+
+func (q *Queries) TaskByID(ctx context.Context, id uuid.UUID) (Task, error) {
+	row := q.db.QueryRow(ctx, taskByID, id)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ProjectID,
+		&i.CompletedBy,
+		&i.Description,
+		&i.Priority,
+		&i.State,
+		&i.Deadline,
+		&i.Schedule,
+		&i.Wait,
+		&i.Create,
+		&i.End,
+		&i.Tags,
+	)
+	return i, err
+}
+
+const updateTask = `-- name: UpdateTask :one
+UPDATE tasks
+SET 
+	description = $1,
+	priority = $2::task_priority,
+	deadline = $3,
+	schedule = $4,
+	wait = $5,
+	tags = $6
+WHERE 
+	id = $7
+RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
+`
+
+type UpdateTaskParams struct {
+	Description string
+	Priority    TaskPriority
+	Deadline    time.Time
+	Schedule    time.Time
+	Wait        time.Time
+	Tags        []string
+	ID          uuid.UUID
+}
+
+func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) (Task, error) {
+	row := q.db.QueryRow(ctx, updateTask,
+		arg.Description,
+		arg.Priority,
+		arg.Deadline,
+		arg.Schedule,
+		arg.Wait,
+		arg.Tags,
+		arg.ID,
 	)
 	var i Task
 	err := row.Scan(

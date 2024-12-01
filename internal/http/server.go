@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -68,13 +69,13 @@ func NewServer() *Server {
 
 	// registers unauthenticated routes
 	{
-		r := s.echo.Group("u", requireNoAuth(s.sessions))
+		r := s.echo.Group("u", s.requireNoAuth(s.sessions))
 		s.registerAuthRoutes(r)
 	}
 
 	// registers authenticated routes
 	{
-		r := s.echo.Group("", requireAuth(s.sessions))
+		r := s.echo.Group("", s.requireAuth(s.sessions))
 		s.registerUserRoutes(r)
 	}
 
@@ -115,7 +116,7 @@ func render(ctx echo.Context, code int, t templ.Component) error {
 	return ctx.HTML(code, buf.String())
 }
 
-func requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
+func (s *Server) requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			userID := sessions.GetString(c.Request().Context(), "userID")
@@ -129,18 +130,28 @@ func requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 }
 
 // TODO: implement url memorization
-func requireAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
+func (s *Server) requireAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			userID := sessions.GetString(c.Request().Context(), "userID")
 			if userID == "" {
 				return c.Redirect(http.StatusTemporaryRedirect, "/u/login")
 			}
+
+			user, err := s.UserService.ByID(c.Request().Context(), userID)
+			if err != nil {
+				log.Printf("cannot find session user: id=%q, err=%s", userID, err)
+			} else {
+				r := c.Request().WithContext(domain.NewContextWithUser(c.Request().Context(), &user))
+				c.SetRequest(r)
+			}
+
 			return next(c)
 		}
 	}
 }
 
+// FIX: deprecated
 func (s *Server) userIDFromSession(ctx context.Context) (uuid.UUID, error) {
 	idString := s.sessions.GetString(ctx, "userID")
 	if idString == "" {

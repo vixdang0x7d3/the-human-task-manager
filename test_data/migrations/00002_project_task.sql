@@ -44,7 +44,7 @@ CREATE TABLE tasks (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TYPE task_state CASCADE;
+DROP TYPE task_status CASCADE;
 DROP TYPE task_priority CASCADE;
 DROP TABLE projects CASCADE;
 DROP TABLE tasks CASCADE;

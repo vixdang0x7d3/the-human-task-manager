@@ -7,12 +7,14 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const taskItemByID = `-- name: TaskItemByID :one
-SELECT id, username, project_title, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags, urgency FROM task_items
+SELECT id, user_id, username, project_id, project_title, completed_by, completed_by_name, description, priority, state, deadline, schedule, wait, "create", "end", tags, urgency FROM task_items
 WHERE id=$1
 `
 
@@ -21,9 +23,12 @@ func (q *Queries) TaskItemByID(ctx context.Context, id uuid.UUID) (TaskItem, err
 	var i TaskItem
 	err := row.Scan(
 		&i.ID,
+		&i.UserID,
 		&i.Username,
+		&i.ProjectID,
 		&i.ProjectTitle,
 		&i.CompletedBy,
+		&i.CompletedByName,
 		&i.Description,
 		&i.Priority,
 		&i.State,
@@ -36,4 +41,107 @@ func (q *Queries) TaskItemByID(ctx context.Context, id uuid.UUID) (TaskItem, err
 		&i.Urgency,
 	)
 	return i, err
+}
+
+const taskItemFind = `-- name: TaskItemFind :many
+SELECT t.id, t.user_id, t.username, t.project_id, t.project_title, t.completed_by, t.completed_by_name, t.description, t.priority, t.state, t.deadline, t.schedule, t.wait, t."create", t."end", t.tags, t.urgency, COUNT(*) OVER()
+FROM task_items t
+WHERE t.user_id = $1
+AND (to_tsvector(
+	t.project_title
+	|| ' '
+	|| t.completed_by
+	|| ' ' 
+	|| t.description
+	|| ' '
+	|| array_to_string(tags, ' ')) @@ websearch_to_tsquery($2) OR $2 IS NULL
+)
+AND (t.state = $3::task_state OR $3 IS NULL)
+AND (t.priority = $4::task_priority OR $4 IS NULL)
+AND (
+	   (t.deadline BETWEEN now() AND (now() + $5::interval))
+        OR (t.schedule BETWEEN now() AND (now() + $5::interval))
+        OR (t.wait BETWEEN now() AND (now() + $5::interval))
+	OR $5 IS NULL
+)
+ORDER BY urgency DESC
+LIMIT $7 OFFSET $6
+`
+
+type TaskItemFindParams struct {
+	UserID       uuid.UUID
+	Q            pgtype.Text
+	State        NullTaskState
+	Priority     NullTaskPriority
+	TimeInterval pgtype.Interval
+	Noffset      int32
+	Nlimit       int32
+}
+
+type TaskItemFindRow struct {
+	ID              uuid.UUID
+	UserID          uuid.UUID
+	Username        string
+	ProjectID       uuid.NullUUID
+	ProjectTitle    string
+	CompletedBy     uuid.NullUUID
+	CompletedByName string
+	Description     string
+	Priority        TaskPriority
+	State           TaskState
+	Deadline        time.Time
+	Schedule        time.Time
+	Wait            time.Time
+	Create          time.Time
+	End             time.Time
+	Tags            []string
+	Urgency         pgtype.Numeric
+	Count           int64
+}
+
+func (q *Queries) TaskItemFind(ctx context.Context, arg TaskItemFindParams) ([]TaskItemFindRow, error) {
+	rows, err := q.db.Query(ctx, taskItemFind,
+		arg.UserID,
+		arg.Q,
+		arg.State,
+		arg.Priority,
+		arg.TimeInterval,
+		arg.Noffset,
+		arg.Nlimit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []TaskItemFindRow
+	for rows.Next() {
+		var i TaskItemFindRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Username,
+			&i.ProjectID,
+			&i.ProjectTitle,
+			&i.CompletedBy,
+			&i.CompletedByName,
+			&i.Description,
+			&i.Priority,
+			&i.State,
+			&i.Deadline,
+			&i.Schedule,
+			&i.Wait,
+			&i.Create,
+			&i.End,
+			&i.Tags,
+			&i.Urgency,
+			&i.Count,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

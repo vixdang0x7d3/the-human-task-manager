@@ -8,6 +8,9 @@ import (
 	"testing"
 )
 
+// TODO: unimplemented test cases:
+// ID not found
+// unauthorized access
 func TestTaskItemByID(t *testing.T) {
 
 	db := MustOpenDB(t, context.Background())
@@ -15,16 +18,16 @@ func TestTaskItemByID(t *testing.T) {
 
 	t.Run("OK", func(t *testing.T) {
 		user := MustCreateUser(t, context.Background(), db, domain.CreateUserCmd{
-			Username:  "kingterry",
-			FirstName: "Terry",
-			LastName:  "David",
-			Email:     "kingterry@coolkid.com",
+			Username:  "USERNAME0",
+			FirstName: "FIRSTNAME0",
+			LastName:  "LASTNAME0",
+			Email:     "EMAIL0@email.com",
 			Password:  "fuckthefeds123",
 		})
 		task := MustCreateTask(t, context.Background(), db, domain.CreateTaskCmd{
 			UserID:      user.ID.String(),
 			ProjectID:   "",
-			Description: "build an app",
+			Description: "TESTTASK0",
 			Deadline:    "2024-12-03T07:00",
 			Schedule:    "2024-11-28T13:00",
 			Wait:        "",
@@ -39,6 +42,10 @@ func TestTaskItemByID(t *testing.T) {
 
 		if !reflect.DeepEqual(task.ID, taskItem.ID) {
 			t.Errorf("ID mismatch: %q != %q", task.ID, taskItem.ID)
+		}
+
+		if !reflect.DeepEqual(user.ID, taskItem.UserID) {
+			t.Errorf("UserID mismatch: %q != %q", user.ID, taskItem.UserID)
 		}
 
 		if !reflect.DeepEqual(user.Username, taskItem.Username) {
@@ -68,5 +75,80 @@ func TestTaskItemByID(t *testing.T) {
 		if taskItem.Urgency == 0 {
 			t.Errorf("Expect urgency")
 		}
+
 	})
+}
+
+// TODO: unimplemented test cases:
+// invalid filters
+// days and months <= 0
+// unauthorized access
+// pagination ok
+func TestTaskItemFind(t *testing.T) {
+	db := MustOpenDB(t, context.Background())
+	s := postgres.NewTaskItemService(db)
+
+	t.Run("OK", func(t *testing.T) {
+		user := MustCreateUser(t, context.Background(), db, domain.CreateUserCmd{
+			Username:  "USERNAME1",
+			FirstName: "FIRSTNAME1",
+			LastName:  "LASTNAME1",
+			Email:     "EMAIL1@email.com",
+			Password:  "PASSWORD1",
+		})
+		MustCreateTask(t, context.Background(), db, domain.CreateTaskCmd{
+			UserID:      user.ID.String(),
+			ProjectID:   "",
+			Description: "TESTTASK1",
+			Deadline:    "2024-12-26T07:00",
+			Schedule:    "2024-12-03T07:00",
+			Wait:        "",
+			Priority:    "M",
+			Tags:        []string{"school", "INT10187"},
+		})
+		MustCreateTask(t, context.Background(), db, domain.CreateTaskCmd{
+			UserID:      user.ID.String(),
+			ProjectID:   "",
+			Description: "TESTTASK2",
+			Deadline:    "2024-12-24T07:00",
+			Schedule:    "2024-12-06T07:00",
+			Wait:        "",
+			Priority:    "M",
+			Tags:        []string{"school", "INT10111"},
+		})
+		MustCreateTask(t, context.Background(), db, domain.CreateTaskCmd{
+			UserID:      user.ID.String(),
+			ProjectID:   "",
+			Description: "TESTTASK3",
+			Deadline:    "2024-12-19T07:00",
+			Schedule:    "2024-12-01T13:00",
+			Wait:        "",
+			Priority:    "L",
+			Tags:        []string{"school", "INT10112"},
+		})
+
+		taskItems, n, err := s.TaskItemFind(
+			domain.NewContextWithUser(context.Background(), &user),
+			domain.TaskItemFilter{
+				Limit:  10,
+				Offset: 0,
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if n != 3 {
+			t.Errorf("mismatch task number returned: %d != %d", 3, len(taskItems))
+		}
+	})
+}
+
+func MustTaskItemByID(tb testing.TB, ctx context.Context, db *postgres.DB, id string) domain.TaskItem {
+	tb.Helper()
+	taskItem, err := postgres.NewTaskItemService(db).TaskItemByID(ctx, id)
+	if err != nil {
+		tb.Fatal(err)
+	}
+	return taskItem
 }

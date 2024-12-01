@@ -7,20 +7,23 @@ import (
 )
 
 type TaskItem struct {
-	ID           uuid.UUID
-	Username     string
-	ProjectTitle string
-	CompletedBy  string
-	Description  string
-	Priority     string
-	State        string
-	Deadline     time.Time
-	Schedule     time.Time
-	Wait         time.Time
-	Create       time.Time
-	End          time.Time
-	Tags         []string
-	Urgency      float64
+	ID              uuid.UUID
+	UserID          uuid.UUID
+	Username        string
+	ProjectID       uuid.UUID
+	ProjectTitle    string
+	CompletedBy     uuid.UUID
+	CompletedByName string
+	Description     string
+	Priority        string
+	State           string
+	Deadline        time.Time
+	Schedule        time.Time
+	Wait            time.Time
+	Create          time.Time
+	End             time.Time
+	Tags            []string
+	Urgency         float64
 }
 
 type TaskItemService interface {
@@ -28,9 +31,11 @@ type TaskItemService interface {
 }
 
 type TaskItemFilter struct {
-	Search     *string
-	Status     *string
-	TimePeriod *string
+	Q        *string
+	State    *string
+	Priority *string
+	Days     *int64
+	Months   *int64
 
 	Offset int
 	Limit  int

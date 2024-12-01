@@ -124,9 +124,12 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE VIEW task_items AS
 SELECT
 	t.id,
+	t.user_id,
 	coalesce(u.username, '') AS username,
+	t.project_id,
 	coalesce(p.title, '') AS project_title,
-	coalesce(c.username, '') AS completed_by,
+	t.completed_by AS completed_by,
+	coalesce(c.username, '') AS completed_by_name,
 	t.description,
 	t.priority,
 	t.state,
