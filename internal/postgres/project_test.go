@@ -45,3 +45,86 @@ func TestCreateProject(t *testing.T) {
 		}
 	})
 }
+
+func TestProjectByID(t *testing.T) {
+	db := MustOpenDB(t, context.Background())
+	defer CloseDB(t, db)
+
+	s := postgres.NewProjectService(db)
+
+	t.Run("OK", func(t *testing.T) {
+		user := MustCreateUser(t, context.Background(), db, domain.CreateUserCmd{
+			Username:  "USERNAME8",
+			FirstName: "FIRSTNAME8",
+			LastName:  "LASTNAME8",
+			Email:     "EMAIL8@email.com",
+		})
+
+		project := MustCreateProject(
+			t,
+			domain.NewContextWithUser(context.Background(), &user),
+			db, "test project for search by id",
+		)
+
+		got, err := s.ProjectByID(context.Background(), project.ID.String())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if got.Title != project.Title {
+			t.Errorf("title mismatched: %q != %q", got.Title, project.Title)
+		}
+	})
+}
+
+func TestDeleteProject(t *testing.T) {
+	db := MustOpenDB(t, context.Background())
+	defer CloseDB(t, db)
+
+	s := postgres.NewProjectService(db)
+
+	t.Run("OK", func(t *testing.T) {
+		user := MustCreateUser(t, context.Background(), db, domain.CreateUserCmd{
+			Username:  "USERNAME9",
+			FirstName: "FIRSTNAME9",
+			LastName:  "LASTNAME9",
+			Email:     "EMAIL9@email.com",
+		})
+
+		project := MustCreateProject(
+			t,
+			domain.NewContextWithUser(context.Background(), &user),
+			db,
+			"test project for search by id",
+		)
+
+		deleted, err := s.DeleteProject(
+			domain.NewContextWithUser(context.Background(), &user),
+			project.ID.String(),
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if !reflect.DeepEqual(deleted.ID, project.ID) {
+			t.Errorf("deleted project ID mismatch: %q != %q", deleted.ID, project.ID)
+		}
+
+		_, err = s.ProjectByID(context.Background(), project.ID.String())
+		if err == nil {
+			t.Errorf("expected not found error")
+		} else if domain.ErrorCode(err) != domain.ENOTFOUND ||
+			domain.ErrorMessage(err) != "project ID not found" {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+}
+
+func MustCreateProject(tb testing.TB, ctx context.Context, db *postgres.DB, title string) domain.Project {
+	tb.Helper()
+	project, err := postgres.NewProjectService(db).CreateProject(ctx, title)
+	if err != nil {
+		tb.Fatal(err)
+	}
+	return project
+}

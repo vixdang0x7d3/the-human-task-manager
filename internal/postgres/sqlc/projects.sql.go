@@ -29,3 +29,28 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 	err := row.Scan(&i.ID, &i.UserID, &i.Title)
 	return i, err
 }
+
+const deleteProject = `-- name: DeleteProject :one
+DELETE FROM projects
+WHERE id = $1
+RETURNING id, user_id, title
+`
+
+func (q *Queries) DeleteProject(ctx context.Context, id uuid.UUID) (Project, error) {
+	row := q.db.QueryRow(ctx, deleteProject, id)
+	var i Project
+	err := row.Scan(&i.ID, &i.UserID, &i.Title)
+	return i, err
+}
+
+const projectByID = `-- name: ProjectByID :one
+SELECT id, user_id, title FROM projects
+WHERE id = $1
+`
+
+func (q *Queries) ProjectByID(ctx context.Context, id uuid.UUID) (Project, error) {
+	row := q.db.QueryRow(ctx, projectByID, id)
+	var i Project
+	err := row.Scan(&i.ID, &i.UserID, &i.Title)
+	return i, err
+}

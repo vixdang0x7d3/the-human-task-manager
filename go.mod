@@ -10,6 +10,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/ory/dockertest/v3 v3.11.0
+	github.com/paulmach/orb v0.11.1
 	github.com/pressly/goose/v3 v3.23.0
 	github.com/spazzymoto/echo-scs-session v1.0.0
 	golang.org/x/crypto v0.28.0
