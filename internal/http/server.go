@@ -3,7 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
-	"log/slog"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -14,10 +14,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
+	"github.com/sirupsen/logrus"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/assets"
 
-	slogecho "github.com/samber/slog-echo"
 	session "github.com/spazzymoto/echo-scs-session"
 )
 
@@ -32,17 +33,27 @@ type Server struct {
 	TaskService domain.TaskService
 }
 
-func NewServer() *Server {
+func NewServer(logger *logrus.Logger) *Server {
 	s := &Server{
 		echo:     echo.New(),
 		sessions: scs.New(),
 	}
 
+	customLogger := customLogger{Logger: logger}
+
+	s.echo.Logger = customLogger
+
+	s.echo.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: `[${time_custom}] ${status} ${method} ${uri} ${latency_human}` + "\n" +
+			`    Remote IP: ${remote_ip}` + "\n" +
+			`    Host: ${host}` + "\n" +
+			`    User Agent: ${user_agent}` + "\n" +
+			`    Error: "${error}"` + "\n",
+		CustomTimeFormat: "2006-01-02 15:04:05",
+		Output:           os.Stdout,
+	}))
+
 	s.echo.Validator = &customValidator{Validator: validator.New()}
-
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-
-	s.echo.Use(slogecho.New(logger))
 
 	s.echo.Use(middleware.Recover())
 
@@ -68,13 +79,13 @@ func NewServer() *Server {
 
 	// registers unauthenticated routes
 	{
-		r := s.echo.Group("u", requireNoAuth(s.sessions))
+		r := s.echo.Group("u", s.requireNoAuth(s.sessions))
 		s.registerAuthRoutes(r)
 	}
 
 	// registers authenticated routes
 	{
-		r := s.echo.Group("", requireAuth(s.sessions))
+		r := s.echo.Group("", s.requireAuth(s.sessions))
 		s.registerUserRoutes(r)
 	}
 
@@ -115,7 +126,7 @@ func render(ctx echo.Context, code int, t templ.Component) error {
 	return ctx.HTML(code, buf.String())
 }
 
-func requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
+func (s *Server) requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			userID := sessions.GetString(c.Request().Context(), "userID")
@@ -129,18 +140,28 @@ func requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 }
 
 // TODO: implement url memorization
-func requireAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
+func (s *Server) requireAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			userID := sessions.GetString(c.Request().Context(), "userID")
 			if userID == "" {
 				return c.Redirect(http.StatusTemporaryRedirect, "/u/login")
 			}
+
+			user, err := s.UserService.ByID(c.Request().Context(), userID)
+			if err != nil {
+				log.Printf("cannot find session user: id=%q, err=%s", userID, err)
+			} else {
+				r := c.Request().WithContext(domain.NewContextWithUser(c.Request().Context(), &user))
+				c.SetRequest(r)
+			}
+
 			return next(c)
 		}
 	}
 }
 
+// FIX: deprecated
 func (s *Server) userIDFromSession(ctx context.Context) (uuid.UUID, error) {
 	idString := s.sessions.GetString(ctx, "userID")
 	if idString == "" {
@@ -165,3 +186,66 @@ func (cv *customValidator) Validate(i interface{}) error {
 	}
 	return nil
 }
+
+type customLogger struct {
+	*logrus.Logger
+}
+
+// Level returns logger level
+func (l customLogger) Level() log.Lvl {
+	switch l.Logger.Level {
+	case logrus.DebugLevel:
+		return log.DEBUG
+	case logrus.InfoLevel:
+		return log.INFO
+	case logrus.WarnLevel:
+		return log.WARN
+	case logrus.ErrorLevel:
+		return log.ERROR
+	default:
+		return log.OFF
+	}
+}
+
+func (l customLogger) SetHeader(_ string) {}
+
+func (l customLogger) SetPrefix(_ string) {}
+
+func (l customLogger) Prefix() string {
+	return ""
+}
+
+func (l customLogger) SetLevel(lvl log.Lvl) {
+	switch lvl {
+	case log.DEBUG:
+		l.Logger.SetLevel(logrus.DebugLevel)
+	case log.INFO:
+		l.Logger.SetLevel(logrus.InfoLevel)
+	case log.WARN:
+		l.Logger.SetLevel(logrus.WarnLevel)
+	case log.ERROR:
+		l.Logger.SetLevel(logrus.ErrorLevel)
+	}
+}
+
+func (l customLogger) Output() io.Writer {
+	return l.Logger.Out
+}
+
+func (l customLogger) SetOutput(w io.Writer) {
+	l.Logger.SetOutput(w)
+}
+
+func (l customLogger) Printj(j log.JSON) {}
+
+func (l customLogger) Debugj(j log.JSON) {}
+
+func (l customLogger) Errorj(j log.JSON) {}
+
+func (l customLogger) Fatalj(j log.JSON) {}
+
+func (l customLogger) Infoj(j log.JSON) {}
+
+func (l customLogger) Panicj(j log.JSON) { panic("not implemented") }
+
+func (l customLogger) Warnj(j log.JSON) {}

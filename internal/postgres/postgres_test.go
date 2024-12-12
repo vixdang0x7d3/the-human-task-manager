@@ -13,7 +13,7 @@ import (
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/pressly/goose/v3"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/postgres"
-	"github.com/vixdang0x7d3/the-human-task-manager/sql/migrations"
+	"github.com/vixdang0x7d3/the-human-task-manager/test_data/migrations"
 )
 
 var dsn string

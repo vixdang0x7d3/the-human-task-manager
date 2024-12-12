@@ -20,13 +20,13 @@ func (s *Server) registerAuthRoutes(r *echo.Group) {
 	r.GET("/calendar", s.handleCalendarShow)
 
 	r.POST("/signup", s.handleSignup)
-	r.POST("/login-email", s.handleLoginEmail)
-	r.POST("/login-password", s.handleLoginPassword)
-	r.GET("/login-success", s.handleLoginSuccess)
+	r.POST("/login/email", s.handleLoginEmail)
+	r.POST("/login/password", s.handleLoginPassword)
+	r.GET("/login/success", s.handleLoginSuccess)
 }
 
 func (s *Server) handleLoginShow(c echo.Context) error {
-	return render(c, http.StatusOK, pages.LoginEmail("/u/login-email", "/u/signup"))
+	return render(c, http.StatusOK, pages.LoginEmail("/u/login/email", "/u/signup"))
 }
 
 func (s *Server) handleSignupShow(c echo.Context) error {
@@ -53,7 +53,7 @@ func (s *Server) handleSignup(c echo.Context) error {
 		return render(c, http.StatusBadRequest, components.AlertError("invalid signup info"))
 	}
 
-	user, err := s.UserService.CreateUser(c.Request().Context(), domain.CreateUserCmd(form))
+	user, err := s.UserService.Create(c.Request().Context(), domain.CreateUserCmd(form))
 	if err != nil {
 		return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
 	}
@@ -97,7 +97,7 @@ func (s *Server) handleLoginEmail(c echo.Context) error {
 		Email:     user.Email,
 	}
 
-	return render(c, http.StatusOK, components.LoginPassword(m, "/u/login-password"))
+	return render(c, http.StatusOK, components.LoginPassword(m, "/u/login/password"))
 }
 
 func (s *Server) handleLoginPassword(c echo.Context) error {
@@ -128,12 +128,9 @@ func (s *Server) handleLoginPassword(c echo.Context) error {
 		log.Println(err)
 		return c.HTML(http.StatusInternalServerError, "internal error")
 	}
-
 	s.sessions.Put(c.Request().Context(), "userID", user.ID.String())
-	s.sessions.Put(c.Request().Context(), "userEmail", user.Email)
-	s.sessions.Put(c.Request().Context(), "userFirstName", user.FirstName)
 
-	return render(c, http.StatusOK, components.LoginAlertRedirect("login successful!", "/u/login-success"))
+	return render(c, http.StatusOK, components.LoginAlertRedirect("login successful!", "/u/login/success"))
 }
 
 func (s *Server) handleLoginSuccess(c echo.Context) error {

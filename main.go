@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/postgres"
 )
@@ -36,15 +37,27 @@ type Main struct {
 	Address string
 
 	// attaching to Main in order to do clean up in Close()
+	logger *logrus.Logger
 	server *http.Server
 	db     *postgres.DB
 }
 
-func NewMain(addr, dburl string) *Main {
+func NewMain(addr, dsn string) *Main {
+
+	logger := logrus.New()
+	logger.SetOutput(os.Stdout)
+	logger.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+		ForceColors:     true,
+		FullTimestamp:   true,
+		PadLevelText:    true,
+	})
+
 	return &Main{
 		Address: addr,
-		db:      postgres.NewDB(dburl),
-		server:  http.NewServer(),
+		db:      postgres.NewDB(dsn),
+		logger:  logger,
+		server:  http.NewServer(logger),
 	}
 }
 
@@ -53,8 +66,8 @@ func (m *Main) Run(ctx context.Context) (err error) {
 		return fmt.Errorf("cannot open db: %w", err)
 	}
 
-	userService := postgres.NewUserService(m.db)
-	taskService := postgres.NewTaskService(m.db)
+	userService := postgres.NewUserService(m.db, m.logger)
+	taskService := postgres.NewTaskService(m.db, m.logger)
 
 	m.server.Addr = m.Address
 	m.server.UserService = userService

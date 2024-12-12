@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	htmhttp "github.com/vixdang0x7d3/the-human-task-manager/internal/http"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/mock"
 )
@@ -20,7 +21,7 @@ type Server struct {
 
 func MustOpenServer(tb testing.TB) *Server {
 
-	s := &Server{Server: htmhttp.NewServer()}
+	s := &Server{Server: htmhttp.NewServer(logrus.New())}
 
 	s.Server.UserService = &s.UserService
 	s.Server.UserService = &s.UserService

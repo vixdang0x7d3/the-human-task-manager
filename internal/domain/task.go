@@ -13,24 +13,37 @@ type Task struct {
 	ProjectID   uuid.UUID
 	Description string
 	Priority    string
-	Status      string
+	State       string
 	Deadline    time.Time
 	Schedule    time.Time
 	Wait        time.Time
 	Create      time.Time
 	End         time.Time
+	Tags        []string
 }
 
 type TaskService interface {
-	CreateTask(ctx context.Context, cmd CreateTaskCmd) (Task, error)
+	Create(ctx context.Context, cmd CreateTaskCmd) (Task, error)
+	Delete(ctx context.Context, id string) (Task, error)
+	Update(ctx context.Context, id string, cmd UpdateTaskCmd) (Task, error)
+	Complete(ctx context.Context, id string) (Task, error)
 }
 
 type CreateTaskCmd struct {
-	UserID      string
 	ProjectID   string
 	Description string
 	Deadline    string
 	Schedule    string
 	Wait        string
 	Priority    string
+	Tags        []string
+}
+
+type UpdateTaskCmd struct {
+	Description string
+	Deadline    string
+	Schedule    string
+	Wait        string
+	Priority    string
+	Tags        []string
 }

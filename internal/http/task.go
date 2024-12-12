@@ -1,6 +1,11 @@
 package http
 
-import "github.com/labstack/echo/v4"
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/pages"
+)
 
 func (s *Server) registerTaskRoutes(r *echo.Group) {
 	r.GET("/tasks", s.handleTaskIndex)
@@ -24,7 +29,8 @@ func (s *Server) handleTaskItem(c echo.Context) error {
 // Data returned by handleTaskDetailShow is
 // shown in Task Update screen
 func (s *Server) handleTaskDetailShow(c echo.Context) error {
-	return nil
+
+	return render(c, http.StatusOK, pages.TaskList("/logout"))
 }
 
 func (s *Server) handleTaskDetailUpdate(c echo.Context) error {

@@ -62,6 +62,6 @@ live/tailwind:
 live: 
 	@air
 
-clean: db-down goose-down
-	rm -rf bin/* tmp/*
+clean: 
+	rm -rf tmp/*
 	

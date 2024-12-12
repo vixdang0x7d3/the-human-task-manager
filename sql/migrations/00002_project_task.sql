@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TYPE task_status AS ENUM (
+CREATE TYPE task_state AS ENUM (
     'started',
     'waiting',
     'completed',
@@ -17,7 +17,6 @@ CREATE TYPE task_priority AS ENUM (
 CREATE TABLE projects (
     "id"        uuid PRIMARY KEY,
     "user_id"   uuid NOT NULL,
-    "parent_id" uuid,
     "title"     varchar(64) NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -30,7 +29,7 @@ CREATE TABLE tasks (
     "completed_by" uuid,
     "description"  text NOT NULL ,
     "priority"     task_priority NOT NULL,
-    "status"       task_status NOT NULL,
+    "state"       task_state NOT NULL,
     "deadline"     timestamptz NOT NULL,
     "schedule"     timestamptz NOT NULL,
     "wait"         timestamptz NOT NULL,

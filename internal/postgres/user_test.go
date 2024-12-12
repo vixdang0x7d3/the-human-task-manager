@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/postgres"
 )
@@ -13,7 +14,7 @@ func TestCreateUser(t *testing.T) {
 		db := MustOpenDB(t, context.Background())
 		defer CloseDB(t, db)
 
-		s := postgres.NewUserService(db)
+		s := postgres.NewUserService(db, logrus.New())
 
 		cmd := domain.CreateUserCmd{
 			Username:  "nhunghongnhung",
@@ -22,7 +23,7 @@ func TestCreateUser(t *testing.T) {
 			Email:     "hongnhungnguyen1304@gmail.com",
 		}
 
-		user, err := s.CreateUser(context.Background(), cmd)
+		user, err := s.Create(context.Background(), cmd)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -56,9 +57,9 @@ func TestCreateUser(t *testing.T) {
 		db := MustOpenDB(t, context.Background())
 		defer CloseDB(t, db)
 
-		s := postgres.NewUserService(db)
+		s := postgres.NewUserService(db, logrus.New())
 
-		_, err := s.CreateUser(context.Background(), domain.CreateUserCmd{
+		_, err := s.Create(context.Background(), domain.CreateUserCmd{
 			Username:  "USERNAME",
 			FirstName: "FIRSTNAME",
 			LastName:  "LASTNAME",
@@ -69,7 +70,7 @@ func TestCreateUser(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		user, err := s.CreateUser(context.Background(), domain.CreateUserCmd{
+		user, err := s.Create(context.Background(), domain.CreateUserCmd{
 			Username:  "USERNAME",
 			FirstName: "FIRSTNAME",
 			LastName:  "LASTNAME",
@@ -105,9 +106,9 @@ func TestByEmailWithPassword(t *testing.T) {
 		Password: "secretpassword",
 	}
 
-	s := postgres.NewUserService(db)
+	s := postgres.NewUserService(db, logrus.New())
 
-	_, err := s.CreateUser(context.Background(), arg)
+	_, err := s.Create(context.Background(), arg)
 	if err != nil {
 		t.Fatalf("unexpected error: %#v", err)
 	}
@@ -147,7 +148,7 @@ func TestByEmailWithPassword(t *testing.T) {
 
 func MustCreateUser(tb testing.TB, ctx context.Context, db *postgres.DB, cmd domain.CreateUserCmd) domain.User {
 	tb.Helper()
-	user, err := postgres.NewUserService(db).CreateUser(ctx, cmd)
+	user, err := postgres.NewUserService(db, logrus.New()).Create(ctx, cmd)
 	if err != nil {
 		tb.Fatal(err)
 	}

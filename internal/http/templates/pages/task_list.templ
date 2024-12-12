@@ -2,11 +2,11 @@ package pages
 
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 
-templ Tasklist(postURL string) {
+templ TaskList(logoutURL string) {
 	@templates.Boilerplate() {
 		@templates.Head("Task List")
 		<body>
-			@templates.Navbar(postURL)
+			@templates.Navbar(logoutURL)
 			<div class="flex items-center justify-center py-4">
 				<div class="flex flex-col w-10/12">
 					<div class="flex justify-between items-center px-4 py-2 bg-base-100">
