@@ -89,6 +89,12 @@ func NewServer(logger *logrus.Logger) *Server {
 		s.registerUserRoutes(r)
 	}
 
+	// registers authenticated routes
+	{
+		r := s.echo.Group("", requireAuth(s.sessions))
+		s.registerCalendarRoutes(r)
+	}
+
 	return s
 }
 

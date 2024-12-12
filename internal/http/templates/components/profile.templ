@@ -1,0 +1,44 @@
+package components
+
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+
+templ ChangeInfoForm(m models.UserView, postURL string) {
+	<div id="user-info" class="w-full text-left py-2">
+		<form hx-post={ string(templ.URL(postURL)) } hx-target="#user-info" hx-swap="outerHTML">
+			<label class="form-control w-full max-w-xs">
+				<div class="label">
+					<span class="label-text">Username</span>
+				</div>
+				<label id="username-label" class="input input-sm w-full input-bordered flex items-center gap-2">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
+						class="h-4 w-4 opacity-70">
+						<path
+							d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
+					</svg>
+					<input id="username" name="username" type="text" class="grow" value={ m.Username } />
+				</label>
+			</label>
+			<div class="flex flex-row gap-6">
+				<label class="form-control w-full max-w-xs">
+					<div class="label">
+						<span class="label-text">First Name</span>
+					</div>
+					<input id="firstname" name="username" type="text"
+						class="grow input input-bordered input-sm w-full max-w-xs" value={ m.FirstName } />
+				</label>
+				<label class="form-control w-full max-w-xs">
+					<div class="label">
+						<span class="label-text">Last Name</span>
+					</div>
+					<input id="lastname" name="username" type="text"
+						class="grow input input-bordered input-sm w-full max-w-xs" value={ m.LastName } />
+				</label>
+			</div>
+			<div class="card-actions justify-end">
+				<button type="submit" id="save-info" class="btn btn-sm btn-neutral mt-4">
+					Save
+				</button>
+			</div>
+		</form>
+	</div>
+}

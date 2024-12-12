@@ -3,7 +3,7 @@ package pages
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 
-script drawCalendar(data []models.TaskView) {
+script drawCalendar(data []models.Calendar) {
     const calendarEl = document.getElementById('calendar');
 
     const events = data;
@@ -17,14 +17,14 @@ script drawCalendar(data []models.TaskView) {
         },
         events: events.map(event => ({
             title: event.Title,
-            start: event.Schedule
+            start: event.StartAt
         }))
     });
 
     calendar.render();
 }
 
-templ Calendar(tasklist []models.TaskView, logoutURL string) {
+templ Calendar(tasklist []models.Calendar, logoutURL string) {
     @templates.Boilerplate(){
         <head>
             <script src="https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js"></script>

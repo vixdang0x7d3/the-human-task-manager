@@ -11,10 +11,10 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 
-func drawCalendar(data []models.TaskView) templ.ComponentScript {
+func drawCalendar(data []models.Calendar) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_drawCalendar_9c97`,
-		Function: `function __templ_drawCalendar_9c97(data){const calendarEl = document.getElementById('calendar');
+		Name: `__templ_drawCalendar_c2e2`,
+		Function: `function __templ_drawCalendar_c2e2(data){const calendarEl = document.getElementById('calendar');
 
     const events = data;
 
@@ -27,18 +27,18 @@ func drawCalendar(data []models.TaskView) templ.ComponentScript {
         },
         events: events.map(event => ({
             title: event.Title,
-            start: event.Schedule
+            start: event.StartAt
         }))
     });
 
     calendar.render();
 }`,
-		Call:       templ.SafeScript(`__templ_drawCalendar_9c97`, data),
-		CallInline: templ.SafeScriptInline(`__templ_drawCalendar_9c97`, data),
+		Call:       templ.SafeScript(`__templ_drawCalendar_c2e2`, data),
+		CallInline: templ.SafeScriptInline(`__templ_drawCalendar_c2e2`, data),
 	}
 }
 
-func Calendar(tasklist []models.TaskView, logoutURL string) templ.Component {
+func Calendar(tasklist []models.Calendar, logoutURL string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

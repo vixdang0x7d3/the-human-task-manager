@@ -116,7 +116,11 @@ func Navbar(logoutURL string) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+<<<<<<< Updated upstream
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"navbar bg-base-100\"><div class=\"flex-1\"><a class=\"btn btn-ghost text-xl\" href=\"/home\" title=\"Home\">Human Task Manager</a><!-- return index --></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1\"><li><a href=\"#!\" title=\"Coming soon! UwU\">PROJECT</a></li><li><details><summary>PERSONAL</summary><ul class=\"bg-base-100 rounded-t-none p-2\"><li><a href=\"/tasklist\" title=\"Task List\">Task List</a></li><li><a href=\"#!\" title=\"Calender\">Calender</a></li><li><a href=\"#!\" title=\"Track Time\">Track Time</a></li><li><a href=\"#!\" title=\"Statitics\">Statitics</a></li></ul></details></li><li><a href=\"/profile\" title=\"Your Profile\">PROFILE</a></li><li><a href=\"/home\" title=\"Home\">HOME</a></li><!-- return index --><li><a title=\"Logout\" hx-delete=\"")
+=======
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"navbar bg-base-100 \"><div class=\"flex-1\"><a class=\"btn btn-ghost text-xl\" href=\"/index\" title=\"Home\">Human Task Manager</a><!-- return index --></div><div class=\"flex-none z-40\"><ul class=\"menu menu-horizontal px-1\"><li><a href=\"#!\" title=\"Coming soon! UwU\">PROJECT</a></li><li><details><summary>PERSONAL</summary><ul class=\"bg-base-100 -z-0 rounded-t-none p-2\"><li><a href=\"/tasklist\" title=\"Task List\">Task List</a></li><li><a href=\"/calendar\" title=\"Calender\">Calender</a></li><li><a href=\"#!\" title=\"Track Time\">Track Time</a></li><li><a href=\"#!\" title=\"Statitics\">Statitics</a></li></ul></details></li><li><a href=\"/profile\" title=\"Your Profile\">PROFILE</a></li><li><a href=\"/index\" title=\"Home\">HOME</a></li><!-- return index --><li><a title=\"Logout\" hx-delete=\"")
+>>>>>>> Stashed changes
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
