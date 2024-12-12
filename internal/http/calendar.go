@@ -14,14 +14,14 @@ func (s *Server) registerCalendarRoutes(r *echo.Group) {
 
 func (s *Server) handleCalendarShow(c echo.Context) error {
 
-	m := []models.Calendar{
+	m := []models.TaskView{
 		{
-			Title:   "task 1",
-			StartAt: "2024-11-26",
+			Title:    "task 1",
+			Schedule: "2024-11-26",
 		},
 		{
-			Title:   "task 2",
-			StartAt: "2024-11-28",
+			Title:    "task 2",
+			Schedule: "2024-11-28",
 		},
 	}
 

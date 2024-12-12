@@ -32,7 +32,7 @@ func (s *ProjectMembershipService) AcceptInvitation(
 	if userID == nil {
 		return domain.ProjectMembership{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "AcceptInvitation: no user ID in context",
 		}
 	}
 	cmd.UserID = (*userID).String()
@@ -61,7 +61,7 @@ func (s *ProjectMembershipService) AcceptRequest(
 	if userID == nil {
 		return domain.ProjectMembership{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "No user ID in context",
+			Message: "AcceptRequest: No user ID in context",
 		}
 	}
 
@@ -96,7 +96,7 @@ func (s *ProjectMembershipService) Invite(
 	if userID == nil {
 		return domain.ProjectMembership{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "Invite: no user ID in context",
 		}
 	}
 
@@ -108,7 +108,7 @@ func (s *ProjectMembershipService) Invite(
 	if project.UserID != *userID {
 		return domain.ProjectMembership{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "unauthorized invite, not project owner",
+			Message: "Invite: unauthorized invite, not project owner",
 		}
 	}
 
@@ -136,7 +136,7 @@ func (s *ProjectMembershipService) Request(
 	if userID == nil {
 		return domain.ProjectMembership{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "Request: no user ID in context",
 		}
 	}
 	cmd.UserID = (*userID).String()
@@ -149,7 +149,7 @@ func (s *ProjectMembershipService) Request(
 	if project.UserID == *userID {
 		return domain.ProjectMembership{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "cannot request membership, is owner",
+			Message: "Request: cannot request membership, is owner",
 		}
 	}
 
@@ -178,7 +178,7 @@ func (s *ProjectMembershipService) Delete(
 	if userID == nil {
 		return domain.ProjectMembership{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "Delete: no user ID in context",
 		}
 	}
 
@@ -193,12 +193,12 @@ func (s *ProjectMembershipService) Delete(
 		if memberID, err := uuid.Parse(cmd.UserID); err != nil {
 			return domain.ProjectMembership{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted user ID",
+				Message: "Delete: corrupted user ID",
 			}
 		} else if *userID == memberID {
 			return domain.ProjectMembership{}, &domain.Error{
 				Code:    domain.ECONFLICT,
-				Message: "cannot delete membership, user is project owner",
+				Message: "Delete: cannot delete membership, user is project owner",
 			}
 		}
 
@@ -276,7 +276,7 @@ func acceptMembershipInvitation(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted user ID",
+			Message: "acceptMembershipInvitation: corrupted user ID",
 		}
 	}
 
@@ -284,7 +284,7 @@ func acceptMembershipInvitation(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted project ID",
+			Message: "acceptMembershipInvitation: corrupted project ID",
 		}
 	}
 
@@ -309,7 +309,7 @@ func acceptMembershipRequest(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted user ID",
+			Message: "acceptMembershipRequest: corrupted user ID",
 		}
 	}
 
@@ -317,7 +317,7 @@ func acceptMembershipRequest(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted project ID",
+			Message: "acceptMembershipRequest: corrupted project ID",
 		}
 	}
 
@@ -342,7 +342,7 @@ func inviteMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted user ID of project guest",
+			Message: "inviteMembership: corrupted user ID of project guest",
 		}
 	}
 
@@ -350,7 +350,7 @@ func inviteMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted project ID",
+			Message: "inviteMembership: corrupted project ID",
 		}
 	}
 
@@ -376,7 +376,7 @@ func requestMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted user ID",
+			Message: "requestMembership: corrupted user ID",
 		}
 	}
 
@@ -384,7 +384,7 @@ func requestMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted project ID",
+			Message: "requestMembership: corrupted project ID",
 		}
 	}
 
@@ -413,7 +413,7 @@ func createOwnerMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted user ID",
+			Message: "createOwnerMembership: corrupted user ID",
 		}
 	}
 
@@ -421,7 +421,7 @@ func createOwnerMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted project ID",
+			Message: "createOwnerMembership: corrupted project ID",
 		}
 	}
 
@@ -447,7 +447,7 @@ func deleteMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted user ID",
+			Message: "deleteMembership: corrupted user ID",
 		}
 	}
 
@@ -455,7 +455,7 @@ func deleteMembership(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted project ID",
+			Message: "deleteMembership: corrupted project ID",
 		}
 	}
 
@@ -480,7 +480,7 @@ func findMembershipsByUserID(
 	if userID == nil {
 		return []sqlc.MembershipsByUserIDRow{}, 0, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "findMembershipsByUserID: no user ID in context",
 		}
 	}
 
@@ -496,7 +496,7 @@ func findMembershipsByUserID(
 	if len(rows) == 0 {
 		return []sqlc.MembershipsByUserIDRow{}, 0, &domain.Error{
 			Code:    domain.ENOTFOUND,
-			Message: "no memberships found",
+			Message: "findMembershipsByUserID: no memberships found",
 		}
 	}
 
@@ -513,7 +513,7 @@ func findMembershipsByProjectID(
 	if userID == nil {
 		return []sqlc.MembershipsByProjectIDRow{}, 0, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "findMembershipByProjectID: no user ID in context",
 		}
 	}
 
@@ -523,13 +523,13 @@ func findMembershipsByProjectID(
 	}); err != nil {
 		return []sqlc.MembershipsByProjectIDRow{}, 0, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "unauthorized access, not a project member",
+			Message: "findMembershipsByProjectID: unauthorized access, not a project member",
 		}
 
 	} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
 		return []sqlc.MembershipsByProjectIDRow{}, 0, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "unauthorized access, not a project member yet",
+			Message: "findMembershipsByProjectID: unauthorized access, not a project member yet",
 		}
 	}
 
@@ -550,7 +550,7 @@ func findMembershipsByProjectID(
 	if len(rows) == 0 {
 		return []sqlc.MembershipsByProjectIDRow{}, 0, &domain.Error{
 			Code:    domain.ENOTFOUND,
-			Message: "no memberships found",
+			Message: "findMembershipsByProjectID: no memberships found",
 		}
 	}
 
@@ -567,7 +567,7 @@ func membershipByIDs(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted user ID",
+			Message: "membershipByIDs: corrupted user ID",
 		}
 	}
 
@@ -575,7 +575,7 @@ func membershipByIDs(
 	if err != nil {
 		return sqlc.ProjectMembership{}, &domain.Error{
 			Code:    domain.EINVALID,
-			Message: "corrupted project ID",
+			Message: "membershipByIDs: corrupted project ID",
 		}
 	}
 

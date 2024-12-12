@@ -238,7 +238,8 @@ func TestDeleteMembership(t *testing.T) {
 			Limit:     10,
 		}); err == nil {
 			t.Errorf("expected not found error")
-		} else if domain.ErrorCode(err) != domain.ENOTFOUND || domain.ErrorMessage(err) != `no memberships found` {
+		} else if domain.ErrorCode(err) != domain.ENOTFOUND ||
+			domain.ErrorMessage(err) != `findMembershipsByUserID: no memberships found` {
 			t.Errorf("unexpected error: %v", err)
 		}
 	})

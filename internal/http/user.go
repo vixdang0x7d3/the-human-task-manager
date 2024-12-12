@@ -19,13 +19,14 @@ func (s *Server) registerUserRoutes(r *echo.Group) {
 
 func (s *Server) handleIndexShow(c echo.Context) error {
 
-	sessionFirstName := s.sessions.GetString(c.Request().Context(), "userFirstName")
-	if sessionFirstName == "" {
-		return c.HTML(http.StatusUnauthorized, "unauthorized user")
+	user := domain.UserFromContext(c.Request().Context())
+	if user == nil {
+		c.Logger().Error("no user in current session")
+		return echo.NewHTTPError(http.StatusBadRequest, "no user in login session")
 	}
 
 	m := models.UserView{
-		FirstName: sessionFirstName,
+		FirstName: user.FirstName,
 	}
 
 	return render(c, http.StatusOK, pages.Index(m, "/logout"))
@@ -33,13 +34,7 @@ func (s *Server) handleIndexShow(c echo.Context) error {
 
 func (s *Server) handleProfileShow(c echo.Context) error {
 
-	id := s.sessions.GetString(c.Request().Context(), "userID")
-
-	user, err := s.UserService.ByID(c.Request().Context(), id)
-	if err != nil {
-		log.Println(err)
-		c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
-	}
+	user := domain.UserFromContext(c.Request().Context())
 
 	m := models.UserView{
 		Username:  user.Username,

@@ -80,7 +80,8 @@ func TestCreateUser(t *testing.T) {
 		_ = user
 		if err == nil {
 			t.Error("expected error, not found")
-		} else if domain.ErrorCode(err) != domain.ECONFLICT || domain.ErrorMessage(err) != `this email exists` {
+		} else if domain.ErrorCode(err) != domain.ECONFLICT ||
+			domain.ErrorMessage(err) != `createUser: this email exists` {
 			t.Errorf(`unexpected error: %#v`, err)
 		}
 	})
@@ -92,7 +93,7 @@ func TestByEmail(t *testing.T) {
 	t.Skip("no test")
 }
 
-func TestByEmailWithPassword(t *testing.T) {
+func TestUserByEmailWithPassword(t *testing.T) {
 
 	db := MustOpenDB(t, context.Background())
 	defer CloseDB(t, db)
@@ -130,7 +131,8 @@ func TestByEmailWithPassword(t *testing.T) {
 		_, err := s.ByEmailWithPassword(context.Background(), "invalid@email.com", "notimportant")
 		if err == nil {
 			t.Error("expected error, not found")
-		} else if domain.ErrorCode(err) != domain.ENOTFOUND || domain.ErrorMessage(err) != `email not found` {
+		} else if domain.ErrorCode(err) != domain.ENOTFOUND ||
+			domain.ErrorMessage(err) != `userByEmailWithPassword: email not found` {
 			t.Errorf("unexpected error: %#v", err)
 		}
 
@@ -140,7 +142,9 @@ func TestByEmailWithPassword(t *testing.T) {
 		_, err := s.ByEmailWithPassword(context.Background(), arg.Email, "wrongpassword")
 		if err == nil {
 			t.Error("expected error, not found")
-		} else if domain.ErrorCode(err) != domain.EUNAUTHORIZED || domain.ErrorMessage(err) != `wrong password` {
+		} else if domain.ErrorCode(err) != domain.EUNAUTHORIZED ||
+			domain.ErrorMessage(err) != `userByEmailWithPassword: wrong password` {
+
 			t.Errorf("unexpected error: %#v", err)
 		}
 	})

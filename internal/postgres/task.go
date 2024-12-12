@@ -58,7 +58,7 @@ func (s *TaskService) Update(ctx context.Context, id string, cmd domain.UpdateTa
 	if userID == nil {
 		return domain.Task{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "Update: no user ID in context",
 		}
 	}
 
@@ -74,19 +74,19 @@ func (s *TaskService) Update(ctx context.Context, id string, cmd domain.UpdateTa
 		}); err != nil {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized update, no association with this task",
+				Message: "Update: unauthorized update, no association with this task",
 			}
 		} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized update, unaccepted association with this task",
+				Message: "Update: unauthorized update, unaccepted association with this task",
 			}
 		}
 	} else {
 		if *userID != task.UserID {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized update, not task owner",
+				Message: "Update: unauthorized update, not task owner",
 			}
 		}
 	}
@@ -112,7 +112,7 @@ func (s *TaskService) Complete(ctx context.Context, id string) (domain.Task, err
 	if userID == nil {
 		return domain.Task{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "Complete: no user ID in context",
 		}
 	}
 
@@ -128,19 +128,19 @@ func (s *TaskService) Complete(ctx context.Context, id string) (domain.Task, err
 		}); err != nil {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized update, no association with this task",
+				Message: "Complete: unauthorized update, no association with this task",
 			}
 		} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized update, unaccepted association with this task",
+				Message: "Complete: unauthorized update, unaccepted association with this task",
 			}
 		}
 	} else {
 		if *userID != task.UserID {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized update, not task owner",
+				Message: "Complete: unauthorized update, not task owner",
 			}
 		}
 	}
@@ -170,7 +170,7 @@ func (s *TaskService) Delete(ctx context.Context, id string) (domain.Task, error
 	if userID == nil {
 		return domain.Task{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "Delete: no user ID in context",
 		}
 	}
 
@@ -186,19 +186,19 @@ func (s *TaskService) Delete(ctx context.Context, id string) (domain.Task, error
 		}); err != nil {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized delete, no association with this task",
+				Message: "Delete: unauthorized delete, no association with this task",
 			}
 		} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized delete, unaccepted association with this task",
+				Message: "Delete: unauthorized delete, unaccepted association with this task",
 			}
 		}
 	} else {
 		if *userID != task.UserID {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized delete, not task owner",
+				Message: "Delete: unauthorized delete, not task owner",
 			}
 		}
 	}
@@ -225,7 +225,7 @@ func (s *TaskService) SetProject(ctx context.Context, id string, projectID *stri
 	if userID == nil {
 		return domain.Task{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "SetProject: no user ID in context",
 		}
 	}
 
@@ -241,19 +241,19 @@ func (s *TaskService) SetProject(ctx context.Context, id string, projectID *stri
 		}); err != nil {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized delete, no association with this task",
+				Message: "SetProject: unauthorized delete, no association with this task",
 			}
 		} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized delete, unaccepted association with this task",
+				Message: "SetProject: unauthorized delete, unaccepted association with this task",
 			}
 		}
 	} else {
 		if *userID != task.UserID {
 			return domain.Task{}, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized delete, not task owner",
+				Message: "SetProject: unauthorized delete, not task owner",
 			}
 		}
 	}
@@ -275,12 +275,12 @@ func (s *TaskService) SetProject(ctx context.Context, id string, projectID *stri
 	if err != nil {
 		return domain.Task{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "unauthorized update, not a project member",
+			Message: "SetProject: unauthorized update, not a project member",
 		}
 	} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
 		return domain.Task{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "unauthorized update, not a project member yet",
+			Message: "SetProject: unauthorized update, not a project member yet",
 		}
 
 	}
@@ -312,7 +312,7 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 	if userID == nil {
 		return sqlc.Task{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "createTask: no user ID in context",
 		}
 	}
 
@@ -320,7 +320,10 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 
 		val, err := uuid.Parse(cmd.ProjectID)
 		if err != nil {
-			return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted project ID"}
+			return sqlc.Task{}, &domain.Error{
+				Code:    domain.EINVALID,
+				Message: "createTask: corrupted project ID",
+			}
 		}
 
 		projectID = uuid.NullUUID{
@@ -333,7 +336,7 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 		if err = priority.Scan(cmd.Priority); err != nil {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted",
+				Message: "createTask: corrupted priority",
 			}
 
 		}
@@ -345,14 +348,14 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 		if err != nil {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted deadline timestamp",
+				Message: "createTask: corrupted deadline timestamp",
 			}
 		}
 
 		if time.Now().After(deadline) {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "deadline timestamp must be set after current moment",
+				Message: "createTask: deadline timestamp must be set after current moment",
 			}
 		}
 	}
@@ -363,14 +366,14 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 		if err != nil {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted schedule timestamp",
+				Message: "createTask: corrupted schedule timestamp",
 			}
 		}
 
 		if time.Now().After(schedule) {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "schedule timestamp must be set after current moment",
+				Message: "createTask: schedule timestamp must be set after current moment",
 			}
 		}
 	}
@@ -381,13 +384,13 @@ func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (s
 		if err != nil {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted wait timestamp"}
+				Message: "createTask: corrupted wait timestamp"}
 		}
 
 		if time.Now().After(wait) {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "wait timestamp must be set after current moment",
+				Message: "createTask: wait timestamp must be set after current moment",
 			}
 		}
 
@@ -421,13 +424,19 @@ func taskByID(ctx context.Context, q TaskQueries, id string) (sqlc.Task, error) 
 
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		return sqlc.Task{}, &domain.Error{Code: domain.EINVALID, Message: "corrupted task ID"}
+		return sqlc.Task{}, &domain.Error{
+			Code:    domain.EINVALID,
+			Message: "taskByID: corrupted task ID",
+		}
 	}
 
 	task, err := q.TaskByID(ctx, uuid)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return sqlc.Task{}, &domain.Error{Code: domain.ENOTFOUND, Message: "task ID not found"}
+			return sqlc.Task{}, &domain.Error{
+				Code:    domain.ENOTFOUND,
+				Message: "taskByID: task ID not found",
+			}
 		}
 		return sqlc.Task{}, err
 	}
@@ -447,14 +456,14 @@ func updateTask(ctx context.Context, q TaskQueries, task sqlc.Task, cmd domain.U
 		if err != nil {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted deadline timestamp",
+				Message: "updateTask: corrupted deadline timestamp",
 			}
 		}
 
 		if time.Now().After(deadline) {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "deadline timestamp must be set after current moment",
+				Message: "updateTask: deadline timestamp must be set after current moment",
 			}
 		}
 
@@ -467,14 +476,14 @@ func updateTask(ctx context.Context, q TaskQueries, task sqlc.Task, cmd domain.U
 		if err != nil {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted schedule timestamp",
+				Message: "updateTask: corrupted schedule timestamp",
 			}
 		}
 
 		if time.Now().After(schedule) {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "schedule timestamp must be set after current moment",
+				Message: "updateTask: schedule timestamp must be set after current moment",
 			}
 		}
 
@@ -487,14 +496,14 @@ func updateTask(ctx context.Context, q TaskQueries, task sqlc.Task, cmd domain.U
 		if err != nil {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "corrupted wait timestamp",
+				Message: "updateTask: corrupted wait timestamp",
 			}
 		}
 
 		if time.Now().After(wait) {
 			return sqlc.Task{}, &domain.Error{
 				Code:    domain.EINVALID,
-				Message: "wait timestamp must be set after current moment",
+				Message: "updateTask: wait timestamp must be set after current moment",
 			}
 		}
 

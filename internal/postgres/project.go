@@ -106,7 +106,10 @@ func createProject(ctx context.Context, q ProjectQueries, title string) (sqlc.Pr
 
 	userID := domain.UserIDFromContext(ctx)
 	if userID == nil {
-		return sqlc.Project{}, &domain.Error{Code: domain.EUNAUTHORIZED, Message: "no user ID in context"}
+		return sqlc.Project{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "createProject: no user ID in context",
+		}
 	}
 
 	project, err := q.CreateProject(ctx, sqlc.CreateProjectParams{
@@ -129,7 +132,10 @@ func projectByID(ctx context.Context, q ProjectQueries, id string) (sqlc.Project
 	project, err := q.ProjectByID(ctx, uuid)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return sqlc.Project{}, &domain.Error{Code: domain.ENOTFOUND, Message: "project ID not found"}
+			return sqlc.Project{}, &domain.Error{
+				Code:    domain.ENOTFOUND,
+				Message: "projectByID: project ID not found",
+			}
 		}
 
 		return sqlc.Project{}, err
@@ -141,7 +147,10 @@ func findProjects(ctx context.Context, q ProjectQueries, filter domain.ProjectFi
 
 	userID := domain.UserIDFromContext(ctx)
 	if userID == nil {
-		return []sqlc.Project{}, 0, &domain.Error{Code: domain.EUNAUTHORIZED, Message: "No user ID in context"}
+		return []sqlc.Project{}, 0, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "findProjects: No user ID in context",
+		}
 	}
 
 	rows, err := q.ProjectsByUserID(ctx, sqlc.ProjectsByUserIDParams{
@@ -156,7 +165,7 @@ func findProjects(ctx context.Context, q ProjectQueries, filter domain.ProjectFi
 	if len(rows) == 0 {
 		return []sqlc.Project{}, 0, &domain.Error{
 			Code:    domain.ENOTFOUND,
-			Message: "no projects found",
+			Message: "findProjects: no projects found",
 		}
 	}
 
@@ -171,11 +180,17 @@ func deleteProject(ctx context.Context, q ProjectQueries, id string) (sqlc.Proje
 
 	userID := domain.UserIDFromContext(ctx)
 	if userID == nil {
-		return sqlc.Project{}, &domain.Error{Code: domain.EUNAUTHORIZED, Message: "no user ID in context"}
+		return sqlc.Project{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "deleteProject: no user ID in context",
+		}
 	}
 
 	if *userID != project.UserID {
-		return sqlc.Project{}, &domain.Error{Code: domain.EUNAUTHORIZED, Message: "unauthorized user, cannot delete"}
+		return sqlc.Project{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "deleteProject: unauthorized user, cannot delete",
+		}
 	}
 
 	deleted, err := q.DeleteProject(ctx, project.ID)

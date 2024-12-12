@@ -168,7 +168,7 @@ func TestDeleteProject(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected not found error")
 		} else if domain.ErrorCode(err) != domain.ENOTFOUND ||
-			domain.ErrorMessage(err) != "project ID not found" {
+			domain.ErrorMessage(err) != `projectByID: project ID not found` {
 			t.Errorf("unexpected error: %v", err)
 		}
 	})

@@ -39,7 +39,7 @@ func signupNavBar() templ.Component {
 	})
 }
 
-func Signup(postURL string) templ.Component {
+func SignupForm(postURL string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -60,7 +60,49 @@ func Signup(postURL string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form hx-post=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(postURL)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/signup.templ`, Line: 14, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#card-body\" hx-target-error=\"#alert\"><div class=\"flex flex-col gap-2\"><label class=\"input input-bordered flex items-center gap-2\">Username: <input type=\"text\" name=\"username\" id=\"username\" class=\"grow\" placeholder=\"taskman\"></label> <label class=\"input input-bordered flex items-center gap-2\">Email: <input type=\"email\" name=\"email\" id=\"email\" class=\"grow\" placeholder=\"htm@site.com\"></label> <label class=\"input input-bordered flex items-center gap-2\">First Name: <input type=\"text\" name=\"first_name\" id=\"first_name\" class=\"grow\" placeholder=\"Human\"></label> <label class=\"input input-bordered flex items-center gap-2\">Last Name: <input type=\"text\" name=\"last_name\" id=\"last_name\" class=\"grow\" placeholder=\"Task Manager\"></label> <label class=\"input input-bordered flex items-center gap-2\">Password: <input type=\"password\" name=\"password\" id=\"password\" class=\"grow\" placeholder=\"********\"></label></div><div class=\"card-actions justify-end pt-4\"><input type=\"submit\" class=\"btn btn-primary\" value=\"Submit\"> <a href=\"/home\" class=\"btn btn-secondary\">Cancel</a></div></form>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func Signup(postURL string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -72,7 +114,7 @@ func Signup(postURL string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_Var6 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 				if !templ_7745c5c3_IsBuffer {
@@ -90,7 +132,7 @@ func Signup(postURL string) templ.Component {
 				}
 				return templ_7745c5c3_Err
 			})
-			templ_7745c5c3_Err = templates.Head("Sign Up").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templates.Head("Sign Up").Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -102,26 +144,21 @@ func Signup(postURL string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"alert\" class=\"fixed top-4 right-4\"></div><div class=\"flex items-center justify-center py-10\"><div class=\"card bg-base-200 w-120 shadow-xl\"><div id=\"card-body\" class=\"card-body items-center text-center\"><h2 class=\"card-title pb-4\">Sign up new account</h2><form hx-post=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"alert\" class=\"fixed top-4 right-4\"></div><div class=\"flex items-center justify-center py-10\"><div class=\"card bg-base-200 w-120 shadow-xl\"><div id=\"card-body\" class=\"card-body items-center text-center\"><h2 class=\"card-title pb-4\">Sign up new account</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(postURL)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/signup.templ`, Line: 26, Col: 48}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			templ_7745c5c3_Err = SignupForm(postURL).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#card-body\" hx-target-error=\"#alert\"><div class=\"flex flex-col gap-2\"><label class=\"input input-bordered flex items-center gap-2\">Username: <input type=\"text\" name=\"username\" id=\"username\" class=\"grow\" placeholder=\"taskman\"></label> <label class=\"input input-bordered flex items-center gap-2\">Email: <input type=\"email\" name=\"email\" id=\"email\" class=\"grow\" placeholder=\"htm@site.com\"></label> <label class=\"input input-bordered flex items-center gap-2\">First Name: <input type=\"text\" name=\"first_name\" id=\"first_name\" class=\"grow\" placeholder=\"Human\"></label> <label class=\"input input-bordered flex items-center gap-2\">Last Name: <input type=\"text\" name=\"last_name\" id=\"last_name\" class=\"grow\" placeholder=\"Task Manager\"></label> <label class=\"input input-bordered flex items-center gap-2\">Password: <input type=\"password\" name=\"password\" id=\"password\" class=\"grow\" placeholder=\"********\"></label></div><div class=\"card-actions justify-end pt-4\"><input type=\"submit\" class=\"btn btn-primary\" value=\"Submit\"> <a href=\"/home\" class=\"btn btn-secondary\">Cancel</a></div></form></div></div></div></body>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div></body>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = templates.Boilerplate().Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templates.Boilerplate().Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

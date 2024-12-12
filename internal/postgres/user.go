@@ -119,7 +119,10 @@ func createUser(ctx context.Context, q UserQueries, cmd domain.CreateUserCmd) (s
 		}
 		switch pgErr.Code {
 		case pgErrCode_UniqueViolation:
-			return sqlc.User{}, &domain.Error{Code: domain.ECONFLICT, Message: "this email exists"}
+			return sqlc.User{}, &domain.Error{
+				Code:    domain.ECONFLICT,
+				Message: "createUser: this email exists",
+			}
 		default:
 			return sqlc.User{}, err
 		}
@@ -137,7 +140,10 @@ func userByID(ctx context.Context, q UserQueries, id string) (sqlc.User, error) 
 	user, err := q.UserByID(ctx, uuid)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "ID not found"}
+			return sqlc.User{}, &domain.Error{
+				Code:    domain.ENOTFOUND,
+				Message: "userByID: ID not found",
+			}
 		}
 		return sqlc.User{}, err
 	}
@@ -148,7 +154,10 @@ func userByEmail(ctx context.Context, q UserQueries, email string) (sqlc.User, e
 	user, err := q.UserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "email not found"}
+			return sqlc.User{}, &domain.Error{
+				Code:    domain.ENOTFOUND,
+				Message: "userByEmail: email not found",
+			}
 		}
 		return sqlc.User{}, err
 	}
@@ -160,13 +169,19 @@ func userByEmailWithPassword(ctx context.Context, q UserQueries, email, password
 	user, err := q.UserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return sqlc.User{}, &domain.Error{Code: domain.ENOTFOUND, Message: "email not found"}
+			return sqlc.User{}, &domain.Error{
+				Code:    domain.ENOTFOUND,
+				Message: "userByEmailWithPassword: email not found",
+			}
 		}
 		return sqlc.User{}, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return sqlc.User{}, &domain.Error{Code: domain.EUNAUTHORIZED, Message: "wrong password"}
+		return sqlc.User{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "userByEmailWithPassword: wrong password",
+		}
 	}
 
 	return user, nil

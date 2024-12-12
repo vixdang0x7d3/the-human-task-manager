@@ -59,7 +59,7 @@ func (s *TaskItemService) Find(ctx context.Context, filter domain.TaskItemFilter
 		if userID == nil {
 			return []domain.TaskItem{}, 0, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "no user ID in context",
+				Message: "Find: no user ID in context",
 			}
 		}
 
@@ -69,12 +69,12 @@ func (s *TaskItemService) Find(ctx context.Context, filter domain.TaskItemFilter
 		}); err != nil {
 			return []domain.TaskItem{}, 0, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized access, not a project member",
+				Message: "Find: unauthorized access, not a project member",
 			}
 		} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
 			return []domain.TaskItem{}, 0, &domain.Error{
 				Code:    domain.EUNAUTHORIZED,
-				Message: "unauthorized access, not a project member yet",
+				Message: "Find: unauthorized access, not a project member yet",
 			}
 		}
 
@@ -99,7 +99,7 @@ func taskItemByID(ctx context.Context, q TaskItemQueries, id string) (sqlc.TaskI
 	if userID == nil {
 		return sqlc.TaskItem{}, &domain.Error{
 			Code:    domain.EUNAUTHORIZED,
-			Message: "no user ID in context",
+			Message: "taskItemByID: no user ID in context",
 		}
 	}
 
@@ -145,14 +145,19 @@ func findTaskItemsByProjectID(ctx context.Context, q TaskItemQueries, filter dom
 	if filter.State != nil {
 		err := state.Scan(*filter.State)
 		if err != nil {
-			return []sqlc.TaskItem{}, 0, &domain.Error{Code: domain.EINVALID, Message: "invalid filter for task state"}
+			return []sqlc.TaskItem{}, 0, &domain.Error{
+				Code:    domain.EINVALID,
+				Message: "findTaskItemByProjectID: invalid filter for task state",
+			}
 		}
 	}
 
 	if filter.Priority != nil {
 		err := priority.Scan(*filter.Priority)
 		if err != nil {
-			return []sqlc.TaskItem{}, 0, &domain.Error{Code: domain.EINVALID, Message: "invalid filter for task priority"}
+			return []sqlc.TaskItem{}, 0, &domain.Error{
+				Code:    domain.EINVALID,
+				Message: "fidnTaskItemByProjectID: invalid filter for task priority"}
 		}
 	}
 
@@ -188,7 +193,7 @@ func findTaskItemsByProjectID(ctx context.Context, q TaskItemQueries, filter dom
 	if len(rows) == 0 {
 		return []sqlc.TaskItem{}, 0, &domain.Error{
 			Code:    domain.ENOTFOUND,
-			Message: "no tasks found",
+			Message: "findTaskItemByProjectID: no tasks found",
 		}
 	}
 
@@ -213,14 +218,19 @@ func findTaskItemsByUserID(ctx context.Context, q TaskItemQueries, filter domain
 	if filter.State != nil {
 		err := state.Scan(*filter.State)
 		if err != nil {
-			return []sqlc.TaskItem{}, 0, &domain.Error{Code: domain.EINVALID, Message: "invalid filter for task state"}
+			return []sqlc.TaskItem{}, 0, &domain.Error{
+				Code:    domain.EINVALID,
+				Message: "findTaskItemByUserID: invalid filter for task state"}
 		}
 	}
 
 	if filter.Priority != nil {
 		err := priority.Scan(*filter.Priority)
 		if err != nil {
-			return []sqlc.TaskItem{}, 0, &domain.Error{Code: domain.EINVALID, Message: "invalid filter for task priorirty"}
+			return []sqlc.TaskItem{}, 0, &domain.Error{
+				Code:    domain.EINVALID,
+				Message: "findTaskItemByUserID: invalid filter for task priorirty",
+			}
 		}
 	}
 
@@ -242,7 +252,10 @@ func findTaskItemsByUserID(ctx context.Context, q TaskItemQueries, filter domain
 
 	userID := domain.UserIDFromContext(ctx)
 	if userID == nil {
-		return []sqlc.TaskItem{}, 0, &domain.Error{Code: domain.EUNAUTHORIZED, Message: "no user ID from context"}
+		return []sqlc.TaskItem{}, 0, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "findTaskItemByUserID: no user ID from context",
+		}
 	}
 
 	rows, err := q.FindTaskItemsByUserID(ctx, sqlc.FindTaskItemsByUserIDParams{
@@ -262,7 +275,7 @@ func findTaskItemsByUserID(ctx context.Context, q TaskItemQueries, filter domain
 	if len(rows) == 0 {
 		return []sqlc.TaskItem{}, 0, &domain.Error{
 			Code:    domain.ENOTFOUND,
-			Message: "no tasks found",
+			Message: "findTaskItemsByUserID: no tasks found",
 		}
 	}
 

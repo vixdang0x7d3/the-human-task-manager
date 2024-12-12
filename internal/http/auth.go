@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,17 +17,9 @@ func (s *Server) registerAuthRoutes(r *echo.Group) {
 	r.GET("/signup", s.handleSignupShow)
 
 	r.POST("/signup", s.handleSignup)
-<<<<<<< Updated upstream
 	r.POST("/login/email", s.handleLoginEmail)
 	r.POST("/login/password", s.handleLoginPassword)
 	r.GET("/login/success", s.handleLoginSuccess)
-=======
-	r.POST("/login-email", s.handleLoginEmail)
-	r.POST("/login-password", s.handleLoginPassword)
-	r.GET("/login-success", s.handleLoginSuccess)
-
-	r.POST("/change-info", s.handleChangeProfileInfo)
->>>>>>> Stashed changes
 }
 
 func (s *Server) handleLoginShow(c echo.Context) error {
@@ -42,20 +33,20 @@ func (s *Server) handleSignupShow(c echo.Context) error {
 func (s *Server) handleSignup(c echo.Context) error {
 	type formValues struct {
 		Username  string `form:"username" validate:"required"`
-		FirstName string `form:"firstname" validate:"required"`
-		LastName  string `form:"lastname" validate:"required"`
+		FirstName string `form:"first_name" validate:"required"`
+		LastName  string `form:"last_name" validate:"required"`
 		Email     string `form:"email" validate:"required,email"`
 		Password  string `form:"password" validate:"required"`
 	}
 
 	form := formValues{}
 	if err := c.Bind(&form); err != nil {
-		log.Printf("form binding error: %v\n", err)
+		c.Logger().Error(err)
 		return render(c, http.StatusBadRequest, components.AlertError("internal error"))
 	}
 
 	if err := c.Validate(form); err != nil {
-		log.Printf("form validation error: %v\n", err)
+		c.Logger().Error("form validation error", err)
 		return render(c, http.StatusBadRequest, components.AlertError("invalid signup info"))
 	}
 
@@ -82,18 +73,18 @@ func (s *Server) handleLoginEmail(c echo.Context) error {
 	form := formValues{}
 
 	if err := c.Bind(&form); err != nil {
-		log.Printf("form binding error: %v\n", err)
+		c.Logger().Error(err)
 		return render(c, http.StatusBadRequest, components.AlertError("invalid form data"))
 	}
 
 	if err := c.Validate(form); err != nil {
-		log.Printf("form validation error: %v\n", err)
+		c.Logger().Error("form validation error", err)
 		return c.HTML(http.StatusBadRequest, "invalid email")
 	}
 
 	user, err := s.UserService.ByEmail(c.Request().Context(), form.Email)
 	if err != nil {
-		log.Println(domain.ErrorMessage(err))
+		c.Logger().Error(err)
 		return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
 	}
 
@@ -115,23 +106,23 @@ func (s *Server) handleLoginPassword(c echo.Context) error {
 
 	form := formValues{}
 	if err := c.Bind(&form); err != nil {
-		log.Printf("form binding error: %v\n", err)
+		c.Logger().Error(err)
 		return c.HTML(http.StatusBadRequest, "invalid form data")
 	}
 
 	if err := c.Validate(form); err != nil {
-		log.Printf("form validation error: %v\n", err)
+		c.Logger().Error(err)
 		return c.HTML(http.StatusBadRequest, "invalid password")
 	}
 
 	user, err := s.UserService.ByEmailWithPassword(c.Request().Context(), form.Email, form.Password)
 	if err != nil {
-		log.Println(domain.ErrorMessage(err))
+		c.Logger().Error(err)
 		return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
 	}
 
 	if err := s.sessions.RenewToken(c.Request().Context()); err != nil {
-		log.Println(err)
+		c.Logger().Error(err)
 		return c.HTML(http.StatusInternalServerError, "internal error")
 	}
 	s.sessions.Put(c.Request().Context(), "userID", user.ID.String())

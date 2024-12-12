@@ -6,6 +6,4 @@ type TaskView struct {
 	Tags        []string
 	Deadline    string
 	Schedule    string
-	CreatedAt   string
-	UpdatedAt   string
 }

@@ -87,11 +87,12 @@ func NewServer(logger *logrus.Logger) *Server {
 	{
 		r := s.echo.Group("", s.requireAuth(s.sessions))
 		s.registerUserRoutes(r)
+		s.registerTaskRoutes(r)
 	}
 
 	// registers authenticated routes
 	{
-		r := s.echo.Group("", requireAuth(s.sessions))
+		r := s.echo.Group("", s.requireAuth(s.sessions))
 		s.registerCalendarRoutes(r)
 	}
 
@@ -137,8 +138,22 @@ func (s *Server) requireNoAuth(sessions *scs.SessionManager) echo.MiddlewareFunc
 		return func(c echo.Context) error {
 			userID := sessions.GetString(c.Request().Context(), "userID")
 			if userID != "" {
+
+				user, err := s.UserService.ByID(c.Request().Context(), userID)
+				if err != nil {
+					c.Logger().Error("cannot find session user", userID, err)
+				} else {
+					r := c.Request().WithContext(domain.NewContextWithUser(c.Request().Context(), &user))
+					c.SetRequest(r)
+				}
+
+				// using redirect header so htmx won't
+				// inject the whole returned page into the
+				// message div :D
+				// FIX: use hx-boost & hx-push-url instead
+				// then redirect normally
 				c.Response().Header().Set("HX-Redirect", "../index")
-				return c.NoContent(http.StatusOK)
+				return c.NoContent(http.StatusTemporaryRedirect)
 			}
 			return next(c)
 		}
@@ -156,7 +171,7 @@ func (s *Server) requireAuth(sessions *scs.SessionManager) echo.MiddlewareFunc {
 
 			user, err := s.UserService.ByID(c.Request().Context(), userID)
 			if err != nil {
-				log.Printf("cannot find session user: id=%q, err=%s", userID, err)
+				c.Logger().Error("cannot find session user", userID, err)
 			} else {
 				r := c.Request().WithContext(domain.NewContextWithUser(c.Request().Context(), &user))
 				c.SetRequest(r)
