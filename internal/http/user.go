@@ -15,6 +15,8 @@ func (s *Server) registerUserRoutes(r *echo.Group) {
 	r.GET("/index", s.handleIndexShow)
 	r.GET("/profile", s.handleProfileShow)
 
+	r.POST("/change-info", s.handleChangeProfileInfo)
+
 	r.DELETE("/logout", s.handleLogout)
 }
 
