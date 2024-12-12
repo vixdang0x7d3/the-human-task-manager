@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/components"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/pages"
 )
 
@@ -44,6 +45,34 @@ func (s *Server) handleProfileShow(c echo.Context) error {
 	}
 
 	return render(c, http.StatusOK, pages.Profile(m, "/change-info", "/logout"))
+}
+
+func (s *Server) handleChangeProfileInfo(c echo.Context) error {
+
+	type formValues struct {
+		Username  string `form:"username" validate:"required"`
+		FirstName string `form:"first_name" validate:"required"`
+		LastName  string `form:"last_name" validate:"required"`
+	}
+
+	form := formValues{}
+	if err := c.Bind(&form); err != nil {
+		c.Logger().Error(err)
+		return c.HTML(http.StatusBadRequest, "invalid form data")
+	}
+
+	if err := c.Validate(form); err != nil {
+		c.Logger().Error(err)
+		return c.HTML(http.StatusBadRequest, "invalid value")
+	}
+
+	m := models.UserView{
+		Username:  form.Username,
+		FirstName: form.FirstName,
+		LastName:  form.LastName,
+	}
+
+	return render(c, http.StatusOK, components.ChangeInfoForm(m, "/change-info-save"))
 }
 
 // TODO: flash message support

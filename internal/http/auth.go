@@ -133,31 +133,3 @@ func (s *Server) handleLoginPassword(c echo.Context) error {
 func (s *Server) handleLoginSuccess(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
-
-func (s *Server) handleChangeProfileInfo(c echo.Context) error {
-
-	type formValues struct {
-		Username  string `form:"username" validate:"required"`
-		FirstName string `form:"firstname" validate:"required"`
-		LastName  string `form:"lastname" validate:"required"`
-	}
-
-	form := formValues{}
-	if err := c.Bind(&form); err != nil {
-		log.Printf("form binding error: %v\n", err)
-		return c.HTML(http.StatusBadRequest, "invalid form data")
-	}
-
-	if err := c.Validate(form); err != nil {
-		log.Printf("form validation error: %v\n", err)
-		return c.HTML(http.StatusBadRequest, "invalid value")
-	}
-
-	m := models.UserView{
-		Username:  form.Username,
-		FirstName: form.FirstName,
-		LastName:  form.LastName,
-	}
-
-	return render(c, http.StatusOK, components.ChangeInfoForm(m, "/change-info-save"))
-}
