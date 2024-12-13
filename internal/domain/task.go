@@ -7,6 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	TaskPriorityH = "H"
+	TaskPriorityM = "M"
+	TaskPriorityL = "L"
+)
+
 type Task struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID

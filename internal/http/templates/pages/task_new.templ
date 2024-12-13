@@ -1,0 +1,129 @@
+package pages
+
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+
+script TagScript(tags []string) {
+	var input = document.querySelector('input[id="tags"]'),
+	// init Tagify script on the above inputs
+	tagify = new Tagify(input, { 
+		whitelist: tags,
+		maxTags: 10,
+		dropdown: {
+			maxItems: 20,           // <- mixumum allowed rendered suggestions
+			classname: 'tags-look', // <- custom classname for this dropdown, so it could be targeted
+			enabled: 0,             // <- show suggestions on focus
+			closeOnSelect: false    // <- do not hide the suggestions dropdown once an item has been selected
+		} 
+	})
+}
+
+templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectView) {
+	<form hx-post="/tasks/new" hx-target-error="#alert">
+		<div class="container bg-base-100 mx-auto p-4 py-10 flex">
+			<!--left side-->
+			<div class="w-10/12 px-10">
+				<label class="form-control w-10/12 max-w-md">
+					<div class="label">
+						<span class="label-text">Description</span>
+					</div>
+					<input
+						type="text"
+						placeholder="Description"
+						class="input input-bordered w-full max-w-md"
+					/>
+				</label>
+				<label class="form-control w-10/12 max-w-md">
+					<div class="label">
+						<p class="label-text">Deadline</p>
+					</div>
+					<input
+						type="datetime-local"
+						id="deadline"
+						name="deadline"
+						class="input input-bordered w-full max-w-md"
+					/>
+				</label>
+				<label class="form-control w-10/12 max-w-md">
+					<div class="label">
+						<span class="label-text">Schedule</span>
+					</div>
+					<input
+						type="datetime-local"
+						id="schedule"
+						name="schedule"
+						class="input input-bordered w-full max-w-md"
+					/>
+				</label>
+				<label class="form-control w-10/12 max-w-md">
+					<div class="label">
+						<span class="label-text">Wait</span>
+					</div>
+					<input
+						type="datetime-local"
+						id="wait"
+						name="wait"
+						class="input input-bordered w-full max-w-md"
+					/>
+				</label>
+			</div>
+			<!--right side-->
+			<div class="flex flex-col justify-evenly w-10/12 px-10 pt-6 space-y-4">
+				<div class="indicator w-full">
+					<span class="indicator-item indicator-start left-8 px-1 bg-base-100 border-2 rounded-lg input-bordered">tags</span>
+					<div class="flex flex-auto w-full p-4 border-2 input-bordered rounded-lg">
+						<input
+							id="tags"
+							class="grow"
+							name="tags"
+							placeholder="add tag"
+						/>
+						@TagScript(tags)
+					</div>
+				</div>
+				<select id="priority" name="priority" class="select select-bordered px-2 my">
+					<option disabled selected>Priority</option>
+					for _, item := range priorities {
+						<option value={ item }>{ item }</option>
+					}
+				</select>
+				<select id="project-id" name="project_id" class="select select-bordered px-2">
+					<option disabled selected>Project</option>
+					for _, project := range projects {
+						<option value={ project.ID }>{ project.Title }</option>
+					}
+				</select>
+			</div>
+		</div>
+		<div class="card-actions justify-end px-4">
+			<input type="submit" class="btn btn-primary" value="Submit"/>
+			<a href="/tasks" class="btn btn-sm btn-secondary">Cancel</a>
+		</div>
+	</form>
+}
+
+templ TaskNew(tags []string, priorities []string, projects []models.ProjectView, logoutURL string) {
+	@templates.Boilerplate() {
+		@templates.Head("New Task") {
+			<!-- Tagify to handle tags easily -->
+			<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+			<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+			<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+		}
+		<body>
+			@templates.Navbar(logoutURL)
+			<div class="flex items-center justify-center py-4">
+				<div class="flex flex-col w-8/12">
+					<div class="flex items-center px-4 py-2 gap-6 bg-base-100">
+						<h1 class="text-4xl font-bold">New Task</h1>
+					</div>
+					<div class="card w-600 bg-base-200 shadow-xl justify-center">
+						<div class="card-body">
+							@TaskNewForm(tags, priorities, projects)
+						</div>
+					</div>
+				</div>
+			</div>
+		</body>
+	}
+}
