@@ -39,7 +39,7 @@ templ InfoForm(m models.UserView, postURL string) {
 					} />
 			</label>
 		</div>
-		<div id="message" class="text-error text-center"></div>
+		<span class="label-text"></span>
 		<div class="card-actions justify-end py-4">
 			<button id="change-info" class="btn btn-sm btn-neutral mt-4">Change</button>
 		</div>
@@ -67,7 +67,7 @@ templ EmailForm(m models.UserView, postURL string) {
 			</label>
 			<label class="form-control">
 				<div class="label">
-					<div id="message" class="text-error text-center"></div>
+					<span class="label-text"></span>
 				</div>
 				<button id="change-email" class="btn btn-sm btn-neutral mt-4 ml-2">Change Email</button>
 			</label>
@@ -93,7 +93,7 @@ templ PasswordForm(postURL string) {
 			</label>
 			<label class="form-control">
 				<div class="label">
-					<div id="message" class="text-error text-center"></div>
+					<span class="label-text"></span>
 				</div>
 				<button id="change-password" class="btn btn-sm btn-neutral mt-4 ml-2">Change Password</button>
 			</label>
@@ -103,7 +103,9 @@ templ PasswordForm(postURL string) {
 
 templ Profile(m models.UserView, infoURL string, emailURL string, passwordURL string, logoutURL string) {
 	@templates.Boilerplate() {
-		@templates.Head("Profile")
+		@templates.Head("Profile"){
+			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+		}
 		<body>
 			@templates.Navbar(logoutURL)
 			<div class="flex items-center justify-center py-10">
@@ -118,7 +120,7 @@ templ Profile(m models.UserView, infoURL string, emailURL string, passwordURL st
 							<div id="user-email">
 								@EmailForm(m, emailURL)
 							</div>
-							<div id="user-password">
+							<div hx-ext="response-targets" id="user-password">
 								@PasswordForm(passwordURL)
 							</div>
 							<div class="flex flex-row justify-between w-full mt-4">

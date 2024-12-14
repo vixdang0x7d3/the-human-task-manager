@@ -102,7 +102,7 @@ templ SavedEmailForm(m models.UserView, postURL string) {
 }
 
 templ ChangePasswordForm(postURL string) {
-	<form hx-post={ string(templ.URL(postURL)) } hx-target="#user-password" hx-target-error="#message" >
+	<form hx-post={ string(templ.URL(postURL)) } hx-target="#user-password" hx-target-error="#message">
 		<div class="flex flex-row justify-between">
 			<div>
 				<label class="form-control w-full max-w-xs">
@@ -117,6 +117,9 @@ templ ChangePasswordForm(postURL string) {
 						</svg>
 						<input id="current-password" name="current-password" type="password" class="grow" />
 					</label>
+					<div class="label">
+						<div id="current-password-message" class="text-error label-text-alt text-center"></div>
+					</div>
 				</label>
 				<label class="form-control w-full max-w-xs">
 					<div class="label">
@@ -130,6 +133,9 @@ templ ChangePasswordForm(postURL string) {
 						</svg>
 						<input id="new-password" name="new-password" type="password" class="grow" />
 					</label>
+					<div class="label">
+						<div id="new-password-message" class="text-error label-text-alt text-center"></div>
+					</div>
 				</label>
 			</div>
 			<label class="form-control">
@@ -145,5 +151,14 @@ templ ChangePasswordForm(postURL string) {
 templ SavedPasswordForm(postURL string) {
 	<div id="user-password">
 		@pages.PasswordForm(postURL)
+	</div>
+}
+
+templ PassWordErrorMessage(currentPwMessage, newPwMessage string) {
+	<div id="current-password-message" hx-swap-oob="true" class="text-error">
+		<span>{ currentPwMessage }</span>
+	</div>
+	<div id="new-password-message" hx-swap-oob="true" class="text-error">
+		<span>{ newPwMessage }</span>
 	</div>
 }

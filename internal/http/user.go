@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
@@ -177,6 +178,21 @@ func (s *Server) handleSaveprofilePasswordChange(c echo.Context) error {
 
 	if err := c.Validate(form); err != nil {
 		c.Logger().Error(err)
+		if err := c.Validate(&form); err != nil {
+			var currentPwMessage, newPwMessage string
+			validationErrors, ok := err.(validator.ValidationErrors)
+			if ok {
+				for _, fieldErr := range validationErrors {
+					switch fieldErr.Field() {
+					case "CurrentPassword":
+						currentPwMessage = "Current password is required."
+					case "NewPassword":
+						newPwMessage = "New password is required."
+					}
+				}
+			}
+			return render(c, http.StatusBadRequest, components.PassWordErrorMessage(currentPwMessage, newPwMessage))
+		}
 		return c.HTML(http.StatusBadRequest, "invalid password")
 	}
 
