@@ -147,10 +147,48 @@ func TestUpdateUser(t *testing.T) {
 	})
 }
 
+func TestUserWithPassword(t *testing.T) {
+	db := MustOpenDB(t, context.Background())
+	defer CloseDB(t, db)
+}
+
 func TestUserByEmail(t *testing.T) {
 	db := MustOpenDB(t, context.Background())
 	defer CloseDB(t, db)
 	t.Skip("no test")
+
+	s := postgres.NewUserService(db, logrus.New())
+	user := MustCreateUser(t, context.Background(), db, domain.CreateUserCmd{
+
+		Username:  "USERNAME28",
+		FirstName: "FIRSTNAME28",
+		LastName:  "LASTNAME28",
+		Email:     "EMAIL28@email.com",
+		Password:  "okiaconma123",
+	})
+
+	ctxWithUser := domain.NewContextWithUser(context.Background(), &user)
+
+	t.Run("OK", func(t *testing.T) {
+
+		_, err := s.WithPassword(ctxWithUser, "okiaconma123")
+		if err != nil {
+			t.Fatalf("should have no error: %#v", err)
+		}
+	})
+
+	t.Run("ErrWrongPassword", func(t *testing.T) {
+
+		_, err := s.WithPassword(ctxWithUser, "wrongpassword")
+		if err == nil {
+			t.Error("expected error, not found")
+		} else if domain.ErrorCode(err) != domain.EUNAUTHORIZED ||
+			domain.ErrorMessage(err) != `userWithPassword: wrong password` {
+
+			t.Errorf("unexpected error: %#v", err)
+		}
+	})
+
 }
 
 func TestUserByEmailWithPassword(t *testing.T) {

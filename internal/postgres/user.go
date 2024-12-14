@@ -109,6 +109,22 @@ func (s *UserService) ByID(ctx context.Context, id string) (domain.User, error) 
 	return toDomainUser(user), nil
 }
 
+func (s *UserService) WithPassword(ctx context.Context, password string) (domain.User, error) {
+	conn, err := s.db.Acquire(ctx)
+	if err != nil {
+		return domain.User{}, err
+	}
+	defer conn.Release()
+
+	q := sqlc.New(conn)
+	user, err := userWithPassword(ctx, q, password)
+	if err != nil {
+		return toDomainUser(user), err
+	}
+
+	return toDomainUser(user), nil
+}
+
 func createUser(ctx context.Context, q UserQueries, cmd domain.CreateUserCmd) (sqlc.User, error) {
 
 	bytes, err := bcrypt.GenerateFromPassword([]byte(cmd.Password), bcrypt.DefaultCost)
@@ -232,6 +248,30 @@ func userByID(ctx context.Context, q UserQueries, id string) (sqlc.User, error) 
 		}
 		return sqlc.User{}, err
 	}
+	return user, nil
+}
+
+func userWithPassword(ctx context.Context, q UserQueries, password string) (sqlc.User, error) {
+	userID := domain.UserIDFromContext(ctx)
+	if userID == nil {
+		return sqlc.User{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "userWithPassword: no user ID in context",
+		}
+	}
+
+	user, err := userByID(ctx, q, userID.String())
+	if err != nil {
+		return sqlc.User{}, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return sqlc.User{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "userWithPassword: wrong password",
+		}
+	}
+
 	return user, nil
 }
 
