@@ -1,0 +1,6 @@
+package components
+
+templ TaskNewCustomError(msg string, descriptionErr, scheduleErr, tagsErr string) {
+	@AlertError(msg)
+	<div id="description-error" hx-swap-oob="outerHTML">{ descriptionErr }</div>
+}

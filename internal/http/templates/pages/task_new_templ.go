@@ -53,7 +53,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form hx-post=\"/tasks/new\" hx-target-error=\"#alert\"><div class=\"container bg-base-100 mx-auto p-4 py-10 flex\"><!--left side--><div class=\"w-10/12 px-10\"><label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><span class=\"label-text\">Description</span></div><input type=\"text\" placeholder=\"Description\" class=\"input input-bordered w-full max-w-md\"></label> <label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><p class=\"label-text\">Deadline</p></div><input type=\"datetime-local\" id=\"deadline\" name=\"deadline\" class=\"input input-bordered w-full max-w-md\"></label> <label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><span class=\"label-text\">Schedule</span></div><input type=\"datetime-local\" id=\"schedule\" name=\"schedule\" class=\"input input-bordered w-full max-w-md\"></label> <label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><span class=\"label-text\">Wait</span></div><input type=\"datetime-local\" id=\"wait\" name=\"wait\" class=\"input input-bordered w-full max-w-md\"></label></div><!--right side--><div class=\"flex flex-col justify-evenly w-10/12 px-10 pt-6 space-y-4\"><div class=\"indicator w-full\"><span class=\"indicator-item indicator-start left-8 px-1 bg-base-100 border-2 rounded-lg input-bordered\">tags</span><div class=\"flex flex-auto w-full p-4 border-2 input-bordered rounded-lg\"><input id=\"tags\" class=\"grow\" name=\"tags\" placeholder=\"add tag\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form hx-post=\"/tasks/new\" hx-target-error=\"#alert\"><div class=\"container bg-base-100 mx-auto p-4 py-10 flex\"><!--left side--><div class=\"w-10/12 px-10\"><label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><span class=\"label-text\">Description</span></div><input type=\"text\" id=\"description\" name=\"description\" placeholder=\"Description\" class=\"input input-bordered w-full max-w-md\"></label> <label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><p class=\"label-text\">Deadline</p></div><input type=\"datetime-local\" id=\"deadline\" name=\"deadline\" class=\"input input-bordered w-full max-w-md\"></label> <label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><span class=\"label-text\">Schedule</span></div><input type=\"datetime-local\" id=\"schedule\" name=\"schedule\" class=\"input input-bordered w-full max-w-md\"></label> <label class=\"form-control w-10/12 max-w-md\"><div class=\"label\"><span class=\"label-text\">Wait</span></div><input type=\"datetime-local\" id=\"wait\" name=\"wait\" class=\"input input-bordered w-full max-w-md\"></label></div><!--right side--><div class=\"flex flex-col justify-evenly w-10/12 px-10 pt-6 space-y-4\"><div class=\"indicator w-full\"><span class=\"indicator-item indicator-start left-8 px-1 bg-base-100 border-2 rounded-lg input-bordered\">tags</span><div class=\"flex flex-auto w-full p-4 border-2 input-bordered rounded-lg\"><input id=\"tags\" class=\"grow\" name=\"tags\" placeholder=\"add tag\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,7 +73,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(item)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 87, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 89, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -86,7 +86,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(item)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 87, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 89, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(project.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 93, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 95, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(project.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 93, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 95, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -186,7 +186,7 @@ func TaskNew(tags []string, priorities []string, projects []models.ProjectView, 
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- Tagify to handle tags easily --> <script src=\"https://cdn.jsdelivr.net/npm/@yaireo/tagify\"></script> <script src=\"https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js\"></script> <link href=\"https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css\" rel=\"stylesheet\" type=\"text/css\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js\"></script> <!-- Tagify to handle tags easily --> <script src=\"https://cdn.jsdelivr.net/npm/@yaireo/tagify\"></script> <script src=\"https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js\"></script> <link href=\"https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css\" rel=\"stylesheet\" type=\"text/css\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -196,7 +196,7 @@ func TaskNew(tags []string, priorities []string, projects []models.ProjectView, 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <body hx-ext=\"response-targets\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -204,7 +204,7 @@ func TaskNew(tags []string, priorities []string, projects []models.ProjectView, 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex items-center justify-center py-4\"><div class=\"flex flex-col w-8/12\"><div class=\"flex items-center px-4 py-2 gap-6 bg-base-100\"><h1 class=\"text-4xl font-bold\">New Task</h1></div><div class=\"card w-600 bg-base-200 shadow-xl justify-center\"><div class=\"card-body\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"alert\" class=\"fixed top-12 right-4\"></div><div class=\"flex items-center justify-center py-4\"><div class=\"flex flex-col w-8/12\"><div class=\"flex items-center px-4 py-2 gap-6 bg-base-100\"><h1 class=\"text-4xl font-bold\">New Task</h1></div><div class=\"card w-600 bg-base-200 shadow-xl justify-center\"><div class=\"card-body\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

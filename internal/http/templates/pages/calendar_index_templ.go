@@ -13,8 +13,8 @@ import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 
 func drawCalendar(data []models.TaskView) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_drawCalendar_9c97`,
-		Function: `function __templ_drawCalendar_9c97(data){const calendarEl = document.getElementById('calendar');
+		Name: `__templ_drawCalendar_ed5f`,
+		Function: `function __templ_drawCalendar_ed5f(data){const calendarEl = document.getElementById('calendar');
 
     const events = data;
 
@@ -26,15 +26,15 @@ func drawCalendar(data []models.TaskView) templ.ComponentScript {
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
         events: events.map(event => ({
-            title: event.Title,
+            title: event.Description,
             start: event.Schedule
         }))
     });
 
     calendar.render();
 }`,
-		Call:       templ.SafeScript(`__templ_drawCalendar_9c97`, data),
-		CallInline: templ.SafeScriptInline(`__templ_drawCalendar_9c97`, data),
+		Call:       templ.SafeScript(`__templ_drawCalendar_ed5f`, data),
+		CallInline: templ.SafeScriptInline(`__templ_drawCalendar_ed5f`, data),
 	}
 }
 

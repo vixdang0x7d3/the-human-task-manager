@@ -2,10 +2,13 @@ package http
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/generic"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/components"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/pages"
 )
 
@@ -18,7 +21,81 @@ func (s *Server) registerTaskRoutes(r *echo.Group) {
 
 func (s *Server) handleTaskIndex(c echo.Context) error {
 
-	return render(c, http.StatusOK, pages.TaskIndex("/logout"))
+	state := "started"
+	taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
+		State:  &state,
+		Offset: 0,
+		Limit:  100,
+	})
+
+	// handle pagination
+	_ = total
+
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EINVALID, domain.EUNAUTHORIZED:
+			return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
+		case domain.EINTERNAL:
+			c.Logger().Error(domain.ErrorMessage(err))
+			return c.HTML(http.StatusInternalServerError, "internal error")
+		}
+	}
+
+	return render(c, http.StatusOK, pages.TaskIndex(
+		generic.Map(taskItems, toTaskItemView),
+		"/logout",
+	))
+}
+
+func toTaskItemView(taskItem domain.TaskItem) models.TaskItemView {
+
+	const timeFormat = "2006/01/02 15:04:05"
+
+	var (
+		deadline string = "none"
+		schedule string = "none"
+		wait     string = "none"
+		end      string = "none"
+	)
+
+	if !taskItem.Deadline.IsZero() {
+		deadline = taskItem.Deadline.Format(timeFormat)
+	}
+
+	if !taskItem.Schedule.IsZero() {
+		schedule = taskItem.Schedule.Format(timeFormat)
+	}
+
+	if !taskItem.Wait.IsZero() {
+		deadline = taskItem.Wait.Format(timeFormat)
+	}
+
+	if !taskItem.End.IsZero() {
+		deadline = taskItem.End.Format(timeFormat)
+	}
+
+	return models.TaskItemView{
+		ID:             taskItem.ID.String(),
+		Description:    taskItem.Description,
+		UserID:         taskItem.UserID.String(),
+		Username:       taskItem.Username,
+		CompleteBy:     taskItem.CompletedBy.String(),
+		CompleteByName: taskItem.CompletedByName,
+		ProjectID:      taskItem.ProjectID.String(),
+		ProjectTitle:   taskItem.ProjectTitle,
+
+		Priority: taskItem.Priority,
+		State:    taskItem.State,
+
+		Deadline: deadline,
+		Schedule: schedule,
+		Wait:     wait,
+		Create:   taskItem.Create.Format(timeFormat),
+		End:      end,
+		Urgency:  strconv.FormatFloat(taskItem.Urgency, 'f', 2, 64),
+
+		Tags: taskItem.Tags,
+	}
 }
 
 // handleTaskItem return task important attributes
@@ -31,11 +108,11 @@ func (s *Server) handleTaskItem(c echo.Context) error {
 // handleTaskDetailShow returns a task object.
 // Data returned by handleTaskDetailShow is
 // shown in Task Update screen
-func (s *Server) handleTaskDetailShow(c echo.Context) error {
+func (s *Server) handleTaskUpdateShow(c echo.Context) error {
 	return nil
 }
 
-func (s *Server) handleTaskDetailUpdate(c echo.Context) error {
+func (s *Server) handleTaskUpdate(c echo.Context) error {
 	return nil
 }
 
@@ -47,29 +124,44 @@ func (s *Server) handleTaskNewShow(c echo.Context) error {
 		domain.TaskPriorityL,
 	}
 
-	projects := []models.ProjectView{
-		{
-			Title: "Project A",
-			ID:    "project-a-id",
-		},
-		{
-			Title: "Project B",
-			ID:    "project-b-id",
-		},
+	projects, total, err := s.ProjectService.Find(c.Request().Context(), domain.ProjectFilter{
+		Limit:  100,
+		Offset: 0,
+	})
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EINVALID, domain.EUNAUTHORIZED:
+			return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
+		case domain.EINTERNAL:
+			c.Logger().Error(err)
+			return c.HTML(http.StatusInternalServerError, "internal error")
+		}
+	}
+
+	if total != len(projects) {
+		c.Logger().Warn("truncated slice of projects ", len(projects), total)
 	}
 
 	return render(c, http.StatusOK, pages.TaskNew(
-		[]string{"your", "mom", ">:("},
+		[]string{"next", "school", "personal"},
 		priorities,
-		projects,
+		generic.Map(projects, toProjectView),
 		"/logout",
 	))
+}
+
+func toProjectView(project domain.Project) models.ProjectView {
+	return models.ProjectView{
+		Title:  project.Title,
+		ID:     project.ID.String(),
+		UserID: project.UserID.String(),
+	}
 }
 
 func (s *Server) handleTaskNew(c echo.Context) error {
 
 	type formValues struct {
-		Description string `form:"description"`
+		Description string `form:"description" validate:"required"`
 		Deadline    string `form:"deadline"`
 		Schedule    string `form:"schedule"`
 		Wait        string `form:"wait"`
@@ -81,18 +173,18 @@ func (s *Server) handleTaskNew(c echo.Context) error {
 	form := formValues{}
 	if err := c.Bind(&form); err != nil {
 		c.Logger().Error(err)
-		return c.HTML(http.StatusBadRequest, "invalid form data")
+		return render(c, http.StatusBadRequest, components.AlertError("invalid form data"))
 	}
 
 	if err := c.Validate(form); err != nil {
 		c.Logger().Error(err)
-		return c.HTML(http.StatusBadRequest, "invalid task info")
+		return render(c, http.StatusBadRequest, components.AlertError("invalid task info"))
 	}
 
 	tags, err := parseTagsJSON([]byte(form.TagsJSON))
 	if err != nil {
 		c.Logger().Error(err)
-		return c.HTML(http.StatusBadRequest, "invalid tags json string")
+		return render(c, http.StatusBadRequest, components.AlertError("invalid tags format"))
 	}
 
 	task, err := s.TaskService.Create(c.Request().Context(), domain.CreateTaskCmd{
@@ -107,10 +199,11 @@ func (s *Server) handleTaskNew(c echo.Context) error {
 	if err != nil {
 		switch domain.ErrorMessage(err) {
 		case domain.EINVALID, domain.EUNAUTHORIZED:
-			return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
+			c.Logger().Error(domain.ErrorMessage(err))
+			return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
 		case domain.EINTERNAL:
 			c.Logger().Error(domain.ErrorMessage(err))
-			return c.HTML(http.StatusInternalServerError, "internal error")
+			return render(c, http.StatusBadRequest, components.AlertError("internal error"))
 		}
 	}
 

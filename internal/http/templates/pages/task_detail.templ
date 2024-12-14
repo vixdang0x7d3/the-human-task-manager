@@ -108,7 +108,7 @@ templ BtnAddTags(tags []string) {
 
 templ TaskDetail(m models.TaskView, tags []string, logoutURL string) {
 	@templates.Boilerplate() {
-		@templates.Head(m.Title)
+		@templates.Head(m.Description)
 		<body>
 			@templates.Navbar(logoutURL)
 			<div class="flex items-center justify-center py-4">
@@ -127,7 +127,7 @@ templ TaskDetail(m models.TaskView, tags []string, logoutURL string) {
 											<div class="label">
 												<span class="label-text">Title</span>
 											</div>
-											<input type="text" placeholder="Title" class="input input-bordered w-full max-w-md" value={ m.Title }/>
+											<input type="text" placeholder="Title" class="input input-bordered w-full max-w-md" value={ m.Description }/>
 										</label>
 										<label class="form-control w-10/12 max-w-md">
 											<div class="label">

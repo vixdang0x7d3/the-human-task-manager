@@ -95,8 +95,8 @@ func TestUpdateTask(t *testing.T) {
 		task := MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "DESCRIPTION1",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T07:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T07:00",
 			Wait:        "",
 			Priority:    "M",
 			Tags:        []string{"school", "INT10111"},
@@ -147,8 +147,8 @@ func TestCompleteTask(t *testing.T) {
 		task := MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "DESCRIPTION4",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T07:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T07:00",
 			Wait:        "",
 			Priority:    "L",
 			Tags:        []string{"A", "B"},
@@ -195,8 +195,8 @@ func TestDeleteTask(t *testing.T) {
 		task := MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "DESCRIPTION5",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T07:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T07:00",
 			Wait:        "",
 			Priority:    "L",
 			Tags:        []string{"B", "C"},
@@ -235,8 +235,8 @@ func TestSetProject(t *testing.T) {
 		task := MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "DESCRIPTION6",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T07:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T07:00",
 			Wait:        "",
 			Priority:    "L",
 			Tags:        []string{"B", "C"},

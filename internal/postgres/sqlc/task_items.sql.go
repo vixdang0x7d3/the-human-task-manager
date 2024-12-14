@@ -17,14 +17,16 @@ const findTaskItemsByProjectID = `-- name: FindTaskItemsByProjectID :many
 SELECT t.id, t.user_id, t.username, t.project_id, t.project_title, t.completed_by, t.completed_by_name, t.description, t.priority, t.state, t.deadline, t.schedule, t.wait, t."create", t."end", t.tags, t.urgency, COUNT(*) OVER()
 FROM task_items t
 WHERE t.project_id = $1
-AND (to_tsvector(
-	t.username
-	|| ' '
-	|| t.completed_by_name
-	|| ' ' 
-	|| t.description
-	|| ' '
-	|| array_to_string(tags, ' ')) @@ websearch_to_tsquery($2) OR $2 IS NULL
+AND (
+	to_tsvector(
+		t.username
+		|| ' '
+		|| t.completed_by_name
+		|| ' ' 
+		|| t.description
+		|| ' '
+		|| array_to_string(tags, ' ')
+	) @@ websearch_to_tsquery($2) OR $2 IS NULL
 )
 AND (t.state = $3::task_state OR $3 IS NULL)
 AND (t.priority = $4::task_priority OR $4 IS NULL)

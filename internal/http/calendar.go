@@ -16,12 +16,12 @@ func (s *Server) handleCalendarShow(c echo.Context) error {
 
 	m := []models.TaskView{
 		{
-			Title:    "task 1",
-			Schedule: "2024-11-26",
+			Description: "task 1",
+			Schedule:    "2024-11-26",
 		},
 		{
-			Title:    "task 2",
-			Schedule: "2024-11-28",
+			Description: "task 2",
+			Schedule:    "2024-11-28",
 		},
 	}
 

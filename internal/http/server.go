@@ -25,12 +25,15 @@ import (
 // TODO: should have a server struct
 
 type Server struct {
+	Addr string
+
 	echo     *echo.Echo
 	sessions *scs.SessionManager
 
-	Addr        string
-	UserService domain.UserService
-	TaskService domain.TaskService
+	UserService     domain.UserService
+	TaskService     domain.TaskService
+	TaskItemService domain.TaskItemService
+	ProjectService  domain.ProjectService
 }
 
 func NewServer(logger *logrus.Logger) *Server {

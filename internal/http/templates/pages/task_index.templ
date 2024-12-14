@@ -1,6 +1,11 @@
 package pages
 
-import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+import (
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+	"strconv"
+	"strings"
+)
 
 templ SearchBar() {
 	<div class="flex w-full items-center gap-2 p-4">
@@ -14,18 +19,29 @@ templ SearchBar() {
 				></path>
 			</svg>
 		</label>
-		<button class="btn btn-square">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="size-6"
+		<div class="dropdown">
+			<div tabindex="0" role="button" class="btn m-1">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+					class="size-6"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+				</svg>
+			</div>
+			<div
+				tabindex="0"
+				class="dropdown-content card card-compact bg-base-100 text-primary-content z-[1] w-64 p-2 shadow"
 			>
-				<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
-			</svg>
-		</button>
+				<div class="card-body">
+					<h3 class="card-title">Filters:</h3>
+					<p>This should be the filter content</p>
+				</div>
+			</div>
+		</div>
 	</div>
 }
 
@@ -137,21 +153,49 @@ templ ButtonBar() {
 	</div>
 }
 
-templ TaskItem() {
+templ TaskItem(index int, m models.TaskItemView) {
 	<div class="indicator w-full">
-		<span class="indicator-item indicator-start badge">#1</span>
-		<div class="w-full mt-2 flex justify-between items-center border border-base-content rounded-lg bg-base-200 mb-4 p-4">
-			<div class="flex-1 grid grid-cols-3 justify-items-start">
-				<span class="text-gray-600">Design Documentation</span>
-				<span class="badge badge-outline">DEADLINE: 2024/09/02 07:00</span>
-				<span class="text-red-500 font-bold">MISSED</span>
+		<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
+		<div tabindex="0" class="collapse collapse-arrow bg-base-300 px-4">
+			<div class="h-16 py-4">
+				<div class="grid grid-cols-4 justify-around">
+					<span class="text-primary-content font-semibold">{ m.Description }</span>
+					<span class="badge badge-primary font-bold">{ strings.ToUpper(m.State) }</span>
+					<span class="text-primary-content font-semibold">Urgency: { m.Urgency }</span>
+					<input type="checkbox" name="checkbox" class="radio place-self-end"/>
+				</div>
 			</div>
-			<input type="checkbox" name="checkbox" class="radio"/>
+			<div class="collapse-content border border-black">
+				<span class="text-primary-content font-semibold">Details: </span>
+				<div class="flex">
+					<div class="flex flex-col gap-y-2 w-4/12">
+						<span class="badge badge-neutral">Create: { m.Create }</span>
+						<span class="badge badge-primary">Deadline: { m.Deadline }</span>
+						<span class="badge badge-secondary">Schedule: { m.Schedule }</span>
+						<span class="badge badge-accent">Wait: { m.Wait }</span>
+					</div>
+					<div class="flex flex-col w-8/12">
+						<span class="text-primary-content font-semibold">Project: { m.ProjectTitle }</span>
+						<span class="text-primary-content font-semibold">Priority: { m.Priority }</span>
+						<span class="text-primary-content font-semibold">
+							Tags:
+							for _, tag := range m.Tags {
+								<span class="badge badge-secondary mx-1">{ tag }</span>
+							}
+						</span>
+					</div>
+					<div class="flex flex-col justify-items-end gap-y-2 w-2/12">
+						<button class="btn btn-primary btn-xs">Update</button>
+						<button class="btn btn-secondary btn-xs">Complete</button>
+						<button class="btn btn-neutral btn-xs">Delete</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 }
 
-templ TaskIndex(logoutURL string) {
+templ TaskIndex(m []models.TaskItemView, logoutURL string) {
 	@templates.Boilerplate() {
 		@templates.Head("Tasks")
 		<body>
@@ -162,18 +206,20 @@ templ TaskIndex(logoutURL string) {
 						<h1 class="text-4xl font-bold">Tasks</h1>
 					</div>
 					@SearchBar()
-					<div class="card w-full bg-base-300 shadow-xl justify-center">
+					<div class="card w-full bg-base-200 shadow-xl justify-center">
 						<div class="card-body">
 							@ButtonBar()
 							<div class="p-4 max-h-80 w-full flex flex-col overflow-y-scroll">
-								@TaskItem()
+								for i, item := range(m) {
+									@TaskItem(i, item)
+								}
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="fixed bottom-4 right-4">
-				<button class="btn btn-primary">+ Add Task</button>
+				<button class="btn btn-lg btn-primary font-semibold">+ Add Task</button>
 			</div>
 		</body>
 	}

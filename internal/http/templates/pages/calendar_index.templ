@@ -16,7 +16,7 @@ script drawCalendar(data []models.TaskView) {
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
         events: events.map(event => ({
-            title: event.Title,
+            title: event.Description,
             start: event.Schedule
         }))
     });
@@ -40,4 +40,3 @@ templ Calendar(tasks []models.TaskView, logoutURL string) {
 		</body>
 	}
 }
-

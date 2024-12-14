@@ -3,6 +3,10 @@ package http
 import "encoding/json"
 
 func parseTagsJSON(data []byte) (tags []string, err error) {
+	if len(data) == 0 {
+		return
+	}
+
 	var items []struct {
 		Value string `json:"value"`
 	}

@@ -45,6 +45,21 @@ func (s *UserService) Create(ctx context.Context, cmd domain.CreateUserCmd) (dom
 	return toDomainUser(user), nil
 }
 
+func (s *UserService) Update(ctx context.Context, cmd domain.UpdateUserCmd) (domain.User, error) {
+	conn, err := s.db.Acquire(ctx)
+	if err != nil {
+		return domain.User{}, err
+	}
+	defer conn.Release()
+
+	q := sqlc.New(conn)
+	user, err := updateUser(ctx, q, cmd)
+	if err != nil {
+		return toDomainUser(user), err
+	}
+	return toDomainUser(user), nil
+}
+
 func (s *UserService) ByEmail(ctx context.Context, email string) (domain.User, error) {
 	conn, err := s.db.Acquire(ctx)
 	if err != nil {
@@ -131,6 +146,76 @@ func createUser(ctx context.Context, q UserQueries, cmd domain.CreateUserCmd) (s
 	return user, nil
 }
 
+// updateUser is an authenticated endpoint and
+// it checks context for the current logged in user
+func updateUser(ctx context.Context, q UserQueries, cmd domain.UpdateUserCmd) (sqlc.User, error) {
+
+	var (
+		err   error
+		bytes []byte
+	)
+
+	userID := domain.UserIDFromContext(ctx)
+	if userID == nil {
+		return sqlc.User{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "no user ID in context",
+		}
+	}
+	user, err := userByID(ctx, q, userID.String())
+
+	if cmd.Username != nil {
+		user.Username = *cmd.Username
+	}
+
+	if cmd.FirstName != nil {
+		user.FirstName = *cmd.FirstName
+	}
+
+	if cmd.LastName != nil {
+		user.LastName = *cmd.LastName
+	}
+
+	if cmd.Email != nil {
+		user.Email = *cmd.Email
+	}
+
+	if cmd.Password != nil {
+		bytes, err = bcrypt.GenerateFromPassword([]byte(*cmd.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return sqlc.User{}, nil
+		}
+
+		user.Password = string(bytes)
+	}
+
+	user, err = q.UpdateUser(ctx, sqlc.UpdateUserParams{
+		ID:        user.ID,
+		Username:  user.Username,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Password:  user.Password,
+	})
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if !errors.As(err, &pgErr) {
+			return sqlc.User{}, err
+		}
+
+		switch pgErr.Code {
+		case pgErrCode_UniqueViolation:
+			return sqlc.User{}, &domain.Error{
+				Code:    domain.ECONFLICT,
+				Message: "this email exists",
+			}
+		default:
+			return sqlc.User{}, err
+		}
+	}
+	return user, nil
+}
+
 func userByID(ctx context.Context, q UserQueries, id string) (sqlc.User, error) {
 	uuid, err := uuid.Parse(id)
 	if err != nil {
@@ -201,6 +286,7 @@ func toDomainUser(user sqlc.User) domain.User {
 
 type UserQueries interface {
 	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
+	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error)
 	UserByID(ctx context.Context, id uuid.UUID) (sqlc.User, error)
 	UserByEmail(ctx context.Context, email string) (sqlc.User, error)
 }

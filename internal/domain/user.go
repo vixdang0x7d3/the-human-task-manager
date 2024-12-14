@@ -31,3 +31,11 @@ type CreateUserCmd struct {
 	Email     string
 	Password  string
 }
+
+type UpdateUserCmd struct {
+	Username  *string
+	FirstName *string
+	LastName  *string
+	Email     *string
+	Password  *string
+}

@@ -32,8 +32,8 @@ func TestTaskItemByID(t *testing.T) {
 		task := MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "TESTTASK0",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T13:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T13:00",
 			Wait:        "",
 			Priority:    "H",
 			Tags:        []string{"school", "INT10187"},
@@ -83,11 +83,6 @@ func TestTaskItemByID(t *testing.T) {
 	})
 }
 
-// TODO: unimplemented test cases:
-// invalid filters
-// days and months <= 0
-// unauthorized access
-// pagination ok
 func TestTaskItemFind(t *testing.T) {
 	db := MustOpenDB(t, context.Background())
 	s := postgres.NewTaskItemService(db, logrus.New())
@@ -106,8 +101,8 @@ func TestTaskItemFind(t *testing.T) {
 		MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "TESTTASK1",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T07:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T07:00",
 			Wait:        "",
 			Priority:    "M",
 			Tags:        []string{"school", "INT10187"},
@@ -115,8 +110,8 @@ func TestTaskItemFind(t *testing.T) {
 		MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "TESTTASK2",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T07:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T07:00",
 			Wait:        "",
 			Priority:    "M",
 			Tags:        []string{"school", "INT10111"},
@@ -124,8 +119,8 @@ func TestTaskItemFind(t *testing.T) {
 		MustCreateTask(t, ctxWithUser, db, domain.CreateTaskCmd{
 			ProjectID:   "",
 			Description: "TESTTASK3",
-			Deadline:    "2024-12-13T07:00",
-			Schedule:    "2024-12-13T13:00",
+			Deadline:    "2024-12-30T07:00",
+			Schedule:    "2024-12-30T13:00",
 			Wait:        "",
 			Priority:    "L",
 			Tags:        []string{"school", "INT10112"},

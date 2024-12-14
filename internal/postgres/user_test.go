@@ -87,7 +87,67 @@ func TestCreateUser(t *testing.T) {
 	})
 }
 
-func TestByEmail(t *testing.T) {
+func TestUpdateUser(t *testing.T) {
+	db := MustOpenDB(t, context.Background())
+	defer CloseDB(t, db)
+
+	s := postgres.NewUserService(db, logrus.New())
+
+	t.Run("OK", func(t *testing.T) {
+		user := MustCreateUser(t, context.Background(), db, domain.CreateUserCmd{
+			Username:  "USERNAME27",
+			FirstName: "FIRSTNAME27",
+			LastName:  "LASTNAME27",
+			Email:     "EMAIL27@email.com",
+		})
+
+		ctxWithUser := domain.NewContextWithUser(context.Background(), &user)
+
+		username := "steveee"
+		firstName := "Steve"
+		lastName := "Dep Trai"
+		email := "stevedt@email.com"
+		password := "stevebibede"
+
+		_, err := s.Update(ctxWithUser, domain.UpdateUserCmd{
+			Username:  &username,
+			FirstName: &firstName,
+			LastName:  &lastName,
+			Email:     &email,
+			Password:  &password,
+		})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		updated, err := s.ByID(ctxWithUser, user.ID.String())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if updated.Username != username {
+			t.Errorf("username mismatch: %q != %q", updated.Username, username)
+		}
+
+		if updated.FirstName != firstName {
+			t.Errorf("first name mismatch: %q != %q", updated.FirstName, firstName)
+		}
+
+		if updated.LastName != lastName {
+			t.Errorf("last name mismatch: %q != %q", updated.LastName, lastName)
+		}
+
+		if updated.Email != email {
+			t.Errorf("email mismatch: %q != %q", updated.Email, email)
+		}
+
+		if _, err := s.ByEmailWithPassword(context.Background(), email, password); err != nil {
+			t.Errorf("password mismatch, got error: %v", err)
+		}
+	})
+}
+
+func TestUserByEmail(t *testing.T) {
 	db := MustOpenDB(t, context.Background())
 	defer CloseDB(t, db)
 	t.Skip("no test")

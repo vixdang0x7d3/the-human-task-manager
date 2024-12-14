@@ -153,7 +153,7 @@ func TaskDetail(m models.TaskView, tags []string, logoutURL string) templ.Compon
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templates.Head(m.Title).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templates.Head(m.Description).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -170,9 +170,9 @@ func TaskDetail(m models.TaskView, tags []string, logoutURL string) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(m.Title)
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(m.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 130, Col: 110}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_detail.templ`, Line: 130, Col: 116}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
