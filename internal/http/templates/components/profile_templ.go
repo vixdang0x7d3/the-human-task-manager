@@ -51,33 +51,33 @@ func ChangeInfoForm(m models.UserView, postURL string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(m.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 18, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 23, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label></label><div class=\"flex flex-row gap-6\"><label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">First Name</span></div><input id=\"firstname\" name=\"username\" type=\"text\" class=\"grow input input-bordered input-sm w-full max-w-xs\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label></label><div class=\"flex flex-row gap-6\"><label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">First Name</span></div><input id=\"first_name\" name=\"first_name\" type=\"text\" class=\"grow input input-bordered input-sm w-full max-w-xs\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(m.FirstName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 27, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 36, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">Last Name</span></div><input id=\"lastname\" name=\"username\" type=\"text\" class=\"grow input input-bordered input-sm w-full max-w-xs\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">Last Name</span></div><input id=\"last_name\" name=\"last_name\" type=\"text\" class=\"grow input input-bordered input-sm w-full max-w-xs\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(m.LastName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 34, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/profile.templ`, Line: 48, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

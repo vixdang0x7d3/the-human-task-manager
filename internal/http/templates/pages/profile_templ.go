@@ -78,33 +78,33 @@ func Profile(m models.UserView, infoURL string, logoutURL string) templ.Componen
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(m.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 28, Col: 121}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 29, Col: 121}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label></label><div class=\"flex flex-row gap-6\"><label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">First Name</span></div><input id=\"firstname\" name=\"firstname\" type=\"text\" class=\"grow input input-bordered input-disabled input-sm w-full max-w-xs\" readonly value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label></label><div class=\"flex flex-row gap-6\"><label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">First Name</span></div><input id=\"first_name\" name=\"first_name\" type=\"text\" class=\"grow input input-bordered input-disabled input-sm w-full max-w-xs\" readonly value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(m.FirstName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 36, Col: 163}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 37, Col: 165}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">Last Name</span></div><input id=\"lastname\" name=\"lastname\" type=\"text\" class=\"grow input input-bordered input-disabled input-sm w-full max-w-xs\" readonly value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></label> <label class=\"form-control w-full max-w-xs\"><div class=\"label\"><span class=\"label-text\">Last Name</span></div><input id=\"last_name\" name=\"last_name\" type=\"text\" class=\"grow input input-bordered input-disabled input-sm w-full max-w-xs\" readonly value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(m.LastName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 42, Col: 160}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 43, Col: 162}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -117,7 +117,7 @@ func Profile(m models.UserView, infoURL string, logoutURL string) templ.Componen
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(m.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 64, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 67, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
