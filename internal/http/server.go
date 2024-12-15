@@ -30,10 +30,11 @@ type Server struct {
 	echo     *echo.Echo
 	sessions *scs.SessionManager
 
-	UserService     domain.UserService
-	TaskService     domain.TaskService
-	TaskItemService domain.TaskItemService
-	ProjectService  domain.ProjectService
+	UserService              domain.UserService
+	TaskService              domain.TaskService
+	TaskItemService          domain.TaskItemService
+	ProjectService           domain.ProjectService
+	ProjectmembershipService domain.ProjectMembershipService
 }
 
 func NewServer(logger *logrus.Logger) *Server {
@@ -91,11 +92,7 @@ func NewServer(logger *logrus.Logger) *Server {
 		r := s.echo.Group("", s.requireAuth(s.sessions))
 		s.registerUserRoutes(r)
 		s.registerTaskRoutes(r)
-	}
-
-	// registers authenticated routes
-	{
-		r := s.echo.Group("", s.requireAuth(s.sessions))
+		s.registerProjectRoutes(r)
 		s.registerCalendarRoutes(r)
 	}
 

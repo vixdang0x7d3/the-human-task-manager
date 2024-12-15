@@ -60,6 +60,19 @@ func (s *UserService) Update(ctx context.Context, cmd domain.UpdateUserCmd) (dom
 	return toDomainUser(user), nil
 }
 
+func (s *UserService) Delete(ctx context.Context) (domain.User, error) {
+	conn, err := s.db.Acquire(ctx)
+	if err != nil {
+		return domain.User{}, err
+	}
+	q := sqlc.New(conn)
+	user, err := deleteUser(ctx, q)
+	if err != nil {
+		return toDomainUser(user), err
+	}
+	return toDomainUser(user), err
+}
+
 func (s *UserService) ByEmail(ctx context.Context, email string) (domain.User, error) {
 	conn, err := s.db.Acquire(ctx)
 	if err != nil {
@@ -232,6 +245,27 @@ func updateUser(ctx context.Context, q UserQueries, cmd domain.UpdateUserCmd) (s
 	return user, nil
 }
 
+func deleteUser(ctx context.Context, q UserQueries) (sqlc.User, error) {
+	var (
+		err error
+	)
+
+	userID := domain.UserIDFromContext(ctx)
+	if userID == nil {
+		return sqlc.User{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "deleteUser: no user ID in context",
+		}
+	}
+
+	deletedUser, err := q.DeleteUser(ctx, *userID)
+	if err != nil {
+		return deletedUser, err
+	}
+
+	return deletedUser, nil
+}
+
 func userByID(ctx context.Context, q UserQueries, id string) (sqlc.User, error) {
 	uuid, err := uuid.Parse(id)
 	if err != nil {
@@ -329,4 +363,5 @@ type UserQueries interface {
 	UpdateUser(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error)
 	UserByID(ctx context.Context, id uuid.UUID) (sqlc.User, error)
 	UserByEmail(ctx context.Context, email string) (sqlc.User, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) (sqlc.User, error)
 }

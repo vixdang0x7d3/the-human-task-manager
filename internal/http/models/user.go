@@ -5,6 +5,7 @@ type UserView struct {
 	Email     string
 	FirstName string
 	LastName  string
+	ID        string
 }
 
 type TaskViewModel struct {

@@ -1,0 +1,176 @@
+package pages
+
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+import "strconv"
+import "strings"
+import "fmt"
+
+templ SearchBarProject() {
+	<div class="flex w-full items-center gap-2 p-4">
+		<label class="input input-bordered flex items-center gap-2">
+			<input type="text" class="grow" placeholder="Search"/>
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4 opacity-70">
+				<path
+					fill-rule="evenodd"
+					d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+					clip-rule="evenodd"
+				></path>
+			</svg>
+		</label>
+	</div>
+}
+
+templ buttonBarRight() {
+	<div class="flex gap-2">
+		<button id="prev-btn" class="btn btn-xs btn-square">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+		</button>
+		<span>(Page 1)</span>
+		<button id="next-btn" class="btn btn-xs btn-square">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</button>
+	</div>
+}
+
+templ ButtonBarProject() {
+    <div class="flex justify-between items-center px-4 py-2">
+		<span></span>
+		@ButtonBarRight()
+	</div>
+}
+
+templ ButtonAcceptJoinProject(prj models.ProjectMembershipItemView) {
+    <div class="col-span-2 flex flex-row gap-2 justify-end">
+        <div id="error-invitation" ></div>
+		<a hx-get={ string(templ.SafeURL(fmt.Sprintf("/accept-invitation/%s", prj.ProjectID))) } hx-target-error="#error-invitation" class="btn btn-square btn-sm btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+        </a>
+        <a hx-delete={ string(templ.SafeURL(fmt.Sprintf("/denine-invitation/%s", prj.ProjectID))) } hx-target-error="#error-invitation" class="btn btn-square btn-sm btn-primary btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+        </a>
+    </div>
+}
+
+templ ModalNewProject(postURL string) {
+	<dialog id="modal_create_project" class="modal">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold pb-2">Creating new project</h3>
+		<form hx-post={ postURL } hx-target-error="#title-message">
+			<label class="input input-sm input-bordered flex items-center gap-2">
+				Title
+				<input id="project-title" name="project-title" type="text" class="grow" placeholder="Project Title" />
+			</label>
+			<div id="title-message" class="text-error text-center text-sm"></div>
+			<div class="modal-action">
+				<button class="btn btn-sm">Create</button>
+			</div>
+		</form>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+	</dialog>
+}
+
+templ ModalJoinProject(postURL string) {
+	<dialog id="modal_join_project" class="modal">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold pb-2">Join a project</h3>
+		<form hx-post={ postURL } hx-target-error="#UUID-message">
+			<label class="input input-sm input-bordered flex items-center gap-2">
+				UUID
+				<input id="project-uuid" name="project-uuid" type="text" class="grow" placeholder="Project UUID" />
+			</label>
+			<div id="UUID-message" class="text-error text-center text-sm"></div>
+			<div class="modal-action">
+				<button class="btn btn-sm">Send request</button>
+			</div>
+		</form>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+	</dialog>
+}
+
+templ ProjectItem(index int, m models.ProjectMembershipItemView) {
+    <div class="indicator w-full">
+		<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
+		<div tabindex="0" class="collapse collapse-arrow bg-base-300 px-4">
+			<div class="h-16 py-4">
+				<div class="grid grid-cols-4 justify-around">
+					if m.Role == "member" || m.Role == "owner"{
+                        <a href={ templ.SafeURL(fmt.Sprintf("/project/%s", m.ProjectID)) } class="text-primary-content font-semibold">{ m.Title }</a>
+                    } else {
+                        <span class="text-primary-content font-semibold">{ m.Title }</span>
+                    }
+					<span class="badge badge-primary font-bold">{ strings.ToUpper(m.Role) }</span>
+                    if m.Role == "invited" {
+                        @ButtonAcceptJoinProject(m)
+                    }
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ ProjectIndex(m []models.ProjectMembershipItemView,logoutURL string) {
+    @templates.Boilerplate(){
+        @templates.Head("Projects"){
+			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+		}
+        <body hx-ext="response-targets">
+			@ModalNewProject("/save-create-project")
+			@ModalJoinProject("/join-project-request")
+            @templates.Navbar(logoutURL)
+			<div id="alert" class="fixed top-12 right-4"></div>
+            <div class="flex items-center justify-center py-4">
+				<div class="flex flex-col w-6/12">
+					<div class="flex justify-between items-center px-4 py-2 bg-base-100">
+						<h1 class="text-4xl font-bold">Tasks</h1>
+					</div>
+					@SearchBarProject()
+					<div class="card w-full bg-base-200 shadow-xl justify-center">
+						<div class="card-body">
+							@ButtonBarProject()
+							<div class="p-4 max-h-80 w-full flex flex-col gap-3 overflow-y-scroll">
+								for i, item := range(m) {
+									@ProjectItem(i, item)
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="fixed bottom-4 right-4">
+            	<!-- The button to open modal -->
+				<button class="btn btn-primary font-semibold" onclick="modal_create_project.showModal()">+ Create Project</button>
+				
+				<button class="btn btn-primary font-semibold" onclick="modal_join_project.showModal()">+ Join Project</button>              
+			</div>
+        </body>
+    }
+}
