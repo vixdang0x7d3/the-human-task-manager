@@ -21,3 +21,8 @@ WHERE id=$1;
 -- name: UserByEmail :one
 SELECT * FROM users
 WHERE email=$1;
+
+-- name: DeleteUser :one
+DELETE FROM users
+WHERE id=$1
+RETURNING *;

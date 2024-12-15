@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -23,10 +22,18 @@ func (s *Server) registerUserRoutes(r *echo.Group) {
 	r.POST("/change-password", s.handleChangeProfilePassword)
 	r.POST("/change-password-save", s.handleSaveprofilePasswordChange)
 
+	r.DELETE("/delete-account", s.handleDeleteUser)
 	r.DELETE("/logout", s.handleLogout)
 }
 
 func (s *Server) handleIndexShow(c echo.Context) error {
+
+	// state := "started"
+	// taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
+	// 	State:  &state,
+	// 	Offset: 0,
+	// 	Limit:  100,
+	// })
 
 	user := domain.UserFromContext(c.Request().Context())
 	if user == nil {
@@ -50,9 +57,10 @@ func (s *Server) handleProfileShow(c echo.Context) error {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
+		ID:        user.ID.String(),
 	}
 
-	return render(c, http.StatusOK, pages.Profile(m, "/change-info", "/change-email", "/change-password", "/logout"))
+	return render(c, http.StatusOK, pages.Profile(m, "/change-info", "/change-email", "/change-password", "/delete-account", "/logout"))
 }
 
 func (s *Server) handleChangeProfileInfo(c echo.Context) error {
@@ -96,12 +104,44 @@ func (s *Server) handleSaveProfileInfoChange(c echo.Context) error {
 		return c.HTML(http.StatusBadRequest, "invalid form data")
 	}
 
-	if err := c.Validate(form); err != nil {
-		c.Logger().Error(err)
-		return c.HTML(http.StatusBadRequest, "invalid value")
+	if err := c.Validate(&form); err != nil {
+		var userNameMessage, firstNameMessage, lastNameMessage string
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			for _, fieldErr := range validationErrors {
+				switch fieldErr.Field() {
+				case "Username":
+					userNameMessage = "User Name is required."
+				case "FirstName":
+					firstNameMessage = "First Name is required."
+				case "LastName":
+					lastNameMessage = "Last Name is required."
+				}
+			}
+		}
+		return render(c, http.StatusBadRequest, components.InfoErrorMessage(userNameMessage, firstNameMessage, lastNameMessage))
 	}
 
 	// save info into database_______________________!!!
+	cmd := domain.UpdateUserCmd{
+		Username:  &form.Username,
+		FirstName: &form.FirstName,
+		LastName:  &form.LastName,
+	}
+
+	user, err := s.UserService.Update(c.Request().Context(), cmd)
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EUNAUTHORIZED:
+			return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
+		case domain.EINTERNAL:
+			c.Logger().Error(err)
+			return c.HTML(http.StatusInternalServerError, "internal error")
+		}
+	}
+
+	c.Logger().Info("update user successful ", user.ID)
+	s.sessions.Put(c.Request().Context(), "userID", user.ID.String())
 
 	m := models.UserView{
 		Username:  form.Username,
@@ -152,6 +192,23 @@ func (s *Server) handleSaveProfileEmailChange(c echo.Context) error {
 	}
 
 	// save info into database_______________________!!!
+	cmd := domain.UpdateUserCmd{
+		Email: &form.Email,
+	}
+
+	user, err := s.UserService.Update(c.Request().Context(), cmd)
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EUNAUTHORIZED:
+			return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
+		case domain.EINTERNAL:
+			c.Logger().Error(err)
+			return c.HTML(http.StatusInternalServerError, "internal error")
+		}
+	}
+
+	c.Logger().Info("update user successful ", user.ID)
+	s.sessions.Put(c.Request().Context(), "userID", user.ID.String())
 
 	m := models.UserView{
 		Email: form.Email,
@@ -197,17 +254,53 @@ func (s *Server) handleSaveprofilePasswordChange(c echo.Context) error {
 	}
 
 	// check current password_______________________!!!
+	_, err := s.UserService.WithPassword(c.Request().Context(), form.CurrentPassword)
+	if err != nil {
+		return render(c, http.StatusBadRequest, components.PassWordErrorMessage("wrong current password", ""))
+	}
 
 	// save info into database_______________________!!!
+	cmd := domain.UpdateUserCmd{
+		Password: &form.NewPassword,
+	}
+	user, err := s.UserService.Update(c.Request().Context(), cmd)
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EUNAUTHORIZED:
+			return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
+		case domain.EINTERNAL:
+			c.Logger().Error(err)
+			return c.HTML(http.StatusInternalServerError, "internal error")
+		}
+	}
+	c.Logger().Info("update user successful ", user.ID)
+	s.sessions.Put(c.Request().Context(), "userID", user.ID.String())
 
 	return render(c, http.StatusOK, components.SavedPasswordForm("/change-password"))
+}
+
+func (s *Server) handleDeleteUser(c echo.Context) error {
+	_, err := s.UserService.Delete(c.Request().Context())
+	if err != nil {
+		c.Logger().Error(err)
+		return c.HTML(http.StatusInternalServerError, "internal error")
+	}
+
+	err = s.sessions.Destroy(c.Request().Context())
+	if err != nil {
+		c.Logger().Error(err)
+		return c.HTML(http.StatusInternalServerError, "internal error")
+	}
+
+	c.Response().Header().Set("HX-Redirect", "/u/login")
+	return c.NoContent(http.StatusOK)
 }
 
 // TODO: flash message support
 func (s *Server) handleLogout(c echo.Context) error {
 	err := s.sessions.Destroy(c.Request().Context())
 	if err != nil {
-		log.Println(err)
+		c.Logger().Error(err)
 		return c.HTML(http.StatusInternalServerError, "internal error")
 	}
 

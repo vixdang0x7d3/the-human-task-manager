@@ -22,6 +22,9 @@ templ ChangeInfoForm(m models.UserView, postURL string) {
 					</svg>
 					<input id="username" name="username" type="text" class="grow" value={ m.Username }/>
 				</label>
+				<div class="label">
+					<div id="username-message" class="text-error label-text-alt text-center"></div>
+				</div>
 			</label>
 			<div class="flex flex-row gap-6">
 				<label class="form-control w-full max-w-xs">
@@ -49,6 +52,18 @@ templ ChangeInfoForm(m models.UserView, postURL string) {
 					/>
 				</label>
 			</div>
+			<div class="flex flex-row gap-6">
+				<div class="label">
+					<div id="firstname-message" class="text-error label-text-alt text-center">
+						<span></span>
+					</div>
+				</div>
+				<div class="label">
+					<div id="lastname-message" class="text-error label-text-alt text-center">
+						<span></span>
+					</div>
+				</div>
+			</div>
 			<div id="message" class="text-error text-center"></div>
 			<div class="card-actions justify-end">
 				<button type="submit" id="save-info" class="btn btn-sm btn-neutral mt-4">
@@ -66,7 +81,7 @@ templ SavedInfoForm(m models.UserView, postURL string) {
 }
 
 templ ChangeEmailForm(m models.UserView, postURL string) {
-	<form hx-post={ string(templ.URL(postURL)) } hx-target="#user-email" hx-target-error="#message">
+	<form hx-post={ string(templ.URL(postURL)) } hx-target="#user-email" hx-target-error="#email-message">
 		<div class="flex flex-row justify-between">
 			<label class="form-control w-full max-w-xs">
 				<div class="label">
@@ -82,12 +97,14 @@ templ ChangeEmailForm(m models.UserView, postURL string) {
 							d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z">
 						</path>
 					</svg>
-					<input id="email" name="email" type="text" class="grow" value={ m.Email } />
+					<input id="email" name="email" type="email" class="grow" value={ m.Email } />
 				</label>
+				<div class="label">
+					<div id="email-message" class="text-error text-sm label-text-alt text-center"></div>
+				</div>
 			</label>
 			<label class="form-control">
 				<div class="label">
-					<div id="message" class="text-error text-center"></div>
 				</div>
 				<button id="change-email" class="btn btn-sm btn-neutral mt-4 ml-2">Save Email</button>
 			</label>
@@ -154,11 +171,23 @@ templ SavedPasswordForm(postURL string) {
 	</div>
 }
 
+templ InfoErrorMessage(userNameMessage, firstNameMessage, lastNameMessage string) {
+	<div id="username-message" hx-swap-oob="true" class="text-error text-sm">
+		<span>{ userNameMessage }</span>
+	</div>
+	<div id="firstname-message" hx-swap-oob="true" class="text-error text-sm">
+		<span>{ firstNameMessage }</span>
+	</div>
+	<div id="lastname-message" hx-swap-oob="true" class="text-error text-sm">
+		<span>{ lastNameMessage }</span>
+	</div>
+}
+
 templ PassWordErrorMessage(currentPwMessage, newPwMessage string) {
-	<div id="current-password-message" hx-swap-oob="true" class="text-error">
+	<div id="current-password-message" hx-swap-oob="true" class="text-error text-sm">
 		<span>{ currentPwMessage }</span>
 	</div>
-	<div id="new-password-message" hx-swap-oob="true" class="text-error">
+	<div id="new-password-message" hx-swap-oob="true" class="text-error text-sm">
 		<span>{ newPwMessage }</span>
 	</div>
 }

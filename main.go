@@ -70,12 +70,14 @@ func (m *Main) Run(ctx context.Context) (err error) {
 	taskService := postgres.NewTaskService(m.db, m.logger)
 	projectService := postgres.NewProjectService(m.db, m.logger)
 	taskItemService := postgres.NewTaskItemService(m.db, m.logger)
+	projectmembershipService := postgres.NewProjectMembershipService(m.db, m.logger)
 
 	m.server.Addr = m.Address
 	m.server.UserService = userService
 	m.server.TaskService = taskService
 	m.server.ProjectService = projectService
 	m.server.TaskItemService = taskItemService
+	m.server.ProjectmembershipService = projectmembershipService
 
 	return m.server.Open()
 }

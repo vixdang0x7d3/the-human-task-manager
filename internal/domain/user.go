@@ -18,6 +18,9 @@ type User struct {
 }
 
 type UserService interface {
+	Update(ctx context.Context, cmd UpdateUserCmd) (User, error)
+	Delete(ctx context.Context) (User, error)
+	WithPassword(ctx context.Context, password string) (User, error)
 	Create(ctx context.Context, cmd CreateUserCmd) (User, error)
 	ByID(ctx context.Context, id string) (User, error)
 	ByEmail(ctx context.Context, email string) (User, error)
