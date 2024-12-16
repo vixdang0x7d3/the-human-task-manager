@@ -9,27 +9,27 @@ import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 )
 
-templ TaskStat() {
-	<div class="stats shadow bg-base-300">
-		<div class="stat">
-			<div class="stat-value">86%</div>
-			<div class="stat-title">Tasks done</div>
-			<div class="stat-desc text-primary">31 tasks remaining</div>
-		</div>
-	</div>
+templ TaskStat(percentDone int, remain int) {
+    <div id="stat-boad" class="stats shadow bg-base-100 glass text-center">
+        <div class="stat">
+            <div class="stat-value">{ strconv.Itoa(percentDone) }%</div>
+            <div class="stat-title">Tasks done</div>
+            <div class="stat-desc text-primary">{ strconv.Itoa(remain) } tasks remaining</div>
+        </div>
+    </div>
 }
 
-templ MemberItem(index int, m models.ProjectMembershipItemView) {
-	<div class="indicator w-full">
+templ MemberItem(index int, m models.ProjectMembershipItemView, prj models.ProjectView, currentUserID string) {
+    <div class="indicator w-full">
 		<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
 		<div tabindex="0" class="collapse collapse-arrow bg-base-300 px-4">
 			<div class="h-16 py-4">
 				<div class="grid grid-cols-4 justify-around">
 					<span class="text-primary-content font-semibold">{ m.Username }</span>
 					<span class="badge badge-primary font-bold">{ strings.ToUpper(m.Role) }</span>
-					if m.Role == "requested" {
-						@ButtonAcceptMemberRequest(m)
-					}
+                    if (m.Role == "requested") || (prj.UserID == currentUserID) {
+                        @ButtonAcceptMemberRequest(m)
+                    }
 				</div>
 			</div>
 		</div>

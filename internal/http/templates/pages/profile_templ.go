@@ -255,14 +255,14 @@ func Profile(m models.UserView, infoURL, emailURL, passwordURL, deleteURL, logou
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex items-center justify-center py-10\"><div class=\" card bg-base-200 w-4/12 shadow-xl\"><div id=\"card-body\" class=\"card-body items-center text-center\"><label class=\"input input-sm w-full input-bordered flex items-center mt-4 gap-2\"><input id=\"UUID\" type=\"text\" class=\"grow\" placeholder=\"ID\" readonly value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"alert\" class=\"fixed top-12 right-4\"></div><div class=\"flex items-center justify-center py-10\"><div class=\" card bg-base-200 w-4/12 shadow-xl\"><div id=\"card-body\" class=\"card-body items-center text-center\"><label class=\"input input-sm w-full input-bordered flex items-center mt-4 gap-2\"><input id=\"UUID\" type=\"text\" class=\"grow\" placeholder=\"ID\" readonly value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(m.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 137, Col: 87}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 138, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -299,7 +299,7 @@ func Profile(m models.UserView, infoURL, emailURL, passwordURL, deleteURL, logou
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(deleteURL)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 160, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/profile.templ`, Line: 161, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
