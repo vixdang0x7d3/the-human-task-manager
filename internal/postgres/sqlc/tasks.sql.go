@@ -180,7 +180,36 @@ func (q *Queries) SetTaskProject(ctx context.Context, arg SetTaskProjectParams) 
 	return i, err
 }
 
-const startWaitingTasks = `-- name: StartWaitingTasks :many
+const startTask = `-- name: StartTask :one
+UPDATE tasks
+SET
+	state = 'started'::task_state
+WHERE id= $1
+RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
+`
+
+func (q *Queries) StartTask(ctx context.Context, id uuid.UUID) (Task, error) {
+	row := q.db.QueryRow(ctx, startTask, id)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ProjectID,
+		&i.CompletedBy,
+		&i.Description,
+		&i.Priority,
+		&i.State,
+		&i.Deadline,
+		&i.Schedule,
+		&i.Wait,
+		&i.Create,
+		&i.End,
+		&i.Tags,
+	)
+	return i, err
+}
+
+const startTasks = `-- name: StartTasks :many
 UPDATE tasks
 SET
 	state = 'started'::task_state
@@ -190,8 +219,8 @@ AND	wait <= now()
 RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
 `
 
-func (q *Queries) StartWaitingTasks(ctx context.Context) ([]Task, error) {
-	rows, err := q.db.Query(ctx, startWaitingTasks)
+func (q *Queries) StartTasks(ctx context.Context) ([]Task, error) {
+	rows, err := q.db.Query(ctx, startTasks)
 	if err != nil {
 		return nil, err
 	}
@@ -255,17 +284,19 @@ UPDATE tasks
 SET 
 	description = $1,
 	priority = $2::task_priority,
-	deadline = $3,
-	schedule = $4,
-	wait = $5,
-	tags = $6
-WHERE id = $7
+	state = $3::task_state,
+	deadline = $4,
+	schedule = $5,
+	wait = $6,
+	tags = $7
+WHERE id = $8
 RETURNING id, user_id, project_id, completed_by, description, priority, state, deadline, schedule, wait, "create", "end", tags
 `
 
 type UpdateTaskParams struct {
 	Description string
 	Priority    TaskPriority
+	State       TaskState
 	Deadline    time.Time
 	Schedule    time.Time
 	Wait        time.Time
@@ -277,6 +308,7 @@ func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) (Task, e
 	row := q.db.QueryRow(ctx, updateTask,
 		arg.Description,
 		arg.Priority,
+		arg.State,
 		arg.Deadline,
 		arg.Schedule,
 		arg.Wait,

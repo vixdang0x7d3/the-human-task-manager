@@ -9,10 +9,12 @@ import (
 var _ domain.TaskService = (*TaskService)(nil)
 
 type TaskService struct {
-	fnCreate   func(ctx context.Context, cmd domain.CreateTaskCmd) (domain.Task, error)
-	fnDelete   func(ctx context.Context, id string) (domain.Task, error)
-	fnUpdate   func(ctx context.Context, id string, cmd domain.UpdateTaskCmd) (domain.Task, error)
-	fnComplete func(ctx context.Context, id string) (domain.Task, error)
+	fnCreate     func(ctx context.Context, cmd domain.CreateTaskCmd) (domain.Task, error)
+	fnDelete     func(ctx context.Context, id string) (domain.Task, error)
+	fnUpdate     func(ctx context.Context, id string, cmd domain.UpdateTaskCmd) (domain.Task, error)
+	fnComplete   func(ctx context.Context, id string) (domain.Task, error)
+	fnSetProject func(ctx context.Context, id string, projectID *string) (domain.Task, error)
+	fnStart      func(ctx context.Context, id string) (domain.Task, error)
 }
 
 func (s *TaskService) Create(ctx context.Context, cmd domain.CreateTaskCmd) (domain.Task, error) {
@@ -29,4 +31,12 @@ func (s *TaskService) Update(ctx context.Context, id string, cmd domain.UpdateTa
 
 func (s *TaskService) Complete(ctx context.Context, id string) (domain.Task, error) {
 	return s.fnComplete(ctx, id)
+}
+
+func (s *TaskService) SetProject(ctx context.Context, id string, projectID *string) (domain.Task, error) {
+	return s.fnSetProject(ctx, id, projectID)
+}
+
+func (s *TaskService) Start(ctx context.Context, id string) (domain.Task, error) {
+	return s.fnStart(ctx, id)
 }

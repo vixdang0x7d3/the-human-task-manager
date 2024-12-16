@@ -293,6 +293,61 @@ func (s *TaskService) SetProject(ctx context.Context, id string, projectID *stri
 	return toDomainTask(task), nil
 }
 
+func (s *TaskService) Start(ctx context.Context, id string) (domain.Task, error) {
+
+	conn, err := s.db.Acquire(ctx)
+	if err != nil {
+		return domain.Task{}, err
+	}
+	defer conn.Release()
+
+	q := sqlc.New(conn)
+
+	userID := domain.UserIDFromContext(ctx)
+	if userID == nil {
+		return domain.Task{}, &domain.Error{
+			Code:    domain.EUNAUTHORIZED,
+			Message: "Delete: no user ID in context",
+		}
+	}
+
+	task, err := taskByID(ctx, q, id)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	if task.ProjectID.Valid {
+		if membership, err := membershipByIDs(ctx, q, domain.ProjectMembershipCmd{
+			UserID:    userID.String(),
+			ProjectID: task.ProjectID.UUID.String(),
+		}); err != nil {
+			return domain.Task{}, &domain.Error{
+				Code:    domain.EUNAUTHORIZED,
+				Message: "Delete: unauthorized delete, no association with this task",
+			}
+		} else if membership.Role == sqlc.MembershipRoleInvited || membership.Role == sqlc.MembershipRoleRequested {
+			return domain.Task{}, &domain.Error{
+				Code:    domain.EUNAUTHORIZED,
+				Message: "Delete: unauthorized delete, unaccepted association with this task",
+			}
+		}
+	} else {
+		if *userID != task.UserID {
+			return domain.Task{}, &domain.Error{
+				Code:    domain.EUNAUTHORIZED,
+				Message: "Delete: unauthorized delete, not task owner",
+			}
+		}
+	}
+
+	task, err = startTask(ctx, q, task)
+	if err != nil {
+		return domain.Task{}, err
+	}
+	return toDomainTask(task), nil
+
+}
+
 func createTask(ctx context.Context, q TaskQueries, cmd domain.CreateTaskCmd) (sqlc.Task, error) {
 
 	var (
@@ -508,6 +563,7 @@ func updateTask(ctx context.Context, q TaskQueries, task sqlc.Task, cmd domain.U
 		}
 
 		task.Wait = wait
+		task.State = sqlc.TaskStateWaiting
 	}
 
 	if cmd.Priority != "" {
@@ -531,6 +587,7 @@ func updateTask(ctx context.Context, q TaskQueries, task sqlc.Task, cmd domain.U
 		Deadline:    task.Deadline,
 		Schedule:    task.Schedule,
 		Wait:        task.Wait,
+		State:       task.State,
 		Priority:    task.Priority,
 		Tags:        task.Tags,
 	})
@@ -610,12 +667,23 @@ func toDomainTask(task sqlc.Task) domain.Task {
 	}
 }
 
+func startTask(ctx context.Context, q TaskQueries, task sqlc.Task) (sqlc.Task, error) {
+
+	startedTask, err := q.StartTask(ctx, task.ID)
+	if err != nil {
+		return startedTask, err
+	}
+
+	return startedTask, nil
+}
+
 type TaskQueries interface {
 	TaskByID(ctx context.Context, id uuid.UUID) (sqlc.Task, error)
 	CreateTask(ctx context.Context, arg sqlc.CreateTaskParams) (sqlc.Task, error)
 	UpdateTask(ctx context.Context, arg sqlc.UpdateTaskParams) (sqlc.Task, error)
 	CompleteTask(ctx context.Context, arg sqlc.CompleteTaskParams) (sqlc.Task, error)
 	DeleteTask(ctx context.Context, id uuid.UUID) (sqlc.Task, error)
-	StartWaitingTasks(ctx context.Context) ([]sqlc.Task, error)
+	StartTasks(ctx context.Context) ([]sqlc.Task, error)
+	StartTask(ctx context.Context, id uuid.UUID) (sqlc.Task, error)
 	SetTaskProject(ctx context.Context, arg sqlc.SetTaskProjectParams) (sqlc.Task, error)
 }

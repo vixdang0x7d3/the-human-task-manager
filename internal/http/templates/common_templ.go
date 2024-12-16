@@ -137,4 +137,25 @@ func Navbar(logoutURL string) templ.Component {
 	})
 }
 
+func TagScript(tags []string) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_TagScript_d9a5`,
+		Function: `function __templ_TagScript_d9a5(tags){var input = document.querySelector('input[id="tags"]'),
+	// init Tagify script on the above inputs
+	tagify = new Tagify(input, { 
+		whitelist: tags,
+		maxTags: 10,
+		dropdown: {
+			maxItems: 20,           // <- mixumum allowed rendered suggestions
+			classname: 'tags-look', // <- custom classname for this dropdown, so it could be targeted
+			enabled: 0,             // <- show suggestions on focus
+			closeOnSelect: false    // <- do not hide the suggestions dropdown once an item has been selected
+		} 
+	})
+}`,
+		Call:       templ.SafeScript(`__templ_TagScript_d9a5`, tags),
+		CallInline: templ.SafeScriptInline(`__templ_TagScript_d9a5`, tags),
+	}
+}
+
 var _ = templruntime.GeneratedTemplate

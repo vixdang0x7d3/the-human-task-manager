@@ -5,21 +5,35 @@ import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 	"strconv"
 	"strings"
+	"fmt"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 )
 
-templ SearchBar() {
-	<div class="flex w-full items-center gap-2 p-4">
-		<label class="input input-bordered flex items-center gap-2">
-			<input type="text" class="grow" placeholder="Search"/>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4 opacity-70">
-				<path
-					fill-rule="evenodd"
-					d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-					clip-rule="evenodd"
-				></path>
-			</svg>
-		</label>
-		<div class="dropdown">
+templ FilterFormContent(oobResponse bool) {
+	<div
+		id="filter-form"
+		class="flex w-full items-center gap-2 p-4"
+		if oobResponse {
+			hx-swap-oob="outerHTML"
+		}
+	>
+		<div class="join">
+			<div>
+				<div>
+					<input
+						id="query"
+						name="query"
+						type="text"
+						placeholder="Search query"
+						class="input input-bordered grow join-item"
+					/>
+				</div>
+			</div>
+			<div>
+				<input type="submit" class="btn join-item" value="Filter"/>
+			</div>
+		</div>
+		<div class="dropdown dropdown-right dropdown-end">
 			<div tabindex="0" role="button" class="btn m-1">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -34,18 +48,79 @@ templ SearchBar() {
 			</div>
 			<div
 				tabindex="0"
-				class="dropdown-content card card-compact bg-base-100 text-primary-content z-[1] w-64 p-2 shadow"
+				class="dropdown-content card card-compact bg-base-200 text-primary-content z-[1] w-80 p-2 shadow"
 			>
 				<div class="card-body">
 					<h3 class="card-title">Filters:</h3>
-					<p>This should be the filter content</p>
+					<div class="flex flex-row gap-4">
+						<div class="flex flex-col w-6/12 gap-2">
+							<select id="priority" name="priority" class="select select-bordered px-2">
+								for _, p := range []string{
+									domain.TaskPriorityH,
+									domain.TaskPriorityM,
+									domain.TaskPriorityL,
+								} {
+									<option value={ p }>{ p }</option>
+								}
+								<option selected value="">all</option>
+							</select>
+							<select id="state" name="state" class="select select-bordered px-2">
+								<option selected hidden value="started">started</option>
+								for _, s := range []string{
+									domain.TaskStateStarted,
+									domain.TaskStateWaiting,
+									domain.TaskStateCompleted,
+									domain.TaskStateDeleted,
+								} {
+									<option value={ s }>{ s }</option>
+								}
+								<option value="">all</option>
+							</select>
+						</div>
+						<div class="flex flex-col gap-2">
+							<label class="input input-bordered flex items-center gap-2">
+								Days:
+								<input
+									id="days"
+									name="days"
+									type="number"
+									class="grow"
+									value="0"
+									min="0"
+									max="30"
+								/>
+							</label>
+							<label class="input input-bordered flex items-center gap-2">
+								Months:
+								<input
+									id="months"
+									name="months"
+									type="number"
+									class="grow"
+									value="0"
+									min="0"
+									max="12"
+								/>
+							</label>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 }
 
-templ ButtonBarLeft() {
+templ Filter() {
+	<form
+		hx-post="/tasks/find"
+		hx-target="#task-list"
+		hx-push-url="true"
+	>
+		@FilterFormContent(false)
+	</form>
+}
+
+templ TaskBulkUpdateButtons() {
 	<div class="flex gap-2">
 		<button id="hyphon-btn" class="btn btn-square btn-xs">
 			<svg
@@ -118,9 +193,19 @@ templ ButtonBarLeft() {
 	</div>
 }
 
-templ ButtonBarRight() {
-	<div class="flex gap-2">
-		<button id="prev-btn" class="btn btn-xs btn-square">
+templ PaginationButtons(pageOffset, pageTotal int) {
+	<div id="pagination-buttons" class="flex gap-2">
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/tasks?pageOffset=%d", pageOffset-1))) }
+			hx-target="#task-list"
+			id="prev-btn"
+			if pageOffset > 0 {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square disabled"
+				disabled
+			}
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="h-4 w-4"
@@ -131,8 +216,18 @@ templ ButtonBarRight() {
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
 			</svg>
 		</button>
-		<span>(Page 1)</span>
-		<button id="next-btn" class="btn btn-xs btn-square">
+		<span>(Page { fmt.Sprintf("%d/%d", pageOffset+1, pageTotal) })</span>
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/tasks?pageOffset=%d", pageOffset+1))) }
+			hx-target="#task-list"
+			id="next-btn"
+			if pageOffset+1 < pageTotal {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square"
+				disabled
+			}
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="h-4 w-4"
@@ -146,72 +241,184 @@ templ ButtonBarRight() {
 	</div>
 }
 
-templ ButtonBar() {
+templ ButtonBar(pageOffset, pageTotal, taskTotal int) {
 	<div class="flex justify-between items-center px-4 py-2">
-		@ButtonBarLeft()
-		@ButtonBarRight()
+		if true {
+			<p id="show-total" class="text-base-content font-semibold">Total: {  strconv.Itoa(taskTotal) }</p>
+		} else {
+			@TaskBulkUpdateButtons()
+		}
+		@PaginationButtons(pageOffset, pageTotal)
 	</div>
 }
 
-templ TaskItem(index int, m models.TaskItemView) {
-	<div class="indicator w-full">
-		<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
-		<div tabindex="0" class="collapse collapse-arrow bg-base-300 px-4">
-			<div class="h-16 py-4">
-				<div class="grid grid-cols-4 justify-around">
-					<span class="text-primary-content font-semibold">{ m.Description }</span>
-					<span class="badge badge-primary font-bold">{ strings.ToUpper(m.State) }</span>
-					<span class="text-primary-content font-semibold">Urgency: { m.Urgency }</span>
-					<input type="checkbox" name="checkbox" class="radio place-self-end"/>
-				</div>
+script showModal(modalID string) {
+	diag = document.querySelector(modalID)
+	diag.showModal()
+}
+
+templ TaskItemButtons(m models.TaskItemView) {
+	<div class="flex flex-col justify-items-end gap-y-2 w-2/12">
+		if m.State != domain.TaskStateDeleted {
+			if m.State != domain.TaskStateCompleted {
+				<a
+					href={ templ.SafeURL(fmt.Sprintf("/tasks/update/%s", m.ID)) }
+					class="btn btn-primary btn-xs"
+				>Update</a>
+				<button
+					class="btn btn-secondary btn-xs"
+					onclick={ showModal(fmt.Sprintf("#set_project_dialog_%s", m.ID)) }
+				>Set project</button>
+				if m.State != domain.TaskStateWaiting {
+					<button
+						hx-post={ string(templ.SafeURL(fmt.Sprintf("/tasks/complete/%s", m.ID))) }
+						hx-target={ fmt.Sprintf("#task-item-%s", m.ID) }
+						hx-replace-url="/tasks"
+						hx-target-error="#alert"
+						class="btn btn-accent btn-xs"
+					>Complete</button>
+				} else {
+					<button
+						class="btn btn-accent btn-xs"
+						hx-post={ string(templ.SafeURL(fmt.Sprintf("/tasks/start/%s", m.ID))) }
+						hx-target={ fmt.Sprintf("#task-item-content-%s", m.ID) }
+						hx-swap="outerHTML"
+						hx-replace-url="/tasks"
+						hx-target-error="#alert"
+					>Start</button>
+				}
+			}
+			<button
+				hx-delete={ string(templ.SafeURL(fmt.Sprintf("/tasks/delete/%s", m.ID))) }
+				hx-target={ fmt.Sprintf("#task-item-%s", m.ID) }
+				hx-replace-url="/tasks"
+				hx-target-error="#alert"
+				class="btn btn-neutral btn-xs"
+			>Delete</button>
+		}
+	</div>
+}
+
+templ TaskItemHidden(m models.TaskItemView) {
+	<span class="text-primary-content font-semibold">Details: </span>
+	<div
+		id={ fmt.Sprintf("task-item-hidden-%s", m.ID) }
+		class="flex"
+	>
+		<div class="flex flex-col gap-y-2 w-4/12">
+			<span class="badge badge-neutral">Create: { m.Create }</span>
+			<span class="badge badge-primary">Deadline: { m.Deadline }</span>
+			<span class="badge badge-secondary">Schedule: { m.Schedule }</span>
+			<span class="badge badge-accent">Wait: { m.Wait }</span>
+		</div>
+		<div class="flex flex-col w-8/12">
+			<span class="text-primary-content font-semibold">Project: { m.ProjectTitle }</span>
+			<span class="text-primary-content font-semibold">Priority: { m.Priority }</span>
+			<span class="text-primary-content font-semibold">
+				Tags:
+				for _, tag := range m.Tags {
+					<span class="badge badge-secondary mx-1">{ tag }</span>
+				}
+			</span>
+		</div>
+		@TaskItemButtons(m)
+	</div>
+}
+
+templ TaskItemContent(m models.TaskItemView) {
+	<div
+		id={ fmt.Sprintf("task-item-content-%s", m.ID) }
+		tabindex="0"
+		class="collapse bg-base-300 px-4"
+	>
+		<input type="checkbox"/>
+		<div class="collapse-title h-16 py-4">
+			<div class="grid grid-cols-4 justify-around">
+				<span class="text-primary-content font-semibold">{ m.Description }</span>
+				<span class="badge badge-primary font-bold">{ strings.ToUpper(m.State) }</span>
+				<span class="text-primary-content font-semibold">Urgency: { m.Urgency }</span>
 			</div>
-			<div class="collapse-content border border-black">
-				<span class="text-primary-content font-semibold">Details: </span>
-				<div class="flex">
-					<div class="flex flex-col gap-y-2 w-4/12">
-						<span class="badge badge-neutral">Create: { m.Create }</span>
-						<span class="badge badge-primary">Deadline: { m.Deadline }</span>
-						<span class="badge badge-secondary">Schedule: { m.Schedule }</span>
-						<span class="badge badge-accent">Wait: { m.Wait }</span>
-					</div>
-					<div class="flex flex-col w-8/12">
-						<span class="text-primary-content font-semibold">Project: { m.ProjectTitle }</span>
-						<span class="text-primary-content font-semibold">Priority: { m.Priority }</span>
-						<span class="text-primary-content font-semibold">
-							Tags:
-							for _, tag := range m.Tags {
-								<span class="badge badge-secondary mx-1">{ tag }</span>
-							}
-						</span>
-					</div>
-					<div class="flex flex-col justify-items-end gap-y-2 w-2/12">
-						<button class="btn btn-primary btn-xs">Update</button>
-						<button class="btn btn-secondary btn-xs">Complete</button>
-						<button class="btn btn-neutral btn-xs">Delete</button>
-					</div>
-				</div>
-			</div>
+		</div>
+		<div class="collapse-content">
+			@TaskItemHidden(m)
 		</div>
 	</div>
 }
 
-templ TaskIndex(m []models.TaskItemView, logoutURL string) {
+templ SetProjectDialog(m models.TaskItemView, projects []models.ProjectView) {
+	<dialog id={ fmt.Sprintf("set_project_dialog_%s", m.ID) } class="modal">
+		<div class="modal-box">
+			<h3 class="text-lg font-bold pb-2">Set project: </h3>
+			<form
+				class="flex items-center"
+				hx-post={ string(templ.SafeURL(fmt.Sprintf("/tasks/set-project/%s", m.ID))) }
+				hx-target={ fmt.Sprintf("#task-item-hidden-%s", m.ID) }
+				hx-select={ fmt.Sprintf("#task-item-hidden-%s", m.ID) }
+				hx-swap="outerHTML"
+				hx-target-error="#error-text"
+			>
+				<div class="flex flex-col gap-2">
+					<select
+						id="project-id"
+						name="project-id"
+						class="select select-bordered grow m-4"
+					>
+						<option selected hidden value={ m.ProjectID }>{ m.ProjectTitle }</option>
+						<option value="">Unset project (none)</option>
+						for _, project := range projects {
+							<option value={ project.ID }>{ project.Title } </option>
+						}
+					</select>
+					<p class="#error-text"></p>
+					<div class="modal-action">
+						<input role="button" type="submit" class="btn btn-primary" value="Save"/>
+					</div>
+				</div>
+			</form>
+		</div>
+		<form method="dialog" class="modal-backdrop">
+			<button>close</button>
+		</form>
+	</dialog>
+}
+
+templ TaskItem(index int, m models.TaskItemView, projects []models.ProjectView) {
+	<div id={ fmt.Sprintf("task-item-%s", m.ID) }>
+		@SetProjectDialog(m, projects)
+		<div class="indicator w-full">
+			<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
+			@TaskItemContent(m)
+		</div>
+	</div>
+}
+
+templ TaskIndex(
+	m []models.TaskItemView,
+	projects []models.ProjectView,
+	pageOffset int,
+	pageTotal int,
+	taskTotal int,
+	logoutURL string,
+) {
 	@templates.Boilerplate() {
-		@templates.Head("Tasks")
-		<body>
+		@templates.Head("Tasks") {
+			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+		}
+		<body hx-ext="response-targets">
 			@templates.Navbar(logoutURL)
+			<div id="alert" class="fixed top-12 right-4"></div>
 			<div class="flex items-center justify-center py-4">
 				<div class="flex flex-col w-10/12">
 					<div class="flex justify-between items-center px-4 py-2 bg-base-100">
 						<h1 class="text-4xl font-bold">Tasks</h1>
 					</div>
-					@SearchBar()
+					@Filter()
 					<div class="card w-full bg-base-200 shadow-xl justify-center">
 						<div class="card-body">
-							@ButtonBar()
-							<div class="p-4 max-h-80 w-full flex flex-col overflow-y-scroll">
+							@ButtonBar(pageOffset, pageTotal, taskTotal)
+							<div id="task-list" class="p-4 max-h-80 w-full flex flex-col gap-y-2 overflow-y-scroll">
 								for i, item := range(m) {
-									@TaskItem(i, item)
+									@TaskItem(i, item, projects)
 								}
 							</div>
 						</div>

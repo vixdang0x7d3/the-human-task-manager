@@ -13,6 +13,13 @@ const (
 	TaskPriorityL = "L"
 )
 
+const (
+	TaskStateStarted   = "started"
+	TaskStateWaiting   = "waiting"
+	TaskStateCompleted = "completed"
+	TaskStateDeleted   = "deleted"
+)
+
 type Task struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
@@ -33,6 +40,8 @@ type TaskService interface {
 	Delete(ctx context.Context, id string) (Task, error)
 	Update(ctx context.Context, id string, cmd UpdateTaskCmd) (Task, error)
 	Complete(ctx context.Context, id string) (Task, error)
+	SetProject(ctx context.Context, id string, projectID *string) (Task, error)
+	Start(ctx context.Context, id string) (Task, error)
 }
 
 type CreateTaskCmd struct {

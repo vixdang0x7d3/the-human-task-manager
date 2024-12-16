@@ -161,7 +161,7 @@ func findTaskItemsByProjectID(ctx context.Context, q TaskItemQueries, filter dom
 		}
 	}
 
-	if filter.Days != nil && filter.Months != nil && *filter.Days > 0 && *filter.Months > 0 {
+	if (filter.Days != nil && *filter.Days > 0) || (filter.Months != nil && *filter.Months > 0) {
 		var value time.Duration
 		if filter.Days != nil {
 			value += time.Duration(*filter.Days) * 24 * time.Hour
@@ -234,7 +234,7 @@ func findTaskItemsByUserID(ctx context.Context, q TaskItemQueries, filter domain
 		}
 	}
 
-	if filter.Days != nil && filter.Months != nil && *filter.Days > 0 && *filter.Months > 0 {
+	if (filter.Days != nil && *filter.Days > 0) || (filter.Months != nil && *filter.Months > 0) {
 		var value time.Duration
 		if filter.Days != nil {
 			value += time.Duration(*filter.Days) * 24 * time.Hour

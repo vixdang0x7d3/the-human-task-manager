@@ -8,29 +8,10 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
-import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
-
-func TagScript(tags []string) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_TagScript_d9a5`,
-		Function: `function __templ_TagScript_d9a5(tags){var input = document.querySelector('input[id="tags"]'),
-	// init Tagify script on the above inputs
-	tagify = new Tagify(input, { 
-		whitelist: tags,
-		maxTags: 10,
-		dropdown: {
-			maxItems: 20,           // <- mixumum allowed rendered suggestions
-			classname: 'tags-look', // <- custom classname for this dropdown, so it could be targeted
-			enabled: 0,             // <- show suggestions on focus
-			closeOnSelect: false    // <- do not hide the suggestions dropdown once an item has been selected
-		} 
-	})
-}`,
-		Call:       templ.SafeScript(`__templ_TagScript_d9a5`, tags),
-		CallInline: templ.SafeScriptInline(`__templ_TagScript_d9a5`, tags),
-	}
-}
+import (
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+)
 
 func TaskNewForm(tags []string, priorities []string, projects []models.ProjectView) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -57,23 +38,23 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = TagScript(tags).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templates.TagScript(tags).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><select id=\"priority\" name=\"priority\" class=\"select select-bordered px-2 my\"><option disabled selected>Priority</option> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><select id=\"priority\" name=\"priority\" class=\"select select-bordered px-2 my\"><option selected value=\"\">Priority(Empty by default)</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, item := range priorities {
+		for _, p := range priorities {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(item)
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(p)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 89, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 76, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -84,9 +65,9 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(item)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(p)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 89, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 76, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -97,7 +78,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select> <select id=\"project-id\" name=\"project_id\" class=\"select select-bordered px-2\"><option disabled selected>Project</option> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select> <select id=\"project-id\" name=\"project_id\" class=\"select select-bordered px-2\"><option selected value=\"\">Project(Empty by default)</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -109,7 +90,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(project.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 95, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 82, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -122,7 +103,7 @@ func TaskNewForm(tags []string, priorities []string, projects []models.ProjectVi
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(project.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 95, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/task_new.templ`, Line: 82, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {

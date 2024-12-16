@@ -3,10 +3,36 @@ package pages
 import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+	"strings"
+	"encoding/json"
+	"fmt"
 )
 
-templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectView) {
-	<form hx-post="/tasks/new" hx-target-error="#alert">
+func marshalTagsJSON(tags []string) (value string, err error) {
+	var items []struct {
+		Value string `json:"value"`
+	}
+
+	for _, tag := range tags {
+		items = append(
+			items,
+			struct {
+				Value string `json:"value"`
+			}{Value: tag},
+		)
+	}
+
+	bytes, err := json.Marshal(tags)
+	if err != nil {
+		return
+	}
+
+	value = string(bytes)
+	return
+}
+
+templ TaskUpdateForm(m models.TaskItemView, tags []string, priorities []string, projects []models.ProjectView) {
+	<form hx-post={ string(templ.SafeURL(strings.Join([]string{"/tasks/update/", m.ID}, ""))) } hx-target-error="#alert">
 		<div class="container bg-base-100 mx-auto p-4 py-10 flex">
 			<!--left side-->
 			<div class="w-10/12 px-10">
@@ -20,6 +46,7 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 						name="description"
 						placeholder="Description"
 						class="input input-bordered w-full max-w-md"
+						value={ m.Description }
 					/>
 				</label>
 				<label class="form-control w-10/12 max-w-md">
@@ -31,6 +58,9 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 						id="deadline"
 						name="deadline"
 						class="input input-bordered w-full max-w-md"
+						if m.Deadline != "" {
+							value={ m.Deadline }
+						}
 					/>
 				</label>
 				<label class="form-control w-10/12 max-w-md">
@@ -42,6 +72,9 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 						id="schedule"
 						name="schedule"
 						class="input input-bordered w-full max-w-md"
+						if m.Schedule != "" {
+							value={ m.Schedule }
+						}
 					/>
 				</label>
 				<label class="form-control w-10/12 max-w-md">
@@ -53,6 +86,9 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 						id="wait"
 						name="wait"
 						class="input input-bordered w-full max-w-md"
+						if m.Wait != "" {
+							value={ m.Wait }
+						}
 					/>
 				</label>
 			</div>
@@ -66,20 +102,16 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 							class="grow"
 							name="tags"
 							placeholder="add tag"
+							value={ marshalTagsJSON(m.Tags) }
 						/>
 						@templates.TagScript(tags)
 					</div>
 				</div>
-				<select id="priority" name="priority" class="select select-bordered px-2 my">
-					<option selected value="">Priority(Empty by default)</option>
-					for _, p := range priorities {
-						<option value={ p }>{ p }</option>
-					}
-				</select>
-				<select id="project-id" name="project_id" class="select select-bordered px-2">
-					<option selected value="">Project(Empty by default)</option>
-					for _, project := range projects {
-						<option value={ project.ID }>{ project.Title }</option>
+				<select id="priority" name="priority" class="select select-bordered px-2">
+					<option value={ m.Priority } hidden selected>{ m.Priority }</option>
+					<option value="">Unset priority</option>
+					for _, item := range priorities {
+						<option value={ item }>{ item }</option>
 					}
 				</select>
 			</div>
@@ -91,9 +123,9 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 	</form>
 }
 
-templ TaskNew(tags []string, priorities []string, projects []models.ProjectView, logoutURL string) {
+templ TaskUpdate(m models.TaskItemView, tags []string, priorities []string, projects []models.ProjectView, logoutURL string) {
 	@templates.Boilerplate() {
-		@templates.Head("New Task") {
+		@templates.Head(fmt.Sprintf("Update %s", m.Description)) {
 			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
 			<!-- Tagify to handle tags easily -->
 			<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
@@ -106,11 +138,11 @@ templ TaskNew(tags []string, priorities []string, projects []models.ProjectView,
 			<div class="flex items-center justify-center py-4">
 				<div class="flex flex-col w-8/12">
 					<div class="flex items-center px-4 py-2 gap-6 bg-base-100">
-						<h1 class="text-4xl font-bold">New Task</h1>
+						<h1 class="text-4xl font-bold">{ m.Description }</h1>
 					</div>
 					<div class="card w-600 bg-base-200 shadow-xl justify-center">
 						<div class="card-body">
-							@TaskNewForm(tags, priorities, projects)
+							@TaskUpdateForm(m, tags, priorities, projects)
 						</div>
 					</div>
 				</div>

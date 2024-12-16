@@ -26,6 +26,7 @@ UPDATE tasks
 SET 
 	description = @description,
 	priority = @priority::task_priority,
+	state = @state::task_state,
 	deadline = @deadline,
 	schedule = @schedule,
 	wait = @wait,
@@ -56,13 +57,20 @@ SET
 WHERE id = @id
 RETURNING *;
 
--- name: StartWaitingTasks :many
+-- name: StartTasks :many
 UPDATE tasks
 SET
 	state = 'started'::task_state
 WHERE 
 	state = 'waiting'::task_state
 AND	wait <= now()
+RETURNING *;
+
+-- name: StartTask :one
+UPDATE tasks
+SET
+	state = 'started'::task_state
+WHERE id= @id
 RETURNING *;
 
 
