@@ -533,7 +533,7 @@ func ProjectIndex(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"alert\" class=\"fixed top-12 right-4\"></div><div class=\"flex items-center justify-center py-4\"><div class=\"flex flex-col w-6/12\"><div class=\"flex justify-between items-center px-4 py-2 bg-base-100\"><h1 class=\"text-4xl font-bold\">Tasks</h1></div><div class=\"card w-full bg-base-200 shadow-xl justify-center\"><div class=\"card-body\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"alert\" class=\"fixed top-12 right-4\"></div><div class=\"flex items-center justify-center py-4\"><div class=\"flex flex-col w-6/12\"><div class=\"flex justify-between items-center px-4 py-2 bg-base-100\"><h1 class=\"text-4xl font-bold\">Projects</h1></div><div class=\"card w-full bg-base-200 shadow-xl justify-center\"><div class=\"card-body\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

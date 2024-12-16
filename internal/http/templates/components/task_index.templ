@@ -140,7 +140,7 @@ templ TaskList(m []models.TaskItemView, projects []models.ProjectView, pageOffse
 	</div>
 }
 
-templ TaskListFindProject(m []models.TaskItemView, project models.ProjectView, pageOffset, pageTotal, taskTotal int) {
+templ TaskListProjectFind(m []models.TaskItemView, project models.ProjectView, pageOffset, pageTotal, taskTotal int) {
 	for i, item := range m {
 		@pages.ProjectTaskItem(i, item)
 	}

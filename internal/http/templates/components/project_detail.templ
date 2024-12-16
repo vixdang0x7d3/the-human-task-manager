@@ -8,82 +8,207 @@ import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 )
 
-templ ProjectTasks(errNorfound bool,prj models.ProjectView ,tasks []models.TaskItemView, percentDone int, remain int) {
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-tasks" role="tab"
-        class="tab tab-active">
-        Tasks
-    </a>
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-members" role="tab"
-        class="tab">
-        Members
-    </a>
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-statistics"
-        role="tab" class="tab">
-        Statistics
-    </a>
-
-    @pages.TasksTab(errNorfound, tasks, prj)
-
-    <div id="stat-boad" hx-swap-oob="true" class="stats shadow bg-base-100 glass text-center">
-        <div class="stat">
-            <div class="stat-value">{ strconv.Itoa(percentDone) }%</div>
-            <div class="stat-title">Tasks done</div>
-            <div class="stat-desc text-primary">{ strconv.Itoa(remain) } tasks remaining</div>
-        </div>
-    </div>
+templ ProjectTasks(
+	errNorfound bool,
+	prj models.ProjectView,
+	tasks []models.TaskItemView,
+	pageOffset int,
+	pageTotal int,
+	taskTotal int,
+	percentDone int,
+	remain int,
+) {
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-tasks"
+		role="tab"
+		class="tab tab-active"
+	>
+		Tasks
+	</a>
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-members"
+		role="tab"
+		class="tab"
+	>
+		Members
+	</a>
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-statistics"
+		role="tab"
+		class="tab"
+	>
+		Statistics
+	</a>
+	@pages.TasksTab(errNorfound, prj, tasks, pageOffset, pageTotal, taskTotal)
+	<div id="stat-boad" hx-swap-oob="true" class="stats shadow bg-base-100 glass text-center">
+		<div class="stat">
+			<div class="stat-value">{ strconv.Itoa(percentDone) }%</div>
+			<div class="stat-title">Tasks done</div>
+			<div class="stat-desc text-primary">{ strconv.Itoa(remain) } tasks remaining</div>
+		</div>
+	</div>
 }
 
-templ ProjectMembers(prj models.ProjectView, members []models.ProjectMembershipItemView, total int, currentUserID string) {
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-tasks" role="tab"
-        class="tab">
-        Tasks
-    </a>
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-members" role="tab"
-        class="tab tab-active">
-        Members
-    </a>
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-statistics"
-        role="tab" class="tab">
-        Statistics
-    </a>
-
-    @pages.MembersTab(members, prj, currentUserID)
-    
-    <div id="stat-boad" hx-swap-oob="true" class="stats shadow bg-base-100 glass text-center">
-        <div class="stat">
-            <div class="stat-desc text-primary">Total</div>
-            <div class="stat-value">{ strconv.Itoa(total) }</div>
-            <div class="stat-title">Members</div>
-        </div>
-    </div>
+templ ProjectMembers(
+	prj models.ProjectView,
+	members []models.ProjectMembershipItemView,
+	pageOffset int,
+	pageTotal int,
+	memberTotal int,
+	currentUserID string,
+) {
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-tasks"
+		role="tab"
+		class="tab"
+	>
+		Tasks
+	</a>
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-members"
+		role="tab"
+		class="tab tab-active"
+	>
+		Members
+	</a>
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-statistics"
+		role="tab"
+		class="tab"
+	>
+		Statistics
+	</a>
+	@pages.MembersTab(prj, members, pageOffset, pageTotal, memberTotal, currentUserID)
+	<div id="stat-boad" hx-swap-oob="true" class="stats shadow bg-base-100 glass text-center">
+		<div class="stat">
+			<div class="stat-desc text-primary">Total</div>
+			<div class="stat-value">{ strconv.Itoa(memberTotal) }</div>
+			<div class="stat-title">Members</div>
+		</div>
+	</div>
 }
 
-templ ProjectStatistics(members []string, completeds []int, prj models.ProjectView ,totalTask int, percentDone int, remain int) {
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-tasks" role="tab"
-        class="tab">
-        Tasks
-    </a>
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-members" role="tab"
-        class="tab">
-        Members
-    </a>
-    <a hx-swap-oob="true" hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-statistics"
-        role="tab" class="tab tab-active">
-        Statistics
-    </a>
+templ ProjectStatistics(members []string, completeds []int, prj models.ProjectView, totalTask int, percentDone int, remain int) {
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-tasks"
+		role="tab"
+		class="tab"
+	>
+		Tasks
+	</a>
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-members"
+		role="tab"
+		class="tab"
+	>
+		Members
+	</a>
+	<a
+		hx-swap-oob="true"
+		hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) }
+		hx-target="#card-body"
+		hx-target-error="#alert"
+		id="tab-statistics"
+		role="tab"
+		class="tab tab-active"
+	>
+		Statistics
+	</a>
+	<div id="stat-boad" hx-swap-oob="true" class="stats shadow bg-base-100 glass text-center">
+		<div class="stat">
+			<div class="stat-value">{ strconv.Itoa(percentDone) }%</div>
+			<div class="stat-title">Tasks done</div>
+			<div class="stat-desc text-primary">{ strconv.Itoa(remain) } tasks remaining</div>
+		</div>
+		<div class="stat">
+			<div class="stat-desc text-primary">Total</div>
+			<div class="stat-value">{ strconv.Itoa(totalTask) }</div>
+			<div class="stat-title">Task</div>
+		</div>
+	</div>
+	@StatisticsProjectChart(members, completeds)
+}
 
-    <div id="stat-boad" hx-swap-oob="true" class="stats shadow bg-base-100 glass text-center">
-        <div class="stat">
-            <div class="stat-value">{ strconv.Itoa(percentDone) }%</div>
-            <div class="stat-title">Tasks done</div>
-            <div class="stat-desc text-primary">{ strconv.Itoa(remain) } tasks remaining</div>
-        </div>
-        <div class="stat">
-            <div class="stat-desc text-primary">Total</div>
-            <div class="stat-value">{ strconv.Itoa(totalTask) }</div>
-            <div class="stat-title">Task</div>
-        </div>
-    </div>
-
-    @StatisticsProjectChart(members,completeds)
+templ MemberList(project models.ProjectView, m []models.ProjectMembershipItemView, pageOffset, pageTotal, memberTotal int, currentUserID string) {
+	for i, item := range(m) {
+		@pages.MemberItem(i, item, project, currentUserID)
+	}
+	<p id="show-total" class="text-base-content font-semibold">Total: {  strconv.Itoa(memberTotal) }</p>
+	<div id="pagination-buttons" class="flex gap-2" hx-swap-oob="outerHTML">
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members?pageOffset=%d", project.ID, pageOffset-1))) }
+			hx-target="#member-list"
+			id="prev-btn"
+			if pageOffset > 0 {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square disabled"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+		</button>
+		<span>(Page { fmt.Sprintf("%d/%d", pageOffset+1, pageTotal) })</span>
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members?pageOffset=%d", project.ID, pageOffset+1))) }
+			hx-target="#member-list"
+			id="next-btn"
+			if pageOffset+1 < pageTotal {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</button>
+	</div>
 }

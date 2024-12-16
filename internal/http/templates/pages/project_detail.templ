@@ -10,26 +10,26 @@ import (
 )
 
 templ TaskStat(percentDone int, remain int) {
-    <div id="stat-boad" class="stats shadow bg-base-100 glass text-center">
-        <div class="stat">
-            <div class="stat-value">{ strconv.Itoa(percentDone) }%</div>
-            <div class="stat-title">Tasks done</div>
-            <div class="stat-desc text-primary">{ strconv.Itoa(remain) } tasks remaining</div>
-        </div>
-    </div>
+	<div id="stat-boad" class="stats shadow bg-base-100 glass text-center">
+		<div class="stat">
+			<div class="stat-value">{ strconv.Itoa(percentDone) }%</div>
+			<div class="stat-title">Tasks done</div>
+			<div class="stat-desc text-primary">{ strconv.Itoa(remain) } tasks remaining</div>
+		</div>
+	</div>
 }
 
 templ MemberItem(index int, m models.ProjectMembershipItemView, prj models.ProjectView, currentUserID string) {
-    <div class="indicator w-full">
+	<div class="indicator w-full">
 		<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
 		<div tabindex="0" class="collapse collapse-arrow bg-base-300 px-4">
 			<div class="h-16 py-4">
 				<div class="grid grid-cols-4 justify-around">
 					<span class="text-primary-content font-semibold">{ m.Username }</span>
 					<span class="badge badge-primary font-bold">{ strings.ToUpper(m.Role) }</span>
-                    if (m.Role == "requested") || (prj.UserID == currentUserID) {
-                        @ButtonAcceptMemberRequest(m)
-                    }
+					if (m.Role == "requested") || (prj.UserID == currentUserID) {
+						@ButtonAcceptMemberRequest(m)
+					}
 				</div>
 			</div>
 		</div>
@@ -50,7 +50,11 @@ templ ButtonAcceptMemberRequest(prj models.ProjectMembershipItemView) {
 				<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"></path>
 			</svg>
 		</a>
-		<a hx-delete={ string(templ.SafeURL(fmt.Sprintf("/project/%s/denine-request/%s", prj.ProjectID, prj.UserID))) } hx-target-error="#alert" class="btn btn-square btn-sm btn-primary btn-outline">
+		<a
+			hx-delete={ string(templ.SafeURL(fmt.Sprintf("/project/%s/denine-request/%s", prj.ProjectID, prj.UserID))) }
+			hx-target-error="#alert"
+			class="btn btn-square btn-sm btn-primary btn-outline"
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -220,6 +224,7 @@ templ MembersTab(
 	pageOffset int,
 	pageTotal int,
 	memberTotal int,
+	currentUserID string,
 ) {
 	@ModalInviteMember(prj, "/invite-member")
 	<div class="card w-full bg-base-200 shadow-xl">
@@ -227,7 +232,7 @@ templ MembersTab(
 			@MemberButtonBar(prj, pageOffset, pageTotal, memberTotal)
 			<div id="member-list" class="p-4 max-h-80 w-full flex flex-col gap-3 overflow-y-scroll">
 				for i, item := range(m) {
-					@MemberItem(i, item)
+					@MemberItem(i, item, prj, currentUserID)
 				}
 				// if (errNotfound == true){
 				// <span class="text-sm">no task found</span>
@@ -325,6 +330,8 @@ templ ProjectDetail(
 	taskTotal int,
 	currentUserID string,
 	logoutURL string,
+	percentDone int,
+	remain int,
 ) {
 	@templates.Boilerplate() {
 		@templates.Head("Projects") {
@@ -340,9 +347,19 @@ templ ProjectDetail(
 							<label class="flex flex-row items-center gap-4">
 								<h1 class="text-4xl font-bold">{ prj.Title }</h1>
 								if (prj.UserID == currentUserID) {
-									<button class="btn btn-sm btn-error" hx-delete={ string(templ.SafeURL(fmt.Sprintf("/delete-project/%s", prj.ID))) } hx-target-error="#error-message" hx-confirm="Do you actualy want to delete this project">Delete</button>
+									<button
+										class="btn btn-sm btn-error"
+										hx-delete={ string(templ.SafeURL(fmt.Sprintf("/delete-project/%s", prj.ID))) }
+										hx-target-error="#error-message"
+										hx-confirm="Do you actualy want to delete this project"
+									>Delete</button>
 								} else {
-									<button class="btn btn-sm btn-error" hx-delete={ string(templ.SafeURL(fmt.Sprintf("/leave-project/%s", prj.ID))) } hx-target-error="#error-message" hx-confirm="Do you actualy want to leave this project">Leave</button>
+									<button
+										class="btn btn-sm btn-error"
+										hx-delete={ string(templ.SafeURL(fmt.Sprintf("/leave-project/%s", prj.ID))) }
+										hx-target-error="#error-message"
+										hx-confirm="Do you actualy want to leave this project"
+									>Leave</button>
 								}
 								<div id="#error-message"></div>
 							</label>
@@ -369,7 +386,7 @@ templ ProjectDetail(
 							@TabsBar(prj)
 						</div>
 						<div id="general-infor">
-							@TaskStat()
+							@TaskStat(percentDone, remain)
 						</div>
 					</div>
 					<div class="card w-full bg-base-300 shadow-xl justify-center">
@@ -382,4 +399,3 @@ templ ProjectDetail(
 		</body>
 	}
 }
-

@@ -353,8 +353,11 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 			nTotal += 1
 		}
 	}
-	percentDone = int(nCompleted * 100 / nTotal)
-	remain = nTotal - nCompleted
+
+	if nTotal != 0 {
+		percentDone = int(nCompleted * 100 / nTotal)
+		remain = nTotal - nCompleted
+	}
 
 	if err != nil {
 		switch domain.ErrorCode(err) {
@@ -372,9 +375,10 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 				pageTotal,
 				taskTotal,
 				currentUserID.String(),
+				"/logout",
 				percentDone,
 				remain,
-				"/logout"))
+			))
 		}
 	}
 
@@ -397,9 +401,10 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 		pageTotal,
 		taskTotal,
 		currentUserID.String(),
+		"/logout",
 		percentDone,
 		remain,
-		"/logout"))
+	))
 }
 
 func (s *Server) handleTabTasksShow(c echo.Context) error {
@@ -447,8 +452,11 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 			nTotal += 1
 		}
 	}
-	percentDone = int(nCompleted * 100 / nTotal)
-	remain = nTotal - nCompleted
+
+	if nTotal != 0 {
+		percentDone = int(nCompleted * 100 / nTotal)
+		remain = nTotal - nCompleted
+	}
 
 	if err != nil {
 		switch domain.ErrorCode(err) {
@@ -466,7 +474,7 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 				pageTotal,
 				taskTotal,
 				percentDone,
-				remain
+				remain,
 			))
 		}
 	}
@@ -479,8 +487,6 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 			pageOffset,
 			pageTotal,
 			taskTotal,
-			percentDone,
-			remain
 		))
 
 	}
@@ -493,7 +499,7 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 		pageTotal,
 		taskTotal,
 		percentDone,
-		remain
+		remain,
 	))
 }
 
@@ -550,6 +556,7 @@ func (s *Server) handleTabMembersShow(c echo.Context) error {
 			pageOffset,
 			pageTotal,
 			memberTotal,
+			currentUserID.String(),
 		))
 
 	}
@@ -760,7 +767,7 @@ func (s *Server) handleProjectTaskFind(c echo.Context) error {
 		}
 	}
 
-	pageTotal := int(math.Ceil(float64(total) / float64(limit)))
+	pageTotal := int(math.Ceil(float64(total) / float64(taskLimit)))
 	taskTotal := total
 
 	project := models.ProjectView{
