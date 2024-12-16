@@ -94,6 +94,7 @@ func NewServer(logger *logrus.Logger) *Server {
 		s.registerTaskRoutes(r)
 		s.registerProjectRoutes(r)
 		s.registerCalendarRoutes(r)
+		s.registerStatisticRoutes(r)
 	}
 
 	return s

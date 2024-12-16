@@ -130,6 +130,7 @@ templ Profile(m models.UserView, infoURL, emailURL, passwordURL, deleteURL, logo
 		}
 		<body>
 			@templates.Navbar(logoutURL)
+			<div id="alert" class="fixed top-12 right-4"></div>
 			<div class="flex items-center justify-center py-10">
 				<div class=" card bg-base-200 w-4/12 shadow-xl">
 					<div id="card-body" class="card-body items-center text-center">

@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/generic"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/components"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/pages"
@@ -28,12 +29,22 @@ func (s *Server) registerUserRoutes(r *echo.Group) {
 
 func (s *Server) handleIndexShow(c echo.Context) error {
 
-	// state := "started"
-	// taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
-	// 	State:  &state,
-	// 	Offset: 0,
-	// 	Limit:  100,
-	// })
+	state := "started"
+	taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
+		State:  &state,
+		Offset: 0,
+		Limit:  3,
+	})
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EINVALID, domain.EUNAUTHORIZED:
+			return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
+		case domain.EINTERNAL:
+			c.Logger().Error(domain.ErrorMessage(err))
+			return c.HTML(http.StatusInternalServerError, "internal error")
+		}
+	}
+	_ = total
 
 	user := domain.UserFromContext(c.Request().Context())
 	if user == nil {
@@ -45,7 +56,9 @@ func (s *Server) handleIndexShow(c echo.Context) error {
 		FirstName: user.FirstName,
 	}
 
-	return render(c, http.StatusOK, pages.Index(m, "/logout"))
+	return render(c, http.StatusOK, pages.Index(m,
+		generic.Map(taskItems, toTaskItemView),
+		"/logout"))
 }
 
 func (s *Server) handleProfileShow(c echo.Context) error {

@@ -1,0 +1,129 @@
+package pages
+
+import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+
+script DrawStatistic(decriptions []string, tasktimes []int) {
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: decriptions ,
+            datasets: [{
+                label: 'Time Track',
+                data: tasktimes,
+                borderWidth: 1
+            }]
+        },
+        
+        options: {
+            maintainAspectRatio: false,
+            responsive: true
+        },
+    });
+}
+
+script DrawProjectStatistics(members []string, completeds []int) {
+    var pjC = document.getElementById('prjChart');
+
+    new Chart(pjC, {
+        type: 'bar',
+        data: {
+            labels: members,
+            datasets: [{
+                label: 'Task Finish',
+                data: completeds,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            responsive: true
+        },
+    });
+}
+
+templ TitleStatistics() {
+    <div class="flex justify-between items-center px-4 py-2 bg-base-100">
+        <div class="w-full">
+            <label class="flex flex-row items-center gap-4">
+                <h1 class="text-4xl font-bold">My Personal Statistics</h1>
+            </label>
+        </div>
+        <div>
+            <form hx-post="/statistic" hx-target="#card-body" hx-target-error="#alert" class="flex flex-row gap-1">
+                <label class="form-control w-10/12 max-w-md">
+                    <div class="label">
+                        <span class="label-text text-sm">From</span>
+                    </div>
+                    <input type="datetime-local" id="from" name="from"
+                        class="input input-sm input-bordered w-full max-w-md" />
+                </label>
+                <label class="form-control w-10/12 max-w-md">
+                    <div class="label">
+                        <span class="label-text text-sm">To</span>
+                    </div>
+                    <input type="datetime-local" id="to" name="to" class="input input-sm input-bordered w-full max-w-md" />
+                </label>
+                <label class="form-control w-10/12 max-w-md">
+                    <div class="label">
+                        <span class="label-text text-sm">_</span>
+                    </div>
+                    <button class="btn btn-sm btn-accent">Submit</button>
+                </label>
+            </form>
+        </div>
+    </div>
+}
+
+templ StatStatistics() {
+    <div class="stats glass stats-vertical lg:stats-horizontal my-2 shadow">
+        <div class="stat">
+            <div class="stat-title">Completed Tasks</div>
+            <div class="stat-value">23</div>
+        </div>
+    
+        <div class="stat">
+            <div class="stat-title">Missed Task</div>
+            <div class="stat-value">6</div>
+        </div>
+    
+        <div class="stat">
+            <div class="stat-title">Total Time Tracked</div>
+            <div class="stat-value">40h</div>
+        </div>
+    </div>
+}
+
+templ StatisticsDefault() {
+    <div id="alert" class="fixed top-12 right-4"></div>
+    <div class="flex items-center h-screen justify-center py-4">
+        <div class="flex flex-col h-full w-9/12">
+            { children... }
+        </div>
+    </div>
+}
+
+templ Statistics(decriptions []string, taskTime []int, logoutURL string) {
+    @templates.Boilerplate() {
+		@templates.Head("Personal Calendar"){
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+        }
+		<body hx-ext="response-targets">
+			@templates.Navbar(logoutURL)
+            @StatisticsDefault(){
+                @TitleStatistics()
+                @StatStatistics()
+                <div hx-ext="response-targets" class="card w-full h-4/6 glass shadow-xl py-2 justify-center">
+                    <div id="card-body" class="card-body items-center justify-center">
+                        <div class="w-10/12 h-5/6">
+                            <canvas id="myChart"></canvas>
+                        </div>
+                        @DrawStatistic(decriptions, taskTime)
+                    </div>
+                </div>
+            }
+		</body>
+    }
+}
