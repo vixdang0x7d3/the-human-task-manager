@@ -140,6 +140,124 @@ templ TaskList(m []models.TaskItemView, projects []models.ProjectView, pageOffse
 	</div>
 }
 
+templ TaskListFindProject(m []models.TaskItemView, project models.ProjectView, pageOffset, pageTotal, taskTotal int) {
+	for i, item := range m {
+		@pages.ProjectTaskItem(i, item)
+	}
+	<p id="show-total" hx-swap-oob="outerHTML" class="text-base-content font-semibold">
+		Total: { strconv.Itoa(taskTotal) }
+	</p>
+	<div id="pagination-buttons" class="flex gap-2" hx-swap-oob="outerHTML">
+		<button
+			hx-post={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks/find?pageOffset=%d", project.ID, pageOffset-1))) }
+			hx-include="#filter-form [name='query'],
+			#filter-form [name='priority'],
+			#filter-form [name='state'],
+			#filter-form [name='days'],
+			#filter-form[name='days']"
+			hx-target="#project-task-list"
+			id="prev-btn"
+			if pageOffset > 0 {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square disabled"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+		</button>
+		<span>(Page { fmt.Sprintf("%d/%d", pageOffset+1, pageTotal) })</span>
+		<button
+			hx-post={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks/find?pageOffset=%d", project.ID, pageOffset+1))) }
+			hx-include="#filter-form [name='query'],
+			#filter-form [name='priority'],
+			#filter-form [name='state'],
+			#filter-form [name='days'],
+			#filter-form[name='days']"
+			hx-target="#project-task-list"
+			id="next-btn"
+			if pageOffset+1 < pageTotal {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</button>
+	</div>
+}
+
+templ TaskListProject(m []models.TaskItemView, project models.ProjectView, pageOffset, pageTotal, taskTotal int) {
+	for i, item := range m {
+		@pages.ProjectTaskItem(i, item)
+	}
+	<p id="show-total" hx-swap-oob="outerHTML" class="text-base-content font-semibold">
+		Total: { strconv.Itoa(taskTotal) }
+	</p>
+	<div id="pagination-buttons" class="flex gap-2" hx-swap-oob="outerHTML">
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks?pageOffset=%d", project.ID, pageOffset-1))) }
+			hx-target="#project-task-list"
+			id="prev-btn"
+			if pageOffset > 0 {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square disabled"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+		</button>
+		<span>(Page { fmt.Sprintf("%d/%d", pageOffset+1, pageTotal) })</span>
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks?pageOffset=%d", project.ID, pageOffset+1))) }
+			hx-target="#project-task-list"
+			id="next-btn"
+			if pageOffset+1 < pageTotal {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</button>
+	</div>
+}
+
 templ AlertAndDeleteTaskItem(message string) {
 	<div
 		id="alert"
@@ -148,6 +266,7 @@ templ AlertAndDeleteTaskItem(message string) {
 	>
 		@AlertSuccess(message)
 	</div>
+	@pages.FilterFormContent(true)
 	<div id="deleted-item"></div>
 }
 
@@ -160,7 +279,7 @@ templ AlertAndUpdateTaskItemHidden(m models.TaskItemView, message string) {
 		@AlertSuccess(message)
 	</div>
 	@pages.FilterFormContent(true)
-	@pages.TaskItemHidden(m)
+	@pages.TaskItemHidden(m, false)
 }
 
 templ AlertAndUpdateTaskItemContent(m models.TaskItemView, message string) {
@@ -172,5 +291,17 @@ templ AlertAndUpdateTaskItemContent(m models.TaskItemView, message string) {
 		@AlertSuccess(message)
 	</div>
 	@pages.FilterFormContent(true)
-	@pages.TaskItemContent(m)
+	@pages.TaskItemContent(m, false)
+}
+
+templ AlertAndUpdateProjectTaskItemContent(m models.TaskItemView, message string) {
+	<div
+		id="alert"
+		class="fixed right-4 top-12"
+		hx-swap-oob="true"
+	>
+		@AlertSuccess(message)
+	</div>
+	@pages.FilterFormContent(true)
+	@pages.TaskItemContent(m, false)
 }

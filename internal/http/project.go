@@ -2,7 +2,9 @@ package http
 
 import (
 	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
@@ -19,6 +21,7 @@ func (s *Server) registerProjectRoutes(r *echo.Group) {
 	r.GET("/project/:id/tab-tasks", s.handleTabTasksShow)
 	r.GET("/project/:id/tab-members", s.handleTabMembersShow)
 	r.GET("/project/:id/tab-statistics", s.handleTabStatisticsShow)
+	r.POST("/project/:id/tab-tasks/find", s.handleProjectTaskFind)
 
 	r.POST("/invite-member/:project-id", s.handleInviteMember)
 	r.GET("/accept-invitation/:project-id", s.handleAcceptInvitation)
@@ -34,14 +37,29 @@ func (s *Server) registerProjectRoutes(r *echo.Group) {
 	r.DELETE("/delete-project/:project-id", s.handleDeleteProject)
 }
 
+const (
+	taskLimit       int = 2
+	projectLimit    int = 2
+	membershipLimit int = 2
+)
+
 func (s *Server) handleProjectIndex(c echo.Context) error {
+
+	var pageOffset int
+	if qParam := c.QueryParam("pageOffset"); qParam != "" {
+		parsed, err := strconv.ParseInt(qParam, 10, 64)
+		if err == nil {
+			pageOffset = int(parsed)
+		}
+	}
+
 	projectItem, total, err := s.ProjectmembershipService.Find(c.Request().Context(), domain.ProjectMembershipFilter{
-		Offset: 0,
-		Limit:  10,
+		Offset: pageOffset * projectLimit,
+		Limit:  projectLimit,
 	})
 
-	// handle pagination
-	_ = total
+	pageTotal := int(math.Ceil(float64(total) / float64(projectLimit)))
+	projectTotal := total
 
 	if err != nil {
 		switch domain.ErrorCode(err) {
@@ -53,8 +71,22 @@ func (s *Server) handleProjectIndex(c echo.Context) error {
 		}
 	}
 
+	trigger := c.Request().Header.Get("HX-Trigger")
+	if trigger == "prev-btn" || trigger == "next-btn" {
+		return render(c, http.StatusOK, components.ProjectList(
+			generic.Map(projectItem, toProjectMemberShipItemView),
+			pageOffset,
+			pageTotal,
+			projectTotal,
+		))
+
+	}
+
 	return render(c, http.StatusOK, pages.ProjectIndex(
-		generic.Map(projectItem, toProjectItemView),
+		generic.Map(projectItem, toProjectMemberShipItemView),
+		pageOffset,
+		pageTotal,
+		projectTotal,
 		"/logout",
 	))
 }
@@ -272,6 +304,14 @@ func (s *Server) handleLeaveProject(c echo.Context) error {
 
 func (s *Server) handleProjectDetailShow(c echo.Context) error {
 
+	var pageOffset int
+	if qParam := c.QueryParam("pageOffset"); qParam != "" {
+		parsed, err := strconv.ParseInt(qParam, 10, 64)
+		if err == nil {
+			pageOffset = int(parsed)
+		}
+	}
+
 	projectId := c.Param("id")
 	if projectId == "" {
 		return c.HTML(http.StatusBadRequest, "Request param error")
@@ -280,12 +320,6 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 	project, err := s.ProjectService.ByID(c.Request().Context(), projectId)
 	if err != nil {
 		return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
-	}
-
-	prj := models.ProjectView{
-		UserID: project.UserID.String(),
-		Title:  project.Title,
-		ID:     projectId,
 	}
 
 	currentUserID := domain.UserIDFromContext(c.Request().Context())
@@ -298,12 +332,12 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 	taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
 		ProjectID: &projectId,
 		State:     &state,
-		Offset:    0,
-		Limit:     100,
+		Offset:    pageOffset * taskLimit,
+		Limit:     taskLimit,
 	})
 
-	// handle pagination
-	_ = total
+	pageTotal := int(math.Ceil(float64(total) / float64(taskLimit)))
+	taskTotal := total
 
 	if err != nil {
 		switch domain.ErrorCode(err) {
@@ -313,21 +347,50 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 			c.Logger().Error(domain.ErrorMessage(err))
 			return render(c, http.StatusInternalServerError, components.AlertError("internal error"))
 		case domain.ENOTFOUND:
-			return render(c, http.StatusOK, pages.ProjectDetail(true,
-				prj,
+			return render(c, http.StatusOK, pages.ProjectDetail(
+				true,
+				toProjectView(project),
 				generic.Map(taskItems, toTaskItemView),
+				pageOffset,
+				pageTotal,
+				taskTotal,
 				currentUserID.String(),
 				"/logout"))
 		}
 	}
 
-	return render(c, http.StatusOK, pages.ProjectDetail(false, prj,
+	trigger := c.Request().Header.Get("HX-Trigger")
+	if trigger == "prev-btn" || trigger == "next-btn" {
+		return render(c, http.StatusOK, components.TaskListProject(
+			generic.Map(taskItems, toTaskItemView),
+			toProjectView(project),
+			pageOffset,
+			pageTotal,
+			taskTotal,
+		))
+	}
+
+	return render(c, http.StatusOK, pages.ProjectDetail(
+		false,
+		toProjectView(project),
 		generic.Map(taskItems, toTaskItemView),
+		pageOffset,
+		pageTotal,
+		taskTotal,
 		currentUserID.String(),
-		"/logout"))
+		"/logout",
+	))
 }
 
 func (s *Server) handleTabTasksShow(c echo.Context) error {
+
+	var pageOffset int
+	if qParam := c.QueryParam("pageOffset"); qParam != "" {
+		parsed, err := strconv.ParseInt(qParam, 10, 64)
+		if err == nil {
+			pageOffset = int(parsed)
+		}
+	}
 
 	projectId := c.Param("id")
 	if projectId == "" {
@@ -339,21 +402,16 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 		return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
 	}
 
-	prj := models.ProjectView{
-		Title: project.Title,
-		ID:    projectId,
-	}
-
 	state := "started"
 	taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
 		ProjectID: &projectId,
 		State:     &state,
-		Offset:    0,
-		Limit:     100,
+		Offset:    pageOffset * taskLimit,
+		Limit:     taskLimit,
 	})
 
-	// handle pagination
-	_ = total
+	pageTotal := int(math.Ceil(float64(total) / float64(taskLimit)))
+	taskTotal := total
 
 	if err != nil {
 		switch domain.ErrorCode(err) {
@@ -363,13 +421,37 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 			c.Logger().Error(domain.ErrorMessage(err))
 			return render(c, http.StatusInternalServerError, components.AlertError("internal error"))
 		case domain.ENOTFOUND:
-			return render(c, http.StatusOK, components.ProjectTasks(true, prj,
-				generic.Map(taskItems, toTaskItemView)))
+			return render(c, http.StatusOK, components.ProjectTasks(
+				true,
+				toProjectView(project),
+				generic.Map(taskItems, toTaskItemView),
+				pageOffset,
+				pageTotal,
+				taskTotal,
+			))
 		}
 	}
 
-	return render(c, http.StatusOK, components.ProjectTasks(false, prj,
-		generic.Map(taskItems, toTaskItemView)))
+	trigger := c.Request().Header.Get("HX-Trigger")
+	if trigger == "prev-btn" || trigger == "next-btn" {
+		return render(c, http.StatusOK, components.TaskListProject(
+			generic.Map(taskItems, toTaskItemView),
+			toProjectView(project),
+			pageOffset,
+			pageTotal,
+			taskTotal,
+		))
+
+	}
+
+	return render(c, http.StatusOK, components.ProjectTasks(
+		false,
+		toProjectView(project),
+		generic.Map(taskItems, toTaskItemView),
+		pageOffset,
+		pageTotal,
+		taskTotal,
+	))
 }
 
 func (s *Server) handleTabMembersShow(c echo.Context) error {
@@ -384,29 +466,69 @@ func (s *Server) handleTabMembersShow(c echo.Context) error {
 		return c.HTML(http.StatusBadRequest, domain.ErrorMessage(err))
 	}
 
-	prj := models.ProjectView{
-		Title: project.Title,
-		ID:    projectId,
+	var pageOffset int
+	if qParam := c.QueryParam("pageParam"); qParam != "" {
+		parsed, err := strconv.ParseInt(qParam, 10, 64)
+		if err == nil {
+			pageOffset = int(parsed)
+		}
 	}
 
-	memberiItems, total, err := s.ProjectmembershipService.Find(c.Request().Context(), domain.ProjectMembershipFilter{
+	memberItems, total, err := s.ProjectmembershipService.Find(c.Request().Context(), domain.ProjectMembershipFilter{
 		ProjectID: &projectId,
-		Offset:    0,
-		Limit:     15,
+		Offset:    pageOffset * membershipLimit,
+		Limit:     membershipLimit,
 	})
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EINVALID, domain.EUNAUTHORIZED:
+			return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
+		case domain.EINTERNAL:
+			c.Logger().Error(err)
+			return render(c, http.StatusInternalServerError, components.AlertError("internal error"))
+		}
+	}
 
-	_ = total
+	pageTotal := int(math.Ceil(float64(total) / float64(membershipLimit)))
+	memberTotal := total
 
-	return render(c, http.StatusOK, components.ProjectMembers(prj,
-		generic.Map(memberiItems, toMemberItemView)))
+	trigger := c.Request().Header.Get("HX-Trigger")
+	if trigger == "prev-btn" || trigger == "next-btn" {
+		return render(c, http.StatusOK, components.MemberList(
+			toProjectView(project),
+			generic.Map(memberItems, toMemberItemView),
+			pageOffset,
+			pageTotal,
+			memberTotal,
+		))
+
+	}
+
+	return render(c, http.StatusOK, components.ProjectMembers(
+		toProjectView(project),
+		generic.Map(memberItems, toMemberItemView),
+		pageOffset,
+		pageTotal,
+		memberTotal,
+	))
 }
 
-func toMemberItemView(memberiItem domain.ProjectMembershipItem) models.ProjectMembershipItemView {
+func toProjectMemberShipItemView(membership domain.ProjectMembershipItem) models.ProjectMembershipItemView {
 	return models.ProjectMembershipItemView{
-		UserID:    memberiItem.User.ID.String(),
-		ProjectID: memberiItem.Project.ID.String(),
-		Username:  memberiItem.User.Username,
-		Role:      memberiItem.Role,
+		UserID:    membership.User.ID.String(),
+		ProjectID: membership.Project.ID.String(),
+		Title:     membership.Project.Title,
+		Username:  membership.User.Username,
+		Role:      membership.Role,
+	}
+}
+
+func toMemberItemView(memberItem domain.ProjectMembershipItem) models.ProjectMembershipItemView {
+	return models.ProjectMembershipItemView{
+		UserID:    memberItem.User.ID.String(),
+		ProjectID: memberItem.Project.ID.String(),
+		Username:  memberItem.User.Username,
+		Role:      memberItem.Role,
 	}
 }
 
@@ -428,4 +550,104 @@ func (s *Server) handleTabStatisticsShow(c echo.Context) error {
 	}
 
 	return render(c, http.StatusOK, components.ProjectStatistics(prj))
+}
+
+func (s *Server) handleProjectTaskFind(c echo.Context) error {
+
+	type formValues struct {
+		Query    string `form:"query"`
+		Priority string `form:"priority"`
+		State    string `form:"state"`
+		Days     string `form:"days"`
+		Months   string `form:"months"`
+	}
+
+	projectID := c.Param("id")
+	if projectID == "" {
+		return render(c, http.StatusBadRequest, components.AlertError("malformed url"))
+	}
+
+	form := formValues{}
+	if err := c.Bind(&form); err != nil {
+		return render(c, http.StatusBadRequest, components.AlertError("invalid form data"))
+	}
+
+	var (
+		query    *string
+		state    *string
+		priority *string
+		days     *int64
+		months   *int64
+	)
+
+	if form.Query != "" {
+		query = &form.Query
+	}
+
+	if form.State != "" {
+		state = &form.State
+	}
+
+	if form.Priority != "" {
+		priority = &form.Priority
+	}
+
+	if form.Days != "" {
+		val, err := strconv.ParseInt(form.Days, 10, 64)
+		if err == nil && val != 0 {
+			days = &val
+		}
+	}
+
+	if form.Months != "" {
+		val, err := strconv.ParseInt(form.Months, 10, 64)
+		if err == nil && val != 0 {
+			months = &val
+
+		}
+	}
+
+	var pageOffset int
+	if qParam := c.QueryParam("pageOffset"); qParam != "" {
+		parsed, err := strconv.ParseInt(qParam, 10, 64)
+		if err == nil {
+			pageOffset = int(parsed)
+		}
+	}
+
+	taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
+		ProjectID: &projectID,
+		Q:         query,
+		Priority:  priority,
+		State:     state,
+		Days:      days,
+		Months:    months,
+		Offset:    pageOffset * taskLimit,
+		Limit:     taskLimit,
+	})
+	if err != nil {
+		switch domain.ErrorCode(err) {
+		case domain.EINVALID, domain.EUNAUTHORIZED:
+			return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
+		case domain.EINTERNAL:
+			c.Logger().Error(err)
+			return render(c, http.StatusInternalServerError, components.AlertError("internal error"))
+
+		}
+	}
+
+	pageTotal := int(math.Ceil(float64(total) / float64(limit)))
+	taskTotal := total
+
+	project := models.ProjectView{
+		ID: projectID,
+	}
+
+	return render(c, http.StatusOK, components.TaskListProject(
+		generic.Map(taskItems, toTaskItemView),
+		project,
+		pageOffset,
+		pageTotal,
+		taskTotal,
+	))
 }

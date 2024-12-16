@@ -5,7 +5,7 @@ import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 )
 
-templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectView) {
+templ TaskNewForm(requestedProject models.ProjectView, tags []string, priorities []string, projects []models.ProjectView) {
 	<form hx-post="/tasks/new" hx-target-error="#alert">
 		<div class="container bg-base-100 mx-auto p-4 py-10 flex">
 			<!--left side-->
@@ -76,12 +76,19 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 						<option value={ p }>{ p }</option>
 					}
 				</select>
-				<select id="project-id" name="project_id" class="select select-bordered px-2">
-					<option selected value="">Project(Empty by default)</option>
-					for _, project := range projects {
-						<option value={ project.ID }>{ project.Title }</option>
-					}
-				</select>
+				if requestedProject.ID != "" {
+					<select name="project_id" disabled class="select select-bordered px-2">
+						<option selected value={ requestedProject.ID }>{ requestedProject.Title }</option>
+					</select>
+					<input id="project_id" name="project_id" type="hidden" value={ requestedProject.ID }/>
+				} else {
+					<select id="project-id" name="project_id" class="select select-bordered px-2">
+						<option selected value="">Project(Empty by default)</option>
+						for _, p := range projects {
+							<option value={ p.ID }>{ p.Title }</option>
+						}
+					</select>
+				}
 			</div>
 		</div>
 		<div class="card-actions justify-end px-4">
@@ -91,7 +98,7 @@ templ TaskNewForm(tags []string, priorities []string, projects []models.ProjectV
 	</form>
 }
 
-templ TaskNew(tags []string, priorities []string, projects []models.ProjectView, logoutURL string) {
+templ TaskNew(requestedProject models.ProjectView, tags []string, priorities []string, projects []models.ProjectView, logoutURL string) {
 	@templates.Boilerplate() {
 		@templates.Head("New Task") {
 			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
@@ -110,7 +117,7 @@ templ TaskNew(tags []string, priorities []string, projects []models.ProjectView,
 					</div>
 					<div class="card w-600 bg-base-200 shadow-xl justify-center">
 						<div class="card-body">
-							@TaskNewForm(tags, priorities, projects)
+							@TaskNewForm(requestedProject, tags, priorities, projects)
 						</div>
 					</div>
 				</div>

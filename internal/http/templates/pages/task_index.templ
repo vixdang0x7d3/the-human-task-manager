@@ -120,6 +120,16 @@ templ Filter() {
 	</form>
 }
 
+templ ProjectFilter(project models.ProjectView) {
+	<form
+		hx-post={ fmt.Sprintf("/project/%s/tab-tasks/find", project.ID) }
+		hx-target="#project-task-list"
+		hx-push-url="true"
+	>
+		@FilterFormContent(false)
+	</form>
+}
+
 templ TaskBulkUpdateButtons() {
 	<div class="flex gap-2">
 		<button id="hyphon-btn" class="btn btn-square btn-xs">
@@ -193,7 +203,7 @@ templ TaskBulkUpdateButtons() {
 	</div>
 }
 
-templ PaginationButtons(pageOffset, pageTotal int) {
+templ TaskPaginationButtons(pageOffset, pageTotal int) {
 	<div id="pagination-buttons" class="flex gap-2">
 		<button
 			hx-get={ string(templ.SafeURL(fmt.Sprintf("/tasks?pageOffset=%d", pageOffset-1))) }
@@ -241,14 +251,16 @@ templ PaginationButtons(pageOffset, pageTotal int) {
 	</div>
 }
 
-templ ButtonBar(pageOffset, pageTotal, taskTotal int) {
+templ TaskButtonBar(pageOffset, pageTotal, taskTotal int) {
 	<div class="flex justify-between items-center px-4 py-2">
 		if true {
 			<p id="show-total" class="text-base-content font-semibold">Total: {  strconv.Itoa(taskTotal) }</p>
 		} else {
+			<!--  TODO: implement bulk operations 
 			@TaskBulkUpdateButtons()
+			-->
 		}
-		@PaginationButtons(pageOffset, pageTotal)
+		@TaskPaginationButtons(pageOffset, pageTotal)
 	</div>
 }
 
@@ -257,7 +269,7 @@ script showModal(modalID string) {
 	diag.showModal()
 }
 
-templ TaskItemButtons(m models.TaskItemView) {
+templ TaskItemButtons(m models.TaskItemView, inProjectPage bool) {
 	<div class="flex flex-col justify-items-end gap-y-2 w-2/12">
 		if m.State != domain.TaskStateDeleted {
 			if m.State != domain.TaskStateCompleted {
@@ -265,10 +277,12 @@ templ TaskItemButtons(m models.TaskItemView) {
 					href={ templ.SafeURL(fmt.Sprintf("/tasks/update/%s", m.ID)) }
 					class="btn btn-primary btn-xs"
 				>Update</a>
-				<button
-					class="btn btn-secondary btn-xs"
-					onclick={ showModal(fmt.Sprintf("#set_project_dialog_%s", m.ID)) }
-				>Set project</button>
+				if !inProjectPage {
+					<button
+						class="btn btn-secondary btn-xs"
+						onclick={ showModal(fmt.Sprintf("#set_project_dialog_%s", m.ID)) }
+					>Set project</button>
+				}
 				if m.State != domain.TaskStateWaiting {
 					<button
 						hx-post={ string(templ.SafeURL(fmt.Sprintf("/tasks/complete/%s", m.ID))) }
@@ -279,6 +293,9 @@ templ TaskItemButtons(m models.TaskItemView) {
 					>Complete</button>
 				} else {
 					<button
+						if inProjectPage {
+							id="start-task-project"
+						}
 						class="btn btn-accent btn-xs"
 						hx-post={ string(templ.SafeURL(fmt.Sprintf("/tasks/start/%s", m.ID))) }
 						hx-target={ fmt.Sprintf("#task-item-content-%s", m.ID) }
@@ -299,7 +316,7 @@ templ TaskItemButtons(m models.TaskItemView) {
 	</div>
 }
 
-templ TaskItemHidden(m models.TaskItemView) {
+templ TaskItemHidden(m models.TaskItemView, inProjectPage bool) {
 	<span class="text-primary-content font-semibold">Details: </span>
 	<div
 		id={ fmt.Sprintf("task-item-hidden-%s", m.ID) }
@@ -321,13 +338,17 @@ templ TaskItemHidden(m models.TaskItemView) {
 				}
 			</span>
 		</div>
-		@TaskItemButtons(m)
+		@TaskItemButtons(m, inProjectPage)
 	</div>
 }
 
-templ TaskItemContent(m models.TaskItemView) {
+templ TaskItemContent(m models.TaskItemView, inProjectPage bool) {
 	<div
-		id={ fmt.Sprintf("task-item-content-%s", m.ID) }
+		if inProjectPage {
+			id={ fmt.Sprintf("project-task-item-content-%s", m.ID) }
+		} else {
+			id={ fmt.Sprintf("task-item-content-%s", m.ID) }
+		}
 		tabindex="0"
 		class="collapse bg-base-300 px-4"
 	>
@@ -340,7 +361,7 @@ templ TaskItemContent(m models.TaskItemView) {
 			</div>
 		</div>
 		<div class="collapse-content">
-			@TaskItemHidden(m)
+			@TaskItemHidden(m, inProjectPage)
 		</div>
 	</div>
 }
@@ -387,7 +408,16 @@ templ TaskItem(index int, m models.TaskItemView, projects []models.ProjectView) 
 		@SetProjectDialog(m, projects)
 		<div class="indicator w-full">
 			<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
-			@TaskItemContent(m)
+			@TaskItemContent(m, false)
+		</div>
+	</div>
+}
+
+templ ProjectTaskItem(index int, m models.TaskItemView) {
+	<div id={ fmt.Sprintf("task-item-%s", m.ID) }>
+		<div class="indicator w-full">
+			<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
+			@TaskItemContent(m, true)
 		</div>
 	</div>
 }
@@ -415,7 +445,7 @@ templ TaskIndex(
 					@Filter()
 					<div class="card w-full bg-base-200 shadow-xl justify-center">
 						<div class="card-body">
-							@ButtonBar(pageOffset, pageTotal, taskTotal)
+							@TaskButtonBar(pageOffset, pageTotal, taskTotal)
 							<div id="task-list" class="p-4 max-h-80 w-full flex flex-col gap-y-2 overflow-y-scroll">
 								for i, item := range(m) {
 									@TaskItem(i, item, projects)

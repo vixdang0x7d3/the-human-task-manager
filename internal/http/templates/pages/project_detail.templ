@@ -4,32 +4,32 @@ import "fmt"
 import "strconv"
 import "strings"
 
-import(
-    "github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
-    "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
+import (
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates"
 )
 
 templ TaskStat() {
-    <div class="stats shadow bg-base-300">
-        <div class="stat">
-            <div class="stat-value">86%</div>
-            <div class="stat-title">Tasks done</div>
-            <div class="stat-desc text-primary">31 tasks remaining</div>
-        </div>
-    </div>
+	<div class="stats shadow bg-base-300">
+		<div class="stat">
+			<div class="stat-value">86%</div>
+			<div class="stat-title">Tasks done</div>
+			<div class="stat-desc text-primary">31 tasks remaining</div>
+		</div>
+	</div>
 }
 
 templ MemberItem(index int, m models.ProjectMembershipItemView) {
-    <div class="indicator w-full">
+	<div class="indicator w-full">
 		<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
 		<div tabindex="0" class="collapse collapse-arrow bg-base-300 px-4">
 			<div class="h-16 py-4">
 				<div class="grid grid-cols-4 justify-around">
 					<span class="text-primary-content font-semibold">{ m.Username }</span>
 					<span class="badge badge-primary font-bold">{ strings.ToUpper(m.Role) }</span>
-                    if m.Role == "requested" {
-                        @ButtonAcceptMemberRequest(m)
-                    }
+					if m.Role == "requested" {
+						@ButtonAcceptMemberRequest(m)
+					}
 				</div>
 			</div>
 		</div>
@@ -37,162 +37,349 @@ templ MemberItem(index int, m models.ProjectMembershipItemView) {
 }
 
 templ ButtonAcceptMemberRequest(prj models.ProjectMembershipItemView) {
-    <div class="col-span-2 flex flex-row gap-2 justify-end">
-        <a hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/accept-request/%s", prj.ProjectID, prj.UserID))) } hx-target-error="#alert" class="btn btn-square btn-sm btn-secondary">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-            </svg>
-        </a>
-        <a hx-delete={ string(templ.SafeURL(fmt.Sprintf("/project/%s/denine-request/%s", prj.ProjectID, prj.UserID))) } hx-target-error="#alert" class="btn btn-square btn-sm btn-primary btn-outline">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-            </svg>
-        </a>
-    </div>
+	<div class="col-span-2 flex flex-row gap-2 justify-end">
+		<a hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/accept-request/%s", prj.ProjectID, prj.UserID))) } hx-target-error="#alert" class="btn btn-square btn-sm btn-secondary">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="size-6"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"></path>
+			</svg>
+		</a>
+		<a hx-delete={ string(templ.SafeURL(fmt.Sprintf("/project/%s/denine-request/%s", prj.ProjectID, prj.UserID))) } hx-target-error="#alert" class="btn btn-square btn-sm btn-primary btn-outline">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="size-6"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+			</svg>
+		</a>
+	</div>
 }
 
-templ TasksTab(errNotfound bool, m []models.TaskItemView) {   
-    @SearchBar()
-    <div class="card w-full bg-base-200 shadow-xl justify-center">
-        <div class="card-body">
-            @ButtonBar()
-            <div class="p-4 max-h-80 w-full flex flex-col gap-3 overflow-y-scroll">
-                for i, item := range(m) {
-                    @TaskItem(i, item)
-                }
-                if (errNotfound == true){
-                <span class="text-sm text-center">no task found</span>
-                }
-            </div>
-        </div>
-    </div>
-    <div id="bottom-right-btn" class="fixed bottom-4 right-4">
-        <a id="create-task-project" href="/tasks/new" class="btn btn-primary font-semibold">+ Add Task</a>
-    </div>
+templ ProjectTaskPaginationButtons(prj models.ProjectView, pageOffset, pageTotal, taskTotal int) {
+	<div id="pagination-buttons" class="flex gap-2">
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks?pageOffset=%d", prj.ID, pageOffset-1))) }
+			hx-target="#project-task-list"
+			id="prev-btn"
+			if pageOffset > 0 {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square disabled"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+		</button>
+		<span>(Page { fmt.Sprintf("%d/%d", pageOffset+1, pageTotal) })</span>
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks?pageOffset=%d", prj.ID, pageOffset+1))) }
+			hx-target="#project-task-list"
+			id="next-btn"
+			if pageOffset+1 < pageTotal {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</button>
+	</div>
 }
 
-templ MembersTab(m []models.ProjectMembershipItemView, prj models.ProjectView) {
-    @ModalInviteMember(prj, "/invite-member")
-    @SearchBar()
-    <div class="card w-full bg-base-200 shadow-xl">
-        <div class="card-body">
-            @ButtonBar()
-            <div class="p-4 max-h-80 w-full flex flex-col gap-3 overflow-y-scroll">
-                for i, item := range(m) {
-                    @MemberItem(i, item)
-                }
-                // if (errNotfound == true){
-                // <span class="text-sm">no task found</span>
-                // }
-            </div>
-        </div>
-    </div>
-    <div id="bottom-right-btn" class="fixed bottom-4 right-4">
-        <button class="btn btn-primary font-semibold" onclick="modal_invite_member.showModal()">+ Invite Member</button>
-    </div>
+templ ProjectTaskButtonBar(prj models.ProjectView, pageOffset, pageTotal, taskTotal int) {
+	<div class="flex justify-between items-center px-4 py-2">
+		if true {
+			<p id="show-total" class="text-base-content font-semibold">Total: {  strconv.Itoa(taskTotal) }</p>
+		} else {
+			<!--  TODO: implement bulk operations 
+			@ProjectTaskTaskBulkUpdateButtons()
+			-->
+		}
+		@ProjectTaskPaginationButtons(prj, pageOffset, pageTotal, taskTotal)
+	</div>
+}
+
+templ TasksTab(
+	errNotfound bool,
+	prj models.ProjectView,
+	m []models.TaskItemView,
+	pageOffset,
+	pageTotal,
+	taskTotal int,
+) {
+	@ProjectFilter(prj)
+	<div class="card w-full bg-base-200 shadow-xl justify-center">
+		<div class="card-body">
+			@ProjectTaskButtonBar(prj, pageOffset, pageTotal, taskTotal)
+			<div id="project-task-list" class="p-4 max-h-80 w-full flex flex-col gap-3 overflow-y-scroll">
+				for i, item := range(m) {
+					@ProjectTaskItem(i, item)
+				}
+				if (errNotfound == true) {
+					<span class="text-sm text-center">no tasks found</span>
+				}
+			</div>
+		</div>
+	</div>
+	<div id="bottom-right-btn" class="fixed bottom-4 right-4">
+		<a id="create-task-project" href={ templ.SafeURL(fmt.Sprintf("/tasks/new?project=%s", prj.ID)) } class="btn btn-primary font-semibold">+ Add Task</a>
+	</div>
+}
+
+templ MemberPaginationButtons(prj models.ProjectView, pageOffset, pageTotal int) {
+	<div id="pagination-buttons" class="flex gap-2">
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members?pageOffset=%d", prj.ID, pageOffset-1))) }
+			hx-target="#memberlist-list"
+			id="prev-btn"
+			if pageOffset > 0 {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square disabled"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+		</button>
+		<span>(Page { fmt.Sprintf("%d/%d", pageOffset+1, pageTotal) })</span>
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members?pageOffset=%d", prj.ID, pageOffset+1))) }
+			hx-target="#member-list"
+			id="next-btn"
+			if pageOffset+1 < pageTotal {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</button>
+	</div>
+}
+
+templ MemberButtonBar(prj models.ProjectView, pageOffset, pageTotal, memberTotal int) {
+	<div class="flex justify-between items-center px-4 py-2">
+		if true {
+			<p id="show-total" class="text-base-content font-semibold">Total: {  strconv.Itoa(memberTotal) }</p>
+		} else {
+			<!--  TODO: implement bulk operations
+                        @MemberBulkUpdateButtons() 
+                        -->
+		}
+		@MemberPaginationButtons(prj, pageOffset, pageTotal)
+	</div>
+}
+
+templ MembersTab(
+	prj models.ProjectView,
+	m []models.ProjectMembershipItemView,
+	pageOffset int,
+	pageTotal int,
+	memberTotal int,
+) {
+	@ModalInviteMember(prj, "/invite-member")
+	<div class="card w-full bg-base-200 shadow-xl">
+		<div class="card-body">
+			@MemberButtonBar(prj, pageOffset, pageTotal, memberTotal)
+			<div id="member-list" class="p-4 max-h-80 w-full flex flex-col gap-3 overflow-y-scroll">
+				for i, item := range(m) {
+					@MemberItem(i, item)
+				}
+				// if (errNotfound == true){
+				// <span class="text-sm">no task found</span>
+				// }
+			</div>
+		</div>
+	</div>
+	<div id="bottom-right-btn" class="fixed bottom-4 right-4">
+		<button class="btn btn-primary font-semibold" onclick="modal_invite_member.showModal()">+ Invite Member</button>
+	</div>
 }
 
 templ StatisticsTab() {
-    
 }
 
 templ TabsBar(prj models.ProjectView) {
-    <div role="tablist" class="tabs tabs-bordered w-5/12">
-        <a hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-tasks" role="tab" class="tab tab-active">Tasks</a>
-        <a hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-members" role="tab" class="tab">Members</a>
-        <a hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) } hx-target="#card-body" hx-target-error="#alert" id="tab-statistics" role="tab" class="tab">Statistics</a>
-    </div>
+	<div role="tablist" class="tabs tabs-bordered w-5/12">
+		<a
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-tasks", prj.ID))) }
+			hx-target="#card-body"
+			hx-target-error="#alert"
+			id="tab-tasks"
+			role="tab"
+			class="tab tab-active"
+		>Tasks</a>
+		<a
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members", prj.ID))) }
+			hx-target="#card-body"
+			hx-target-error="#alert"
+			id="tab-members"
+			role="tab"
+			class="tab"
+		>Members</a>
+		<a
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-statistics", prj.ID))) }
+			hx-target="#card-body"
+			hx-target-error="#alert"
+			id="tab-statistics"
+			role="tab"
+			class="tab"
+		>Statistics</a>
+	</div>
 }
 
 templ ModalInviteMember(prj models.ProjectView, postURL string) {
 	<dialog id="modal_invite_member" class="modal">
-	<div class="modal-box">
-		<h3 class="text-lg font-bold pb-2">Invite Member</h3>
-		<form hx-post={ string(templ.SafeURL(fmt.Sprintf("%s/%s", postURL, prj.ID))) } hx-target-error="#invite-message">
-			<label class="input input-sm input-bordered flex items-center gap-2">
-				UUID
-				<input id="member-uuid" name="member-uuid" type="text" class="grow" placeholder="Member UUID" />
-			</label>
-			<div id="invite-message" class="text-error text-center text-sm"></div>
-			<div class="modal-action">
-				<button class="btn btn-sm">Invite</button>
-			</div>
+		<div class="modal-box">
+			<h3 class="text-lg font-bold pb-2">Invite Member</h3>
+			<form hx-post={ string(templ.SafeURL(fmt.Sprintf("%s/%s", postURL, prj.ID))) } hx-target-error="#invite-message">
+				<label class="input input-sm input-bordered flex items-center gap-2">
+					UUID
+					<input id="member-uuid" name="member-uuid" type="text" class="grow" placeholder="Member UUID"/>
+				</label>
+				<div id="invite-message" class="text-error text-center text-sm"></div>
+				<div class="modal-action">
+					<button class="btn btn-sm">Invite</button>
+				</div>
+			</form>
+		</div>
+		<form method="dialog" class="modal-backdrop">
+			<button>close</button>
 		</form>
-	</div>
-	<form method="dialog" class="modal-backdrop">
-		<button>close</button>
-	</form>
 	</dialog>
 }
 
-templ ProjectDetail(errNotfound bool, prj models.ProjectView, tasks []models.TaskItemView, currentUserID string,logoutURL string) {
-    @templates.Boilerplate(){
-        @templates.Head("Projects"){
-            <script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
-            <script>
-                function copyText() {
-                    // Get the text field
-                    const textField = document.getElementById("UUID");
+script copyProjectID() {
+    function copyText() {
+        // Get the text field
+        const textField = document.getElementById("UUID");
 
-                    // Select the text field content
-                    textField.select();
-                    textField.setSelectionRange(0, 99999); // For mobile devices
+        // Select the text field content
+        textField.select();
+        textField.setSelectionRange(0, 99999); // For mobile devices
 
-                    // Copy the text inside the text field to the clipboard
-                    navigator.clipboard.writeText(textField.value)
-                        .then(() => {
-                            // Show a success message
-                            document.getElementById("copyMessage").innerText = "Copied to clipboard!";
-                        })
-                        .catch(err => {
-                            // Handle error
-                            console.error("Failed to copy text: ", err);
-                            document.getElementById("copyMessage").innerText = "Failed to copy text!";
-                        });
-                }
-            </script>
-        }
-        <body hx-ext="response-targets">
-            @templates.Navbar(logoutURL)
-            <div id="alert" class="fixed top-12 right-4"></div>
-            <div class="flex items-center justify-center py-4">
+        // Copy the text inside the text field to the clipboard
+        navigator.clipboard.writeText(textField.value)
+            .then(() => {
+                // Show a success message
+                document.getElementById("copyMessage").innerText = "Copied to clipboard!";
+            })
+            .catch(err => {
+                // Handle error
+                console.error("Failed to copy text: ", err);
+                document.getElementById("copyMessage").innerText = "Failed to copy text!";
+            });
+    }
+}
+
+templ ProjectDetail(
+	errNotfound bool,
+	prj models.ProjectView,
+	tasks []models.TaskItemView,
+	pageOffset int,
+	pageTotal int,
+	taskTotal int,
+	currentUserID string,
+	logoutURL string,
+) {
+	@templates.Boilerplate() {
+		@templates.Head("Projects") {
+			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+		}
+		<body hx-ext="response-targets">
+			@templates.Navbar(logoutURL)
+			<div id="alert" class="fixed top-12 right-4"></div>
+			<div class="flex items-center justify-center py-4">
 				<div class="flex flex-col w-9/12">
 					<div class="flex justify-between items-center px-4 py-2 bg-base-100">
 						<div class="w-full">
-                            <label class="flex flex-row items-center gap-4">
-                                <h1 class="text-4xl font-bold">{ prj.Title }</h1>
-                                if (prj.UserID == currentUserID) {
-                                    <button class="btn btn-sm btn-error" hx-delete={ string(templ.SafeURL(fmt.Sprintf("/delete-project/%s", prj.ID))) } hx-target-error="#error-message" hx-confirm="Do you actualy want to delete this project" >Delete</button>
-                                } else {
-                                    <button class="btn btn-sm btn-error" hx-delete={ string(templ.SafeURL(fmt.Sprintf("/leave-project/%s", prj.ID))) } hx-target-error="#error-message" hx-confirm="Do you actualy want to leave this project" >Leave</button>
-                                }
-                                <div id="#error-message"></div>
-                            </label>
-                            <label class="input input-sm w-5/12 input-bordered flex items-center mt-4 gap-2">
-                                <input id="UUID" type="text" class="grow" placeholder="Search" readonly value={ prj.ID } />
-                                <button class="copy-btn" onclick="copyText()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                        class="size-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
-                                    </svg>
-                                </button>
-                            </label>
-                            @TabsBar(prj)
-                        </div>
-                        <div id="general-infor">
-                            @TaskStat()
-                        </div>
+							<label class="flex flex-row items-center gap-4">
+								<h1 class="text-4xl font-bold">{ prj.Title }</h1>
+								if (prj.UserID == currentUserID) {
+									<button class="btn btn-sm btn-error" hx-delete={ string(templ.SafeURL(fmt.Sprintf("/delete-project/%s", prj.ID))) } hx-target-error="#error-message" hx-confirm="Do you actualy want to delete this project">Delete</button>
+								} else {
+									<button class="btn btn-sm btn-error" hx-delete={ string(templ.SafeURL(fmt.Sprintf("/leave-project/%s", prj.ID))) } hx-target-error="#error-message" hx-confirm="Do you actualy want to leave this project">Leave</button>
+								}
+								<div id="#error-message"></div>
+							</label>
+							<label class="input input-sm w-5/12 input-bordered flex items-center mt-4 gap-2">
+								<input id="UUID" type="text" class="grow" placeholder="Search" readonly value={ prj.ID }/>
+								<button class="copy-btn" onclick="copyText()">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="size-6"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+										></path>
+									</svg>
+								</button>
+							</label>
+							@copyProjectID()
+							@TabsBar(prj)
+						</div>
+						<div id="general-infor">
+							@TaskStat()
+						</div>
 					</div>
 					<div class="card w-full bg-base-300 shadow-xl justify-center">
 						<div id="card-body" class="card-body">
-                            @TasksTab(errNotfound ,tasks)
+							@TasksTab(errNotfound, prj, tasks, pageOffset, pageTotal, taskTotal)
 						</div>
 					</div>
 				</div>
 			</div>
-        </body>
-    }
+		</body>
+	}
 }
+

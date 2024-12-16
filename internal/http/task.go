@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/domain"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/generic"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/components"
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/pages"
 )
@@ -131,7 +132,6 @@ func (s *Server) handleTaskFind(c echo.Context) error {
 		if err == nil && val != 0 {
 			days = &val
 		}
-		c.Logger().Debugf("parse month has problem: %v", err)
 	}
 
 	if form.Months != "" {
@@ -140,7 +140,6 @@ func (s *Server) handleTaskFind(c echo.Context) error {
 			months = &val
 
 		}
-		c.Logger().Debugf("parse month has problem: %v", err)
 	}
 
 	var pageOffset int
@@ -387,6 +386,14 @@ func (s *Server) handleTaskStart(c echo.Context) error {
 		}
 	}
 
+	trigger := c.Request().Header.Get("HX-Trigger")
+	if trigger == "project-task-start" {
+		return render(c, http.StatusOK, components.AlertAndUpdateProjectTaskItemContent(
+			toTaskItemView(taskItem),
+			"task started successfully",
+		))
+	}
+
 	return render(c, http.StatusOK, components.AlertAndUpdateTaskItemContent(
 		toTaskItemView(taskItem),
 		"task started successfully"),
@@ -467,7 +474,31 @@ func (s *Server) handleTaskNewShow(c echo.Context) error {
 		c.Logger().Warn("truncated slice of projects ", len(projects), total)
 	}
 
+	projectID := c.QueryParam("project")
+	if projectID != "" {
+
+		project, err := s.ProjectService.ByID(c.Request().Context(), projectID)
+		if err != nil {
+			switch domain.ErrorCode(err) {
+			case domain.EINVALID, domain.EUNAUTHORIZED:
+				return c.HTML(http.StatusBadRequest, domain.ErrorCode(err))
+			case domain.EINTERNAL:
+				c.Logger().Error(err)
+				return c.HTML(http.StatusInternalServerError, "internal error")
+			}
+		}
+
+		return render(c, http.StatusOK, pages.TaskNew(
+			toProjectView(project),
+			[]string{"next", "school", "personal"},
+			priorities,
+			[]models.ProjectView{},
+			"/logout",
+		))
+	}
+
 	return render(c, http.StatusOK, pages.TaskNew(
+		models.ProjectView{},
 		[]string{"next", "school", "personal"},
 		priorities,
 		generic.Map(projects, toProjectView),
@@ -514,7 +545,7 @@ func (s *Server) handleTaskNew(c echo.Context) error {
 		ProjectID:   form.ProjectID,
 	})
 	if err != nil {
-		switch domain.ErrorMessage(err) {
+		switch domain.ErrorCode(err) {
 		case domain.EINVALID, domain.EUNAUTHORIZED:
 			c.Logger().Error(domain.ErrorMessage(err))
 			return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))

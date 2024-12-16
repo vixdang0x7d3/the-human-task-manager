@@ -1,0 +1,63 @@
+package components
+
+import (
+	"fmt"
+
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/pages"
+	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
+	"strconv"
+)
+
+templ ProjectList(m []models.ProjectMembershipItemView, pageOffset, pageTotal, projectTotal int) {
+	for i, item := range(m) {
+		@pages.ProjectItem(i, item)
+	}
+	<p id="show-total" hx-swap-oob="outerHTML" class="text-base-content font-semibold">
+		Total: { strconv.Itoa(projectTotal) }
+	</p>
+	<div id="pagination-buttons" class="flex gap-2" hx-swap-oob="outerHTML">
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/projects?pageOffset=%d", pageOffset-1))) }
+			hx-target="#project-list"
+			id="prev-btn"
+			if pageOffset > 0 {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square disabled"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+		</button>
+		<span>(Page { fmt.Sprintf("%d/%d", pageOffset+1, pageTotal) })</span>
+		<button
+			hx-get={ string(templ.SafeURL(fmt.Sprintf("/projects?pageOffset=%d", pageOffset+1))) }
+			hx-target="#project-list"
+			id="next-btn"
+			if pageOffset+1 < pageTotal {
+				class="btn btn-xs btn-square"
+			} else {
+				class="btn btn-xs btn-square"
+				disabled
+			}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</button>
+	</div>
+}
