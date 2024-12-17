@@ -328,16 +328,14 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "no user in login session")
 	}
 
-	state := "started"
 	taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
 		ProjectID: &projectId,
-		State:     &state,
-		Offset:    pageOffset * taskLimit,
-		Limit:     taskLimit,
+		Limit:     100,
 	})
 
-	pageTotal := int(math.Ceil(float64(total) / float64(taskLimit)))
-	taskTotal := total
+	if total > 100 {
+		c.Logger().Warnf("truncate task list, total: %d show 100", total)
+	}
 
 	var (
 		nCompleted  = 0
@@ -345,6 +343,7 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 		percentDone = 0
 		remain      = 0
 	)
+
 	for _, v := range taskItems {
 		if v.State != domain.TaskStateDeleted {
 			if v.State == domain.TaskStateCompleted {
@@ -358,6 +357,17 @@ func (s *Server) handleProjectDetailShow(c echo.Context) error {
 		percentDone = int(nCompleted * 100 / nTotal)
 		remain = nTotal - nCompleted
 	}
+
+	state := domain.TaskStateStarted
+	taskItems, total, err = s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
+		ProjectID: &projectId,
+		State:     &state,
+		Offset:    pageOffset * taskLimit,
+		Limit:     taskLimit,
+	})
+
+	pageTotal := int(math.Ceil(float64(total) / float64(taskLimit)))
+	taskTotal := total
 
 	if err != nil {
 		switch domain.ErrorCode(err) {
@@ -427,16 +437,14 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 		return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
 	}
 
-	state := "started"
 	taskItems, total, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
 		ProjectID: &projectId,
-		State:     &state,
-		Offset:    pageOffset * taskLimit,
-		Limit:     taskLimit,
+		Limit:     100,
 	})
 
-	pageTotal := int(math.Ceil(float64(total) / float64(taskLimit)))
-	taskTotal := total
+	if total > 100 {
+		c.Logger().Warnf("truncated task list, total: %d show: 100")
+	}
 
 	var (
 		nCompleted  = 0
@@ -457,6 +465,17 @@ func (s *Server) handleTabTasksShow(c echo.Context) error {
 		percentDone = int(nCompleted * 100 / nTotal)
 		remain = nTotal - nCompleted
 	}
+
+	state := domain.TaskStateStarted
+	taskItems, total, err = s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
+		ProjectID: &projectId,
+		State:     &state,
+		Offset:    pageOffset * taskLimit,
+		Limit:     taskLimit,
+	})
+
+	pageTotal := int(math.Ceil(float64(total) / float64(taskLimit)))
+	taskTotal := total
 
 	if err != nil {
 		switch domain.ErrorCode(err) {
@@ -516,7 +535,7 @@ func (s *Server) handleTabMembersShow(c echo.Context) error {
 	}
 
 	var pageOffset int
-	if qParam := c.QueryParam("pageParam"); qParam != "" {
+	if qParam := c.QueryParam("pageOffset"); qParam != "" {
 		parsed, err := strconv.ParseInt(qParam, 10, 64)
 		if err == nil {
 			pageOffset = int(parsed)
@@ -613,7 +632,13 @@ func (s *Server) handleTabStatisticsShow(c echo.Context) error {
 		Offset:    0,
 	})
 	if err != nil {
-		return render(c, http.StatusBadRequest, components.AlertError(err.Error()))
+		switch domain.ErrorCode(err) {
+		case domain.EINVALID, domain.EUNAUTHORIZED:
+			return render(c, http.StatusBadRequest, components.AlertError(domain.ErrorMessage(err)))
+		case domain.EINTERNAL:
+			c.Logger().Error(err)
+			return render(c, http.StatusBadRequest, components.AlertError("internal error"))
+		}
 	}
 	if totalMember > 100 {
 		c.Logger().Warnf("truncated project members, total: %d, show: 100", totalMember)
@@ -623,14 +648,6 @@ func (s *Server) handleTabStatisticsShow(c echo.Context) error {
 
 	for _, mem := range members {
 		memberMaps[mem.User.Username] = 0
-	}
-
-	Usernames := []string{}
-	CompleteNums := []int{}
-
-	for k, v := range memberMaps {
-		Usernames = append(Usernames, k)
-		CompleteNums = append(CompleteNums, v)
 	}
 
 	taskItems, totalTask, err := s.TaskItemService.Find(c.Request().Context(), domain.TaskItemFilter{
@@ -643,6 +660,20 @@ func (s *Server) handleTabStatisticsShow(c echo.Context) error {
 	}
 	if totalTask > 100 {
 		c.Logger().Warnf("truncated project members, total: %d, show: 100", totalTask)
+	}
+
+	for _, item := range taskItems {
+		if item.CompletedByName != "" {
+			memberMaps[item.CompletedByName] += 1
+		}
+	}
+
+	Usernames := []string{}
+	CompleteNums := []int{}
+
+	for k, v := range memberMaps {
+		Usernames = append(Usernames, k)
+		CompleteNums = append(CompleteNums, v)
 	}
 
 	var (
@@ -659,19 +690,10 @@ func (s *Server) handleTabStatisticsShow(c echo.Context) error {
 			nTotal += 1
 		}
 	}
-	percentDone = int(nCompleted * 100 / nTotal)
-	remain = nTotal - nCompleted
 
-	taskModels := generic.Map(taskItems, toTaskItemView)
-
-	completedBys := generic.Map(taskModels, func(t models.TaskItemView) string {
-		return t.CompleteByName
-	})
-
-	for _, item := range completedBys {
-		if item != "" {
-
-		}
+	if nTotal != 0 {
+		percentDone = int(nCompleted * 100 / nTotal)
+		remain = nTotal - nCompleted
 	}
 
 	return render(c, http.StatusOK, components.ProjectStatistics(
@@ -680,7 +702,8 @@ func (s *Server) handleTabStatisticsShow(c echo.Context) error {
 		prj,
 		totalTask,
 		percentDone,
-		remain))
+		remain,
+	))
 }
 
 func (s *Server) handleProjectTaskFind(c echo.Context) error {
@@ -756,6 +779,7 @@ func (s *Server) handleProjectTaskFind(c echo.Context) error {
 		Offset:    pageOffset * taskLimit,
 		Limit:     taskLimit,
 	})
+
 	if err != nil {
 		switch domain.ErrorCode(err) {
 		case domain.EINVALID, domain.EUNAUTHORIZED:
@@ -774,7 +798,7 @@ func (s *Server) handleProjectTaskFind(c echo.Context) error {
 		ID: projectID,
 	}
 
-	return render(c, http.StatusOK, components.TaskListProject(
+	return render(c, http.StatusOK, components.TaskListProjectFind(
 		generic.Map(taskItems, toTaskItemView),
 		project,
 		pageOffset,

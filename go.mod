@@ -33,6 +33,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/keighl/postmark v0.0.0-20190821160221-28358b1a94e3 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect

@@ -361,14 +361,14 @@ func MemberList(project models.ProjectView, m []models.ProjectMembershipItemView
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p id=\"show-total\" class=\"text-base-content font-semibold\">Total: ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p id=\"show-total\" class=\"text-base-content font-semibold\" hx-swap-oob=\"outerHTML\">Total: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(memberTotal))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/project_detail.templ`, Line: 168, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/project_detail.templ`, Line: 168, Col: 119}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {

@@ -165,7 +165,7 @@ templ MemberList(project models.ProjectView, m []models.ProjectMembershipItemVie
 	for i, item := range(m) {
 		@pages.MemberItem(i, item, project, currentUserID)
 	}
-	<p id="show-total" class="text-base-content font-semibold">Total: {  strconv.Itoa(memberTotal) }</p>
+	<p id="show-total" class="text-base-content font-semibold" hx-swap-oob="outerHTML">Total: {  strconv.Itoa(memberTotal) }</p>
 	<div id="pagination-buttons" class="flex gap-2" hx-swap-oob="outerHTML">
 		<button
 			hx-get={ string(templ.SafeURL(fmt.Sprintf("/project/%s/tab-members?pageOffset=%d", project.ID, pageOffset-1))) }

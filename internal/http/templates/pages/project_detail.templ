@@ -27,7 +27,7 @@ templ MemberItem(index int, m models.ProjectMembershipItemView, prj models.Proje
 				<div class="grid grid-cols-4 justify-around">
 					<span class="text-primary-content font-semibold">{ m.Username }</span>
 					<span class="badge badge-primary font-bold">{ strings.ToUpper(m.Role) }</span>
-					if (m.Role == "requested") || (prj.UserID == currentUserID) {
+					if (m.Role == "requested") && (prj.UserID == currentUserID) {
 						@ButtonAcceptMemberRequest(m)
 					}
 				</div>
@@ -245,9 +245,6 @@ templ MembersTab(
 	</div>
 }
 
-templ StatisticsTab() {
-}
-
 templ TabsBar(prj models.ProjectView) {
 	<div role="tablist" class="tabs tabs-bordered w-5/12">
 		<a
@@ -336,6 +333,7 @@ templ ProjectDetail(
 	@templates.Boilerplate() {
 		@templates.Head("Projects") {
 			<script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 		}
 		<body hx-ext="response-targets">
 			@templates.Navbar(logoutURL)
@@ -390,7 +388,7 @@ templ ProjectDetail(
 						</div>
 					</div>
 					<div class="card w-full bg-base-300 shadow-xl justify-center">
-						<div id="card-body" class="card-body">
+						<div id="card-body" class="card-body items-center">
 							@TasksTab(errNotfound, prj, tasks, pageOffset, pageTotal, taskTotal)
 						</div>
 					</div>

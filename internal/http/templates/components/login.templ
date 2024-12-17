@@ -4,7 +4,7 @@ import (
 	"github.com/vixdang0x7d3/the-human-task-manager/internal/http/models"
 )
 
-templ LoginPassword(m models.UserView, postURL string) {
+templ LoginPassword(m models.UserView, postURL string, forgotPasswordURL string) {
 	<div class="items-center">
 		<h2 class="card-title text-primary-content">Welcome to Human Task Manager, { m.FirstName }!</h2>
 	</div>
@@ -54,7 +54,7 @@ templ LoginPassword(m models.UserView, postURL string) {
 				<input type="submit" value="Login" class="btn btn-sm btn-primary mt-4"/>
 			</div>
 		</form>
-		<a href="#!" title="Fogot password" class="card-actions link link-secondary">Fogot your password?</a>
+		<a href={ templ.SafeURL(forgotPasswordURL) } title="Fogot password" class="card-actions link link-secondary">Fogot your password?</a>
 	</div>
 }
 

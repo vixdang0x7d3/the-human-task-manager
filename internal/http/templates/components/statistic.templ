@@ -2,18 +2,17 @@ package components
 
 import "github.com/vixdang0x7d3/the-human-task-manager/internal/http/templates/pages"
 
-
-
 templ StatisticChart(decriptions []string, tasktimes []int) {
-    <div class=" w-10/12 h-5/6">
-        <canvas id="myChart"></canvas>
-    </div>
-    @pages.DrawStatistic(decriptions,tasktimes)
+	<div class=" w-10/12 h-5/6">
+		<canvas id="myChart"></canvas>
+	</div>
+	@pages.DrawStatistic(decriptions, tasktimes)
 }
 
 templ StatisticsProjectChart(members []string, completeds []int) {
-    <div class=" w-10/12 h-5/6 bg-base-200">
-        <canvas id="prjChart"></canvas>
-    </div>
-    @pages.DrawProjectStatistics(members, completeds)
+	<div class="w-10/12 bg-base-200" style="height: 400px;">
+		<canvas id="prjChart"></canvas>
+	</div>
+	@pages.DrawProjectStatistics(members, completeds)
 }
+

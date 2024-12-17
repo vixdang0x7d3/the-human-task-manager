@@ -358,6 +358,9 @@ templ TaskItemContent(m models.TaskItemView, inProjectPage bool) {
 				<span class="text-primary-content font-semibold">{ m.Description }</span>
 				<span class="badge badge-primary font-bold">{ strings.ToUpper(m.State) }</span>
 				<span class="text-primary-content font-semibold">Urgency: { m.Urgency }</span>
+				if m.State == domain.TaskStateCompleted && inProjectPage {
+					<span class="text-primary-content font-semibold">Completed by: { m.CompleteByName }</span>
+				}
 			</div>
 		</div>
 		<div class="collapse-content">
@@ -414,7 +417,7 @@ templ TaskItem(index int, m models.TaskItemView, projects []models.ProjectView) 
 }
 
 templ ProjectTaskItem(index int, m models.TaskItemView) {
-	<div id={ fmt.Sprintf("task-item-%s", m.ID) }>
+	<div id={ fmt.Sprintf("project-task-item-%s", m.ID) }>
 		<div class="indicator w-full">
 			<span class="indicator-item indicator-start badge badge-accent">#{ strconv.Itoa(index) }</span>
 			@TaskItemContent(m, true)
@@ -456,7 +459,7 @@ templ TaskIndex(
 				</div>
 			</div>
 			<div class="fixed bottom-4 right-4">
-				<button class="btn btn-lg btn-primary font-semibold">+ Add Task</button>
+				<a href="/tasks/new" class="btn btn-lg btn-primary font-semibold">+ Add Task</a>
 			</div>
 		</body>
 	}

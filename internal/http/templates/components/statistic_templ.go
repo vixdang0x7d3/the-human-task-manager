@@ -64,7 +64,7 @@ func StatisticsProjectChart(members []string, completeds []int) templ.Component 
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\" w-10/12 h-5/6 bg-base-200\"><canvas id=\"prjChart\"></canvas></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-10/12 bg-base-200\" style=\"height: 400px;\"><canvas id=\"prjChart\"></canvas></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

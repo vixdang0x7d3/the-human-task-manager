@@ -49,7 +49,7 @@ func toTaskItemView(taskItem domain.TaskItem) models.TaskItemView {
 	}
 
 	if taskItem.Priority != "" {
-		taskItem.Priority = taskItem.Priority
+		priority = taskItem.Priority
 	}
 
 	if !taskItem.Deadline.IsZero() {
